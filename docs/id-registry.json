@@ -1,0 +1,57 @@
+{
+  "project": "look-lab",
+  "code": "LL",
+  "kinds": {
+    "vision": "V",
+    "decision": "D",
+    "arch-decision": "AD",
+    "progress": "PR",
+    "plan": "P",
+    "working-note": "WN",
+    "addendum": "ADD",
+    "document": "DOC",
+    "bug": "B"
+  },
+  "allocated": {
+    "vision": 1,
+    "decision": 23,
+    "arch-decision": 9,
+    "progress": 1,
+    "plan": 0,
+    "working-note": 0,
+    "addendum": 0,
+    "document": 9,
+    "bug": 1
+  },
+  "assigned": {
+    "document": {
+      "1": "docs/decision-log.md#preamble",
+      "2": "docs/architecture-decisions.md#preamble",
+      "3": "docs/progress-log.md#preamble",
+      "4": "docs/VISION.md#preamble",
+      "5": "docs/CONTEXT.md",
+      "6": "docs/PRD.md",
+      "7": "docs/architecture.md",
+      "8": "docs/phases.md",
+      "9": "docs/bug-log.md#preamble"
+    }
+  },
+  "renderings": {
+    "decision": {
+      "note": "v0.2 decisions D-001..D-012 (reference/v0.2/docs/10-DECISIONS-AND-OPEN-QUESTIONS.md) are the same records as D-LL-001..D-LL-012. See D-LL-018.",
+      "D-001": "D-LL-001",
+      "D-002": "D-LL-002",
+      "D-003": "D-LL-003",
+      "D-004": "D-LL-004",
+      "D-005": "D-LL-005",
+      "D-006": "D-LL-006",
+      "D-007": "D-LL-007",
+      "D-008": "D-LL-008",
+      "D-009": "D-LL-009",
+      "D-010": "D-LL-010",
+      "D-011": "D-LL-011",
+      "D-012": "D-LL-012"
+    }
+  },
+  "retired": {}
+}

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+:root{--bg0:#0D0D0D;--bg1:#151515;--bg2:#1C1C1C;--bg3:#262626;--line:#2A2A2A;--line2:#3A3A3A;--tx:#EDEDED;--tx2:#A6A6A6;--tx3:#808080;--sur:#101010;--acc:#22D3EE;--acc-ink:#04232A;--acc-soft:rgba(34,211,238,.12);--warn:#F5A524;--warn-soft:rgba(245,165,36,.10);--err:#F05252;--err-soft:rgba(240,82,82,.10);--sh:0 16px 48px rgba(0,0,0,.5)}
+html,body{margin:0;background:var(--bg0);color:var(--tx);font:13px/1.45 'Geist',system-ui,sans-serif}
+*{box-sizing:border-box}
+</style>
+</helmet>
+<div data-screen-label="Breakdown" style="height:100%;min-height:760px;display:grid;grid-template-columns:minmax(0,1fr) 336px;background:var(--bg0);color:var(--tx)">
+
+  <section style="display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0">
+    <div style="display:flex;align-items:center;gap:12px;height:32px">
+      <h1 style="margin:0;font-size:15px;font-weight:600">Breakdown</h1>
+      <span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx3)">{{ refName }}</span>
+      <div style="flex:1"></div>
+      <sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:4px;padding:3px;border-radius:8px;background:var(--bg1);border:1px solid var(--line)">
+          <sc-for list="{{ overlays }}" as="o" hint-placeholder-count="3">
+            <button onClick="{{ o.toggle }}" title="{{ o.cmd }}" style="height:26px;padding:0 10px;border-radius:6px;border:none;background:{{ o.bg }};color:{{ o.color }};cursor:pointer;font-size:12px" style-hover="color:var(--tx)">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <button onClick="{{ replace }}" title="breakdown.import_reference" style="height:32px;padding:0 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:var(--tx2);cursor:pointer" style-hover="color:var(--tx);border-color:var(--line2)">Replace reference</button>
+    </div>
+
+    <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:var(--sur);border:1px solid var(--line);border-radius:10px;container-type:size;overflow:hidden">
+      <div style="position:relative;width:min(calc(100cqw - 32px), calc((100cqh - 32px) * 2.39));aspect-ratio:2.39/1">
+
+        <sc-if value="{{ showFrame }}" hint-placeholder-val="{{ true }}">
+          <image-slot id="ref-12c" shape="rect" fit="contain" placeholder="Drop the reference frame (2.39:1)"></image-slot>
+        </sc-if>
+
+        <sc-if value="{{ isReadyOverlay.thirds }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(90deg,transparent calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% + .5px),transparent calc(66.666% + .5px)),linear-gradient(transparent calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% + .5px),transparent calc(66.666% + .5px))"></div>
+        </sc-if>
+        <sc-if value="{{ isReadyOverlay.light }}" hint-placeholder-val="{{ false }}">
+          <svg viewBox="0 0 239 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+            <line x1="14" y1="22" x2="62" y2="44" stroke="#FFFFFF" stroke-width=".6" stroke-dasharray="2 1.5" vector-effect="non-scaling-stroke"></line>
+          </svg>
+          <div style="position:absolute;left:3%;top:10%;display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.72);color:#EDEDED;font-family:'Geist Mono',monospace;font-size:11px;pointer-events:none">Key −60° az · 25° el · 2000 K</div>
+        </sc-if>
+        <sc-if value="{{ isReadyOverlay.palette }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ dots }}" as="d" hint-placeholder-count="6">
+            <button onClick="{{ d.select }}" title="{{ d.hex }}" style="position:absolute;left:{{ d.x }};top:{{ d.y }};transform:translate(-50%,-50%);width:18px;height:18px;border-radius:9px;padding:0;background:{{ d.hex }};border:2px solid {{ d.ring }};box-shadow:0 0 0 3px rgba(0,0,0,.45);cursor:pointer"></button>
+          </sc-for>
+          <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:{{ selDot.x }};top:{{ selDot.y }};transform:translate(-50%,-38px);padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.8);color:#EDEDED;font-family:'Geist Mono',monospace;font-size:11px;white-space:nowrap;pointer-events:none">{{ selDot.hex }} · {{ selDot.share }}%</div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ st.empty }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border:1.5px dashed var(--line2);border-radius:8px;background:var(--bg1)">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="1.5"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4"></path></svg>
+            <div style="font-size:15px;font-weight:500">Drag in a video or image</div>
+            <div style="color:var(--tx3)">MOV, MP4, ProRes, JPG, PNG, TIFF. Stays on this computer.</div>
+            <div style="display:flex;gap:8px">
+              <button onClick="{{ upload }}" title="breakdown.import_reference" style="height:32px;padding:0 14px;border-radius:8px;background:var(--acc);border:none;color:var(--acc-ink);font-weight:600;cursor:pointer">Browse files</button>
+              <button onClick="{{ upload }}" style="height:32px;padding:0 14px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:var(--tx2);cursor:pointer">Paste a link</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ st.uploading }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg1);border-radius:8px">
+            <div style="font-size:14px;font-weight:500">Importing ref_kitchen_night.mov</div>
+            <div style="width:320px;height:4px;border-radius:2px;background:var(--bg3);overflow:hidden"><div style="width:{{ upPct }};height:100%;background:var(--acc);transition:width .3s"></div></div>
+            <div style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx3)">{{ upText }}</div>
+            <div style="font-size:12px;color:var(--tx3)">Copying to local project folder. Nothing is uploaded to the cloud.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ st.analysing }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:12px;top:12px;width:260px;padding:12px;border-radius:10px;background:rgba(21,21,21,.94);border:1px solid var(--line2);display:flex;flex-direction:column;gap:8px">
+            <div style="font-weight:500">Analysing reference</div>
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:8px;color:{{ s.color }}">
+                <span style="width:14px;font-family:'Geist Mono',monospace">{{ s.mark }}</span>
+                <span style="flex:1">{{ s.label }}</span>
+                <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--tx3)">{{ s.tier }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ st.error }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(13,13,13,.7)">
+            <div style="width:400px;padding:16px;border-radius:10px;background:var(--bg1);border:1px solid var(--err);display:flex;flex-direction:column;gap:10px">
+              <div style="font-weight:600;color:var(--err)">Analysis stopped at “Light”</div>
+              <div style="color:var(--tx2)">The model returned an invalid response for shot 3. Shots, colour and framing were kept. Nothing was lost.</div>
+              <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--tx3)">breakdown.fit_light · error 502 · 19:42:07</div>
+              <div style="display:flex;gap:8px">
+                <button onClick="{{ retry }}" title="breakdown.fit_light" style="height:32px;padding:0 14px;border-radius:8px;background:var(--acc);border:none;color:var(--acc-ink);font-weight:600;cursor:pointer">Retry</button>
+                <button onClick="{{ skipToManual }}" style="height:32px;padding:0 14px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:var(--tx2);cursor:pointer">Enter light by hand</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onClick="{{ prev }}" title="Previous shot" style="width:28px;height:28px;flex:none;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"></path></svg></button>
+      <span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx2);width:196px">{{ shotLabel }}</span>
+      <div style="flex:1;position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+        <sc-for list="{{ thumbs }}" as="t" hint-placeholder-count="7">
+          <button onClick="{{ t.go }}" style="height:40px;border-radius:6px;background:{{ t.bg }};border:1px solid {{ t.border }};color:{{ t.color }};font-family:'Geist Mono',monospace;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2">
+            <span>{{ t.n }}</span><span style="font-size:10px;color:var(--tx3)">{{ t.dur }}</span>
+          </button>
+        </sc-for>
+        <span style="position:absolute;top:-4px;bottom:-4px;left:{{ scrub }};width:2px;background:var(--tx);border-radius:1px;pointer-events:none"></span>
+      </div>
+      <button onClick="{{ next }}" title="Next shot" style="width:28px;height:28px;flex:none;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg></button>
+    </div>
+
+    <sc-if value="{{ hasAnswer }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:10px;background:var(--bg1);border:1px dashed var(--line2)">
+        <span style="font-family:'Geist Mono',monospace;font-size:10px;padding:2px 6px;border-radius:4px;border:1px dashed var(--tx3);color:var(--tx2);white-space:nowrap">AI 78%</span>
+        <div style="flex:1;color:var(--tx2);text-wrap:pretty">{{ answer }}</div>
+        <button onClick="{{ closeAnswer }}" style="background:none;border:none;color:var(--tx3);cursor:pointer;font-size:16px;line-height:1">×</button>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;align-items:center;gap:8px">
+      <form onSubmit="{{ ask }}" style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:44px;padding:0 6px 0 12px;background:var(--bg1);border:1px solid var(--line);border-radius:10px;margin:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        <input value="{{ q }}" onChange="{{ onQ }}" disabled="{{ askDisabled }}" placeholder="{{ askPlaceholder }}" title="breakdown.ask" style="flex:1;min-width:0;background:none;border:none;outline:none;color:var(--tx);font:inherit"></input>
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="2">
+          <button type="button" onClick="{{ c.use }}" disabled="{{ askDisabled }}" style="height:28px;padding:0 10px;border-radius:14px;background:var(--bg2);border:1px solid var(--line);color:var(--tx2);cursor:pointer;white-space:nowrap;font-size:12px" style-hover="color:var(--tx)">{{ c.label }}</button>
+        </sc-for>
+      </form>
+      <button onClick="{{ saveLook }}" title="breakdown.save_look" style="height:44px;padding:0 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--tx);cursor:pointer;white-space:nowrap" style-hover="border-color:var(--line2)">Save look</button>
+      <button onClick="{{ adapt }}" title="adapt.open" style="height:44px;padding:0 18px;border-radius:10px;background:var(--acc);border:none;color:var(--acc-ink);font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px">Adapt to our location <span>→</span></button>
+    </div>
+  </section>
+
+  <aside style="border-left:1px solid var(--line);background:var(--bg1);overflow:auto;min-height:0">
+    <sc-if value="{{ lowConf }}" hint-placeholder-val="{{ false }}">
+      <div style="margin:12px 12px 0;padding:10px 12px;border-radius:8px;background:var(--warn-soft);border:1px solid var(--warn);display:flex;flex-direction:column;gap:4px">
+        <div style="font-weight:600;color:var(--warn)">3 values need review</div>
+        <div style="color:var(--tx2)">Practicals, fill temperature and camera height are below 60% confidence. Confirm or edit them.</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ aiBlocked }}" hint-placeholder-val="{{ false }}">
+      <div style="margin:12px 12px 0;padding:10px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--line2);color:var(--tx2)">{{ aiMsg }}. AI buttons are paused; every value can still be measured or entered by hand.</div>
+    </sc-if>
+    <sc-if value="{{ panelEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:40px 24px;text-align:center;color:var(--tx3)">No breakdown yet. Import a reference to measure colour, light, lens and framing.</div>
+    </sc-if>
+
+    <sc-if value="{{ panelShow }}" hint-placeholder-val="{{ true }}">
+      <div style="border-bottom:1px solid var(--line)">
+        <button onClick="{{ sec.colour.toggle }}" style="width:100%;display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.08em">
+          <span style="display:inline-block;transform:{{ sec.colour.rot }};transition:transform .15s">▾</span>COLOUR<span style="flex:1"></span>
+          <span title="breakdown.sample_palette" style="font-weight:400;letter-spacing:0;color:var(--tx3)">6 samples</span>
+        </button>
+        <sc-if value="{{ sec.colour.open }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;height:12px;border-radius:3px;overflow:hidden">
+              <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="6"><span style="flex:{{ s.share }};background:{{ s.hex }}"></span></sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="6">
+                <button onClick="{{ s.select }}" style="display:flex;align-items:center;gap:8px;height:28px;padding:0 6px;margin:0 -6px;border-radius:6px;background:{{ s.rowBg }};border:none;color:var(--tx);cursor:pointer;text-align:left" style-hover="background:var(--bg2)">
+                  <span style="width:16px;height:16px;border-radius:3px;background:{{ s.hex }};border:1px solid rgba(255,255,255,.14)"></span>
+                  <span style="flex:1;font-family:'Geist Mono',monospace">{{ s.hex }}</span>
+                  <span style="font-family:'Geist Mono',monospace;color:var(--tx2)">{{ s.share }}%</span>
+                  <span style="font-family:'Geist Mono',monospace;font-size:10px;padding:1px 5px;border-radius:4px;border:1px solid var(--line2);color:var(--tx2)">MEASURED</span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:4px">
+              <sc-for list="{{ tints }}" as="t" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:6px;background:var(--bg2)">
+                  <span style="font-size:11px;color:var(--tx3)">{{ t.label }}</span>
+                  <span style="display:flex;align-items:center;gap:6px;font-family:'Geist Mono',monospace;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:{{ t.hex }}"></span>{{ t.val }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ colourRows }}" as="r" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:8px;min-height:28px">
+                <span style="width:96px;color:var(--tx2)">{{ r.label }}</span>
+                <span style="flex:1;font-family:'Geist Mono',monospace;color:{{ r.vc }}">{{ r.val }}</span>
+                <span style="font-family:'Geist Mono',monospace;font-size:10px;padding:1px 5px;border-radius:4px;border:{{ r.b.border }};background:{{ r.b.bg }};color:{{ r.b.color }};white-space:nowrap">{{ r.b.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="border-bottom:1px solid var(--line)">
+        <button onClick="{{ sec.light.toggle }}" style="width:100%;display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.08em">
+          <span style="display:inline-block;transform:{{ sec.light.rot }};transition:transform .15s">▾</span>LIGHT
+        </button>
+        <sc-if value="{{ sec.light.open }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:12px;align-items:center">
+              <svg width="120" height="120" viewBox="0 0 140 140" style="flex:none">
+                <circle cx="70" cy="70" r="54" fill="var(--bg2)" stroke="var(--line2)"></circle>
+                <circle cx="70" cy="70" r="36" fill="none" stroke="var(--line)" stroke-dasharray="2 3"></circle>
+                <line x1="70" y1="16" x2="70" y2="124" stroke="var(--line)"></line>
+                <line x1="16" y1="70" x2="124" y2="70" stroke="var(--line)"></line>
+                <rect x="63" y="120" width="14" height="10" rx="2" fill="var(--tx3)"></rect>
+                <circle cx="70" cy="70" r="5" fill="var(--tx)"></circle>
+                <line x1="{{ dial.lx }}" y1="{{ dial.ly }}" x2="{{ dial.ax }}" y2="{{ dial.ay }}" stroke="var(--acc)" stroke-width="2"></line>
+                <circle cx="{{ dial.lx }}" cy="{{ dial.ly }}" r="7" fill="var(--acc)"></circle>
+                <text x="70" y="11" text-anchor="middle" font-size="9" fill="var(--tx3)" font-family="Geist Mono">180°</text>
+                <text x="70" y="139" text-anchor="middle" font-size="9" fill="var(--tx3)" font-family="Geist Mono">cam</text>
+              </svg>
+              <div style="display:flex;flex-direction:column;gap:6px;font-family:'Geist Mono',monospace">
+                <span style="font-size:18px">{{ azLabel }}</span>
+                <span style="color:var(--tx2)">{{ elLabel }}</span>
+                <span style="font-family:'Geist',sans-serif;font-size:11px;color:var(--tx3)">Top-down, camera at bottom</span>
+              </div>
+            </div>
+            <sc-for list="{{ lightRows }}" as="r" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:8px;min-height:28px">
+                <span style="width:96px;color:var(--tx2)">{{ r.label }}</span>
+                <sc-if value="{{ r.editing }}" hint-placeholder-val="{{ false }}">
+                  <input autoFocus="{{ true }}" defaultValue="{{ r.val }}" onBlur="{{ r.commit }}" onKeyDown="{{ r.key }}" style="flex:1;min-width:0;height:24px;padding:0 6px;border-radius:4px;border:1px solid var(--acc);background:var(--bg0);color:var(--tx);font-family:'Geist Mono',monospace;font-size:13px;outline:none"></input>
+                </sc-if>
+                <sc-if value="{{ r.idle }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ r.edit }}" title="Click to edit (breakdown.edit_value)" style="flex:1;min-width:0;text-align:left;height:24px;padding:0 6px;margin-left:-6px;border-radius:4px;background:none;border:none;color:{{ r.vc }};font-family:'Geist Mono',monospace;font-size:13px;cursor:text" style-hover="background:var(--bg2)">{{ r.val }}</button>
+                </sc-if>
+                <span style="font-family:'Geist Mono',monospace;font-size:10px;padding:1px 5px;border-radius:4px;border:{{ r.b.border }};background:{{ r.b.bg }};color:{{ r.b.color }};white-space:nowrap">{{ r.b.label }}</span>
+              </div>
+            </sc-for>
+            <div style="display:flex;gap:6px;margin-top:4px">
+              <button onClick="{{ fitLight }}" disabled="{{ aiBlocked }}" title="breakdown.fit_light" style="flex:1;height:30px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:{{ aiBtnColor }};cursor:pointer">Fit light (AI)</button>
+              <button onClick="{{ editKey }}" title="breakdown.edit_value" style="flex:1;height:30px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--tx);cursor:pointer">Set by hand</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="border-bottom:1px solid var(--line)">
+        <button onClick="{{ sec.lens.toggle }}" style="width:100%;display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.08em">
+          <span style="display:inline-block;transform:{{ sec.lens.rot }};transition:transform .15s">▾</span>LENS &amp; CAMERA
+        </button>
+        <sc-if value="{{ sec.lens.open }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ lensRows }}" as="r" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:8px;min-height:28px">
+                <span style="width:96px;color:var(--tx2)">{{ r.label }}</span>
+                <sc-if value="{{ r.editing }}" hint-placeholder-val="{{ false }}">
+                  <input autoFocus="{{ true }}" defaultValue="{{ r.val }}" onBlur="{{ r.commit }}" onKeyDown="{{ r.key }}" style="flex:1;min-width:0;height:24px;padding:0 6px;border-radius:4px;border:1px solid var(--acc);background:var(--bg0);color:var(--tx);font-family:'Geist Mono',monospace;font-size:13px;outline:none"></input>
+                </sc-if>
+                <sc-if value="{{ r.idle }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ r.edit }}" title="Click to edit (breakdown.edit_value)" style="flex:1;min-width:0;text-align:left;height:24px;padding:0 6px;margin-left:-6px;border-radius:4px;background:none;border:none;color:{{ r.vc }};font-family:'Geist Mono',monospace;font-size:13px;cursor:text" style-hover="background:var(--bg2)">{{ r.val }}</button>
+                </sc-if>
+                <span style="font-family:'Geist Mono',monospace;font-size:10px;padding:1px 5px;border-radius:4px;border:{{ r.b.border }};background:{{ r.b.bg }};color:{{ r.b.color }};white-space:nowrap">{{ r.b.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="border-bottom:1px solid var(--line)">
+        <button onClick="{{ sec.framing.toggle }}" style="width:100%;display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.08em">
+          <span style="display:inline-block;transform:{{ sec.framing.rot }};transition:transform .15s">▾</span>FRAMING
+        </button>
+        <sc-if value="{{ sec.framing.open }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ framingRows }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:8px;min-height:28px">
+                <span style="width:96px;color:var(--tx2)">{{ r.label }}</span>
+                <sc-if value="{{ r.editing }}" hint-placeholder-val="{{ false }}">
+                  <input autoFocus="{{ true }}" defaultValue="{{ r.val }}" onBlur="{{ r.commit }}" onKeyDown="{{ r.key }}" style="flex:1;min-width:0;height:24px;padding:0 6px;border-radius:4px;border:1px solid var(--acc);background:var(--bg0);color:var(--tx);font-family:'Geist Mono',monospace;font-size:13px;outline:none"></input>
+                </sc-if>
+                <sc-if value="{{ r.idle }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ r.edit }}" title="Click to edit (breakdown.edit_value)" style="flex:1;min-width:0;text-align:left;height:24px;padding:0 6px;margin-left:-6px;border-radius:4px;background:none;border:none;color:{{ r.vc }};font-family:'Geist Mono',monospace;font-size:13px;cursor:text" style-hover="background:var(--bg2)">{{ r.val }}</button>
+                </sc-if>
+                <span style="font-family:'Geist Mono',monospace;font-size:10px;padding:1px 5px;border-radius:4px;border:{{ r.b.border }};background:{{ r.b.bg }};color:{{ r.b.color }};white-space:nowrap">{{ r.b.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div>
+        <button onClick="{{ sec.mood.toggle }}" style="width:100%;display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.08em">
+          <span style="display:inline-block;transform:{{ sec.mood.rot }};transition:transform .15s">▾</span>MOOD<span style="flex:1"></span>
+          <span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:400;letter-spacing:0;padding:1px 5px;border-radius:4px;border:1px dashed var(--tx3);color:var(--tx2)">AI 70%</span>
+        </button>
+        <sc-if value="{{ sec.mood.open }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:0 16px 16px;display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ moods }}" as="m" hint-placeholder-count="3">
+              <span style="height:26px;display:flex;align-items:center;padding:0 10px;border-radius:13px;border:1px dashed var(--line2);color:var(--tx2)">{{ m }}</span>
+            </sc-for>
+            <button onClick="{{ addMood }}" style="height:26px;padding:0 10px;border-radius:13px;border:1px solid var(--line);background:none;color:var(--tx3);cursor:pointer">+ Add</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const PAL = [
+  ['#1B2230',38,'22%','24%'],['#3E4A52',22,'82%','30%'],['#C7803A',14,'27%','52%'],
+  ['#6E5B4A',11,'44%','80%'],['#E9C9A0',9,'36%','38%'],['#0D0F12',6,'92%','86%'],
+];
+const ROWS = {
+  light: [
+    ['key','Key','hard · 2000 K sodium','ai',81],
+    ['fill','Fill','5600 K ambient','ai',57],
+    ['ratio','Key:fill','8:1 (3 stops)','measured'],
+    ['hard','Hardness','hard, sharp shadow edge','measured'],
+    ['prac','Practicals','none','ai',52],
+  ],
+  lens: [
+    ['focal','Focal length','≈40 mm','ai',72],
+    ['dof','Depth of field','shallow','ai',74],
+    ['height','Camera height','1.2 m','ai',55],
+    ['angle','Angle','slight low, 4°','ai',66],
+    ['move','Movement','static','measured'],
+  ],
+  framing: [
+    ['size','Shot size','MCU','ai',88],
+    ['pos','Subject','left third','measured'],
+    ['room','Lead room','right','measured'],
+    ['aspect','Aspect','2.39:1','measured'],
+  ],
+};
+const STEPS = [['Shots detected','T0'],['Colour','T0'],['Light','T2'],['Lens','T2'],['Framing','T1'],['Mood','T2']];
+const DURS = ['2.4s','3.1s','4.6s','2.0s','5.2s','1.8s','3.3s'];
+
+function badge(src, conf, lowMode) {
+  if (src === 'manual') return { label:'MANUAL', border:'1px solid transparent', bg:'var(--bg3)', color:'var(--tx)' };
+  if (src === 'measured') return { label:'MEASURED', border:'1px solid var(--line2)', bg:'transparent', color:'var(--tx2)' };
+  if (src === 'sample') return { label:'SAMPLE', border:'1px dotted var(--tx3)', bg:'transparent', color:'var(--tx3)' };
+  const low = lowMode && conf < 60;
+  return { label:`AI ${conf}%`, border: low ? '1px dashed var(--warn)' : '1px dashed var(--tx3)', bg: low ? 'var(--warn-soft)' : 'transparent', color: low ? 'var(--warn)' : 'var(--tx2)' };
+}
+
+class Component extends DCLogic {
+  state = { shot:2, sel:null, ov:{ thirds:true, light:true, palette:true }, open:{ colour:true, light:true, lens:true, framing:true, mood:true }, edits:{}, editing:null, q:'', answer:'', step:0, up:0, moods:['lonely','warm–cold tension','neo-noir'] };
+
+  componentDidMount() { this.drive(); }
+  componentDidUpdate(pp) { if (pp.bstate !== this.props.bstate) this.drive(); }
+  componentWillUnmount() { clearInterval(this._i); }
+  setB(b) { this.props.setBstate ? this.props.setBstate(b) : null; }
+  drive() {
+    clearInterval(this._i);
+    const b = this.props.bstate;
+    if (b === 'uploading') {
+      this.setState({ up:0 });
+      this._i = setInterval(() => {
+        const up = Math.min(this.state.up + 12, 100);
+        this.setState({ up });
+        if (up >= 100) { clearInterval(this._i); this.setB('analysing'); }
+      }, 180);
+    } else if (b === 'analysing') {
+      this.setState({ step:0 });
+      this._i = setInterval(() => {
+        const step = this.state.step + 1;
+        this.setState({ step });
+        if (step >= STEPS.length) { clearInterval(this._i); this.setB('ready'); this.props.run && this.props.run('breakdown.analyse', 'Breakdown ready for Shot 12C'); }
+      }, 750);
+    }
+  }
+
+  rows(group, low) {
+    const { edits, editing } = this.state;
+    return ROWS[group].map(([id, label, val, src, conf]) => {
+      const e = edits[id];
+      const s = e !== undefined ? 'manual' : src;
+      const v = e !== undefined ? e : val;
+      const commit = ev => this.setState(st => ({ editing:null, edits: ev.target.value.trim() && ev.target.value !== val ? { ...st.edits, [id]: ev.target.value } : st.edits }));
+      return {
+        label, val:v, b: badge(s, conf, low),
+        vc: s === 'ai' ? 'var(--tx2)' : 'var(--tx)',
+        editing: editing === id, idle: editing !== id,
+        edit: () => this.setState({ editing:id }),
+        commit, key: ev => { if (ev.key === 'Enter') ev.target.blur(); if (ev.key === 'Escape') this.setState({ editing:null }); },
+      };
+    });
+  }
+
+  renderVals() {
+    const { shot, sel, ov, open, q, answer, step, up } = this.state;
+    const b = this.props.bstate || 'ready';
+    const aiOk = this.props.aiOk ?? true;
+    const run = this.props.run || (() => {});
+    const nav = this.props.nav || (() => {});
+    const st = { empty:b==='empty', uploading:b==='uploading', analysing:b==='analysing', error:b==='error' };
+    const hasData = b === 'ready' || b === 'low' || b === 'error';
+    const isReady = b === 'ready' || b === 'low';
+    const low = b === 'low';
+    const dots = PAL.map(([hex, share, x, y], i) => ({ hex, share, x, y, ring: sel === i ? 'var(--acc)' : 'rgba(255,255,255,.9)', select: () => this.setState({ sel: sel === i ? null : i }) }));
+    const az = -60 * Math.PI / 180, r = 54;
+    const lx = 70 + r * Math.sin(az), ly = 70 + r * Math.cos(az) * -1 * -1;
+    const dial = { lx: 70 + 50 * Math.sin(az), ly: 70 + 50 * Math.cos(az), ax: 70 + 12 * Math.sin(az), ay: 70 + 12 * Math.cos(az) };
+    const secKeys = ['colour','light','lens','framing','mood'];
+    const sec = {}; secKeys.forEach(k => sec[k] = { open: open[k], rot: open[k] ? 'none' : 'rotate(-90deg)', toggle: () => this.setState(s => ({ open: { ...s.open, [k]: !s.open[k] } })) });
+    const ANSWERS = {
+      "What's the exact colour scheme?": 'Six measured shades: #1B2230 38% and #3E4A52 22% carry the cold ambient; #C7803A 14% is the sodium key on the wall and skin; #6E5B4A 11% counter wood; #E9C9A0 9% skin highlight; #0D0F12 6% crushed shadow. Warm–cold split roughly 34:66.',
+      'How many lights?': 'Two sources. A hard sodium key through the window, screen-left (≈2000 K, −60° az). A soft blue ambient fill (≈5600 K), about 3 stops under. No practicals in frame.',
+    };
+    const askFn = text => { if (!aiOk || !text) return; run('breakdown.ask', 'Answered from the breakdown'); this.setState({ answer: ANSWERS[text] || 'Based on the breakdown: hard sodium key screen-left at −60°, cold ambient fill 3 stops under, ≈40 mm lens at 1.2 m. Edit any value in the panel to change the answer.', q:text }); };
+    return {
+      refName: st.empty ? 'No reference' : 'ref_kitchen_night.mov · 7 shots · 2.39:1',
+      isReady, st, showFrame: !st.empty && !st.uploading,
+      isReadyOverlay: { thirds: isReady && ov.thirds, light: isReady && ov.light, palette: isReady && ov.palette },
+      overlays: [['thirds','Thirds','breakdown.toggle_thirds'],['light','Light','breakdown.toggle_light'],['palette','Palette','breakdown.toggle_samples']].map(([k,label,cmd]) => ({ label, cmd, bg: ov[k] ? 'var(--bg3)' : 'transparent', color: ov[k] ? 'var(--tx)' : 'var(--tx3)', toggle: () => this.setState(s => ({ ov: { ...s.ov, [k]: !s.ov[k] } })) })),
+      replace: () => { this.setB('empty'); },
+      upload: () => { run('breakdown.import_reference', 'Importing reference'); this.setB('uploading'); },
+      upPct: up + '%', upText: `${Math.round(640 * up / 100)} MB of 640 MB · ${up}%`,
+      steps: STEPS.map(([label, tier], i) => {
+        const skip = !aiOk && tier === 'T2';
+        return { label: skip ? label + ' (skipped, enter by hand)' : label, tier, mark: i < step ? (skip ? '–' : '✓') : i === step ? '…' : '·', color: i <= step ? 'var(--tx)' : 'var(--tx3)' };
+      }),
+      retry: () => { run('breakdown.fit_light', 'Retrying light analysis'); this.setB('analysing'); },
+      skipToManual: () => { this.setB('ready'); this.setState({ editing:'key' }); },
+      dots, hasSel: sel !== null, selDot: sel !== null ? dots[sel] : dots[0],
+      shotLabel: `Shot ${shot + 1} of 7 · 00:01:${String(4 + shot * 4).padStart(2,'0')}:08`,
+      thumbs: DURS.map((dur, i) => ({ n: '12' + 'ABCDEFG'[i], dur, go: () => this.setState({ shot:i }), bg: i === shot ? 'var(--bg3)' : 'var(--bg1)', border: i === shot ? 'var(--acc)' : 'var(--line)', color: i === shot ? 'var(--tx)' : 'var(--tx3)' })),
+      scrub: `calc(${(shot + 0.5) / 7 * 100}% - 1px)`,
+      prev: () => this.setState({ shot: Math.max(0, shot - 1) }), next: () => this.setState({ shot: Math.min(6, shot + 1) }),
+      hasAnswer: !!answer && isReady, answer, closeAnswer: () => this.setState({ answer:'' }),
+      q, onQ: e => this.setState({ q:e.target.value }), ask: e => { e.preventDefault(); askFn(q); },
+      askDisabled: !aiOk || !isReady,
+      askPlaceholder: aiOk ? 'Ask about this reference' : `Ask needs AI · ${this.props.aiMsg || 'unavailable'}`,
+      chips: ["What's the exact colour scheme?", 'How many lights?'].map(label => ({ label, use: () => askFn(label) })),
+      saveLook: () => run('breakdown.save_look', 'Look saved to Library'),
+      adapt: () => nav('location'),
+      lowConf: low, aiBlocked: !aiOk, aiMsg: this.props.aiMsg || '', aiBtnColor: aiOk ? 'var(--tx)' : 'var(--tx3)',
+      panelEmpty: !hasData, panelShow: hasData,
+      sec,
+      swatches: PAL.map(([hex, share], i) => ({ hex, share, rowBg: sel === i ? 'var(--bg3)' : 'transparent', select: () => this.setState({ sel: sel === i ? null : i, ov: { ...ov, palette:true } }) })),
+      tints: [['Shadow','#1B2230','blue −6'],['Mid','#3E4A52','neutral'],['Highlight','#E9C9A0','warm +9']].map(([label,hex,val]) => ({ label, hex, val })),
+      colourRows: [{ label:'Saturation', val:'38% (low)', b: badge('measured'), vc:'var(--tx)' }, { label:'Contrast', val:'9.2 stops', b: badge('measured'), vc:'var(--tx)' }],
+      dial, azLabel:'−60° az', elLabel:'25° el',
+      lightRows: this.rows('light', low), lensRows: this.rows('lens', low), framingRows: this.rows('framing', low),
+      fitLight: () => { run('breakdown.fit_light', 'Light re-fitted to reference'); this.setState(s => { const e = { ...s.edits }; ['key','fill','prac'].forEach(k => delete e[k]); return { edits:e }; }); },
+      editKey: () => this.setState({ editing:'key', open:{ ...open, light:true } }),
+      moods: this.state.moods,
+      addMood: () => { const m = window.prompt('Add a mood tag'); if (m) this.setState(s => ({ moods:[...s.moods, m] })); },
+    };
+  }
+}
+</script>
+</body>
+</html>

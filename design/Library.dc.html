@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+:root{--bg0:#0D0D0D;--bg1:#151515;--bg2:#1C1C1C;--bg3:#262626;--line:#2A2A2A;--line2:#3A3A3A;--tx:#EDEDED;--tx2:#A6A6A6;--tx3:#808080;--sur:#101010;--acc:#22D3EE;--acc-ink:#04232A;--warn:#F5A524;--sh:0 16px 48px rgba(0,0,0,.5)}
+html,body{margin:0;background:var(--bg0);color:var(--tx);font:13px/1.45 'Geist',system-ui,sans-serif}
+*{box-sizing:border-box}
+input[type=range]{accent-color:var(--acc)}
+</style>
+</helmet>
+<div data-screen-label="Library" style="height:100%;min-height:760px;display:grid;grid-template-columns:232px minmax(0,1fr) 320px;background:var(--bg0);color:var(--tx)">
+  <aside style="border-right:1px solid var(--line);background:var(--bg1);padding:16px;overflow:auto;display:flex;flex-direction:column;gap:20px">
+    <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">FILTERS</span>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="color:var(--tx2)">Mood</span>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ moods }}" as="m" hint-placeholder-count="5">
+          <button onClick="{{ m.toggle }}" style="height:26px;padding:0 10px;border-radius:13px;border:1px solid {{ m.border }};background:{{ m.bg }};color:{{ m.color }};cursor:pointer;font-size:12px">{{ m.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="color:var(--tx2)">Light hardness</span>
+      <div style="display:flex;gap:2px;padding:3px;border-radius:8px;background:var(--bg0);border:1px solid var(--line)">
+        <sc-for list="{{ hards }}" as="h" hint-placeholder-count="3">
+          <button onClick="{{ h.go }}" style="flex:1;height:26px;border-radius:6px;border:none;background:{{ h.bg }};color:{{ h.color }};cursor:pointer;font-size:12px">{{ h.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="display:flex;justify-content:space-between;color:var(--tx2)">Key colour temp <span style="font-family:'Geist Mono',monospace;color:var(--tx)">≤ {{ kMax }} K</span></span>
+      <input type="range" min="2000" max="6000" step="100" value="{{ kMax }}" onChange="{{ onK }}"></input>
+      <span style="display:flex;justify-content:space-between;font-family:'Geist Mono',monospace;font-size:11px;color:var(--tx3)"><span>2000 K</span><span>6000 K</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="color:var(--tx2)">Project</span>
+      <select value="{{ project }}" onChange="{{ onProject }}" style="height:32px;padding:0 8px;border-radius:6px;background:var(--bg0);border:1px solid var(--line);color:var(--tx);font:inherit">
+        <option value="all">All projects</option><option value="Neel">Neel</option><option value="Monsoon Letters">Monsoon Letters</option><option value="Tram 36">Tram 36</option><option value="Salt">Salt</option>
+      </select>
+    </div>
+    <button onClick="{{ reset }}" style="align-self:flex-start;background:none;border:none;padding:0;color:var(--acc);cursor:pointer">Reset filters</button>
+  </aside>
+
+  <section style="padding:20px 24px;overflow:auto;display:flex;flex-direction:column;gap:16px;min-width:0">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <h1 style="margin:0;font-size:18px;font-weight:600">Library</h1>
+      <span style="color:var(--tx3)">{{ countLabel }}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
+      <sc-for list="{{ looks }}" as="l" hint-placeholder-count="8">
+        <button onClick="{{ l.select }}" style="display:flex;flex-direction:column;padding:0;border-radius:10px;overflow:hidden;background:var(--bg1);border:1px solid {{ l.border }};color:var(--tx);cursor:pointer;text-align:left" style-hover="border-color:var(--line2)">
+          <div style="width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="{{ l.slot }}" shape="rect" fit="contain" placeholder="{{ l.name }}"></image-slot></div>
+          <div style="display:flex;height:8px;width:100%"><sc-for list="{{ l.pal }}" as="p" hint-placeholder-count="5"><span style="flex:1;background:{{ p }}"></span></sc-for></div>
+          <div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;width:100%">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+                <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
+                <span style="font-size:12px;color:var(--tx3)">{{ l.project }}</span>
+              </div>
+              <svg width="34" height="34" viewBox="0 0 34 34" style="flex:none"><circle cx="17" cy="17" r="15" fill="none" stroke="var(--line2)"></circle><circle cx="17" cy="17" r="2.5" fill="var(--tx2)"></circle><line x1="17" y1="17" x2="{{ l.dx }}" y2="{{ l.dy }}" stroke="var(--acc)" stroke-width="1.5"></line><circle cx="{{ l.dx }}" cy="{{ l.dy }}" r="3" fill="var(--acc)"></circle></svg>
+            </div>
+            <div style="display:flex;gap:10px;font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx2)"><span>{{ l.az }}°</span><span>{{ l.ratio }}</span><span>{{ l.k }} K</span><span>{{ l.hard }}</span></div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px"><sc-for list="{{ l.tags }}" as="t" hint-placeholder-count="3"><span style="height:20px;display:flex;align-items:center;padding:0 8px;border-radius:10px;background:var(--bg2);color:var(--tx2);font-size:11px">{{ t }}</span></sc-for></div>
+          </div>
+        </button>
+      </sc-for>
+    </div>
+    <sc-if value="{{ none }}" hint-placeholder-val="{{ false }}"><div style="padding:48px;text-align:center;color:var(--tx3)">No saved looks match these filters.</div></sc-if>
+  </section>
+
+  <aside style="border-left:1px solid var(--line);background:var(--bg1);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px">
+    <div style="width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden;border:1px solid var(--line)"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="{{ cur.slot }}" shape="rect" fit="contain" placeholder="{{ cur.name }}"></image-slot></div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="font-size:15px;font-weight:600">{{ cur.name }}</span>
+      <span style="color:var(--tx3)">{{ cur.project }} · saved {{ cur.saved }}</span>
+    </div>
+    <div style="display:flex;height:12px;border-radius:3px;overflow:hidden"><sc-for list="{{ cur.pal }}" as="p" hint-placeholder-count="5"><span style="flex:1;background:{{ p }}"></span></sc-for></div>
+    <div style="display:flex;flex-direction:column">
+      <sc-for list="{{ curRows }}" as="r" hint-placeholder-count="6">
+        <div style="display:flex;min-height:28px;align-items:center;border-bottom:1px solid var(--line)"><span style="width:100px;color:var(--tx2)">{{ r.label }}</span><span style="flex:1;font-family:'Geist Mono',monospace">{{ r.val }}</span></div>
+      </sc-for>
+    </div>
+    <div style="flex:1"></div>
+    <button onClick="{{ compare }}" title="library.compare" style="height:34px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:var(--tx);cursor:pointer">Compare with…</button>
+    <button onClick="{{ apply }}" title="library.apply_look" style="height:40px;border-radius:8px;background:var(--acc);border:none;color:var(--acc-ink);font-weight:600;cursor:pointer">Apply to shot…</button>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const L = [
+  ['Kitchen sodium','Neel','Sc 12 · 12C',-60,'8:1',2000,'hard',['neo-noir','sodium','hard key'],['#1B2230','#3E4A52','#C7803A','#6E5B4A','#E9C9A0'],['lonely','warm']],
+  ['Tram stop, rain','Neel','Sc 7',-30,'4:1',4300,'soft',['rain','teal','wet street'],['#10222A','#2C4E58','#6E8A94','#C9D3D6','#0A1216'],['lonely','cold']],
+  ['Terrace dawn','Neel','Sc 4',20,'2:1',5200,'soft',['dawn','haze'],['#6B7A8C','#B7A9A0','#E4CFB8','#F2E6D8','#3A4450'],['dreamy']],
+  ['Monsoon window','Monsoon Letters','Spot 1',-45,'3:1',5600,'soft',['window','overcast'],['#2B3440','#6B7F99','#B7C4D1','#E6E1D8','#161B20'],['cold','dreamy']],
+  ['Neon bar','Tram 36','Verse 2',70,'6:1',3200,'hard',['neon','magenta'],['#1A0F1E','#5A1E4E','#C23A7A','#F08FB8','#0C070E'],['neo-noir']],
+  ['Stairwell practical','Neel','Sc 15',0,'10:1',2700,'hard',['practical','bare bulb'],['#0E0C0A','#3A2E24','#8A6A48','#E0B07A','#050403'],['lonely','warm']],
+  ['Corridor fluorescent','Salt','Sc 3',0,'2:1',4000,'soft',['fluorescent','green cast'],['#2E3A34','#6B7F72','#B9C6B8','#E3EBE0','#171D1A'],['cold']],
+  ['Night car','Tram 36','Bridge',-90,'12:1',3000,'hard',['dashboard','streetlight'],['#0B0E14','#1F2A3A','#C98A4B','#F2C48D','#050608'],['neo-noir','lonely']],
+];
+const MOODS = ['neo-noir','lonely','warm','cold','dreamy'];
+class Component extends DCLogic {
+  state = { sel:0, moods:[], hard:'any', kMax:6000, project:'all' };
+  renderVals() {
+    const { sel, moods, hard, kMax, project } = this.state;
+    const run = this.props.run || (() => {});
+    const vis = L.map((l, i) => ({ l, i })).filter(({ l }) => (hard === 'any' || l[6] === hard) && l[5] <= kMax && (project === 'all' || l[1] === project) && moods.every(m => l[9].includes(m)));
+    const c = L[sel];
+    const dial = az => ({ dx: 17 + 12 * Math.sin(az * Math.PI / 180), dy: 17 + 12 * Math.cos(az * Math.PI / 180) });
+    return {
+      moods: MOODS.map(m => { const on = moods.includes(m); return { label:m, border: on ? 'var(--acc)' : 'var(--line)', bg: on ? 'var(--acc-soft, rgba(34,211,238,.12))' : 'transparent', color: on ? 'var(--tx)' : 'var(--tx2)', toggle: () => this.setState({ moods: on ? moods.filter(x => x !== m) : [...moods, m] }) }; }),
+      hards: [['any','Any'],['hard','Hard'],['soft','Soft']].map(([id, label]) => ({ label, bg: hard === id ? 'var(--bg3)' : 'transparent', color: hard === id ? 'var(--tx)' : 'var(--tx3)', go: () => this.setState({ hard:id }) })),
+      kMax, onK: e => this.setState({ kMax:+e.target.value }),
+      project, onProject: e => this.setState({ project:e.target.value }),
+      reset: () => this.setState({ moods:[], hard:'any', kMax:6000, project:'all' }),
+      countLabel: `${vis.length} of ${L.length} saved looks`, none: vis.length === 0,
+      looks: vis.map(({ l, i }) => ({ name:l[0], project:`${l[1]} · ${l[2]}`, az:(l[3] > 0 ? '+' : '') + l[3], ratio:l[4], k:l[5], hard:l[6], tags:l[7], pal:l[8], slot:'look-' + i, ...dial(l[3]),
+        border: i === sel ? 'var(--acc)' : 'var(--line)', select: () => this.setState({ sel:i }) })),
+      cur: { name:c[0], project:`${c[1]} · ${c[2]}`, pal:c[8], slot:'look-' + sel, saved: sel === 0 ? 'today 19:48' : '12 Sep' },
+      curRows: [['Key direction',(c[3] > 0 ? '+' : '') + c[3] + '° az'],['Key:fill',c[4]],['Key temp',c[5] + ' K'],['Hardness',c[6]],['Tags',c[7].join(', ')],['Mood',c[9].join(', ')]].map(([label,val]) => ({ label, val })),
+      compare: () => run('library.compare', `Comparing “${c[0]}” with Shot 12C`),
+      apply: () => run('library.apply_look', `“${c[0]}” applied to Shot 12C as a target`),
+    };
+  }
+}
+</script>
+</body>
+</html>

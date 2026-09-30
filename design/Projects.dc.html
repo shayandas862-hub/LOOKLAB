@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+:root{--bg0:#0D0D0D;--bg1:#151515;--bg2:#1C1C1C;--bg3:#262626;--line:#2A2A2A;--line2:#3A3A3A;--tx:#EDEDED;--tx2:#A6A6A6;--tx3:#808080;--sur:#101010;--acc:#22D3EE;--acc-ink:#04232A;--acc-soft:rgba(34,211,238,.12);--warn:#F5A524;--warn-soft:rgba(245,165,36,.10);--err:#F05252;--sh:0 16px 48px rgba(0,0,0,.5)}
+html,body{margin:0;background:var(--bg0);color:var(--tx);font:13px/1.45 'Geist',system-ui,sans-serif}
+*{box-sizing:border-box}
+</style>
+</helmet>
+<div data-screen-label="Projects" style="height:100%;min-height:760px;display:grid;grid-template-columns:minmax(0,1fr) 380px;background:var(--bg0);color:var(--tx)">
+  <section style="padding:24px;overflow:auto;display:flex;flex-direction:column;gap:20px;min-width:0">
+    <div style="display:flex;align-items:center;gap:8px">
+      <h1 style="margin:0;font-size:18px;font-weight:600">Projects</h1>
+      <span style="color:var(--tx3);margin-left:4px">4 productions</span>
+      <div style="flex:1"></div>
+      <button onClick="{{ importRef }}" title="breakdown.import_reference" style="height:32px;padding:0 14px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:var(--tx);cursor:pointer" style-hover="border-color:var(--line2)">Import reference</button>
+      <button onClick="{{ newProject }}" title="project.create" style="height:32px;padding:0 14px;border-radius:8px;background:var(--acc);border:none;color:var(--acc-ink);font-weight:600;cursor:pointer">New project</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+      <sc-for list="{{ projects }}" as="p" hint-placeholder-count="4">
+        <button onClick="{{ p.open }}" style="display:flex;flex-direction:column;text-align:left;padding:0;border-radius:10px;overflow:hidden;background:var(--bg1);border:1px solid {{ p.border }};color:var(--tx);cursor:pointer" style-hover="border-color:var(--line2)">
+          <div style="width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="{{ p.slot }}" shape="rect" fit="contain" placeholder="Poster frame"></image-slot></div>
+          <div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;width:100%">
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <span style="font-size:14px;font-weight:600">{{ p.name }}</span>
+              <span style="color:var(--tx3)">{{ p.type }}</span>
+            </div>
+            <span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx2)">{{ p.dates }}</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ p.stages }}" as="s" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <div style="height:4px;border-radius:2px;background:var(--bg3);overflow:hidden"><div style="width:{{ s.w }};height:100%;background:var(--tx2)"></div></div>
+                  <span style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx3)"><span>{{ s.label }}</span><span style="font-family:'Geist Mono',monospace">{{ s.v }}</span></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </button>
+      </sc-for>
+    </div>
+  </section>
+
+  <aside style="border-left:1px solid var(--line);background:var(--bg1);display:flex;flex-direction:column;min-height:0;overflow:auto">
+    <div style="padding:20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:4px">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">OPEN PROJECT</span>
+      <span style="font-size:16px;font-weight:600">{{ cur.name }}</span>
+      <span style="color:var(--tx2)">{{ cur.type }} · {{ cur.dates }}</span>
+    </div>
+    <div style="padding:12px 12px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:2px">
+      <span style="padding:4px 8px 8px;font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">SCENES</span>
+      <sc-for list="{{ scenes }}" as="s" hint-placeholder-count="4">
+        <button onClick="{{ s.open }}" style="display:flex;align-items:center;gap:10px;height:44px;padding:0 8px;border-radius:8px;background:{{ s.bg }};border:none;color:var(--tx);cursor:pointer;text-align:left" style-hover="background:var(--bg2)">
+          <span style="width:28px;font-family:'Geist Mono',monospace;color:var(--tx3)">{{ s.n }}</span>
+          <span style="flex:1;min-width:0">{{ s.name }}</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx2)">{{ s.meta }}</span>
+          <span style="color:var(--tx3)">›</span>
+        </button>
+      </sc-for>
+    </div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">RECENT ACTIVITY</span>
+      <sc-for list="{{ recent }}" as="r" hint-placeholder-count="3">
+        <div style="display:flex;gap:10px">
+          <span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx3);width:44px;flex:none">{{ r.t }}</span>
+          <span style="color:var(--tx2);text-wrap:pretty">{{ r.text }}</span>
+        </div>
+      </sc-for>
+      <button onClick="{{ openActivity }}" style="align-self:flex-start;background:none;border:none;padding:0;color:var(--acc);cursor:pointer">Open activity log</button>
+    </div>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const P = [
+  { id:'neel', name:'Neel', type:'Short film', dates:'Shoot 14–18 Oct 2026', st:[[100,'7/7'],[57,'4/7'],[14,'1/7']] },
+  { id:'monsoon', name:'Monsoon Letters', type:'Commercial', dates:'Shoot 2–3 Nov 2026', st:[[100,'5/5'],[20,'1/5'],[0,'0/5']] },
+  { id:'tram', name:'Tram 36', type:'Music video', dates:'Shoot 21 Nov 2026', st:[[40,'4/10'],[0,'0/10'],[0,'0/10']] },
+  { id:'salt', name:'Salt', type:'Feature pitch', dates:'Dates not set', st:[[12,'3/24'],[0,'0/24'],[0,'0/24']] },
+];
+const SCENES = [
+  ['4','Terrace, dawn','3 shots · 3 planned'],
+  ['7','Tram stop, rain','5 shots · 1 planned'],
+  ['12','Kitchen, night','6 shots · 4 planned'],
+  ['15','Stairwell','2 shots · 0 planned'],
+];
+class Component extends DCLogic {
+  state = { cur:'neel' };
+  renderVals() {
+    const nav = this.props.nav || (() => {});
+    const run = this.props.run || (() => {});
+    const cur = P.find(p => p.id === this.state.cur);
+    return {
+      projects: P.map(p => ({ ...p, slot:'poster-' + p.id, border: p.id === this.state.cur ? 'var(--acc)' : 'var(--line)', open: () => this.setState({ cur:p.id }),
+        stages: p.st.map(([w, v], i) => ({ w: w + '%', v, label: ['Breakdown','Plan','Set sheet'][i] })) })),
+      cur,
+      scenes: SCENES.map(([n, name, meta]) => ({ n, name: `“${name}”`, meta, bg: n === '12' ? 'var(--bg2)' : 'transparent', open: () => nav('breakdown') })),
+      recent: [
+        { t:'19:42', text:'Look match for 12C rose to 87% after moving the key 0.4 m back.' },
+        { t:'18:10', text:'Recipe for 12C generated. 1 gap: window stand at 2.5 m.' },
+        { t:'Mon', text:'Director added 4 frames to “Sodium & teal”.' },
+      ],
+      openActivity: () => nav('activity'),
+      importRef: () => { this.props.setBstate && this.props.setBstate('empty'); nav('breakdown'); },
+      newProject: () => run('project.create', 'New project created'),
+    };
+  }
+}
+</script>
+</body>
+</html>

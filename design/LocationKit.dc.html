@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+:root{--bg0:#0D0D0D;--bg1:#151515;--bg2:#1C1C1C;--bg3:#262626;--line:#2A2A2A;--line2:#3A3A3A;--tx:#EDEDED;--tx2:#A6A6A6;--tx3:#808080;--sur:#101010;--acc:#22D3EE;--acc-ink:#04232A;--acc-soft:rgba(34,211,238,.12);--warn:#F5A524;--warn-soft:rgba(245,165,36,.10);--err:#F05252;--err-soft:rgba(240,82,82,.10);--sh:0 16px 48px rgba(0,0,0,.5)}
+html,body{margin:0;background:var(--bg0);color:var(--tx);font:13px/1.45 'Geist',system-ui,sans-serif}
+*{box-sizing:border-box}
+</style>
+</helmet>
+<div data-screen-label="Location & Kit" style="height:100%;min-height:760px;display:grid;grid-template-columns:minmax(300px,1fr) minmax(280px,.9fr) minmax(380px,1.25fr);background:var(--bg0);color:var(--tx)">
+
+  <section style="border-right:1px solid var(--line);overflow:auto;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">LOCATION</span>
+      <span style="font-size:15px;font-weight:600">Ballygunge flat, kitchen</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div style="aspect-ratio:3/2;background:var(--sur);border-radius:6px;overflow:hidden;position:relative"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="loc-1" shape="rect" placeholder="Wide, from door"></image-slot></div>
+      <div style="aspect-ratio:3/2;background:var(--sur);border-radius:6px;overflow:hidden;position:relative"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="loc-2" shape="rect" placeholder="Window, east"></image-slot></div>
+      <div style="aspect-ratio:3/2;background:var(--sur);border-radius:6px;overflow:hidden;position:relative"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="loc-3" shape="rect" placeholder="Counter"></image-slot></div>
+      <div style="aspect-ratio:3/2;background:var(--sur);border-radius:6px;overflow:hidden;position:relative"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="loc-4" shape="rect" placeholder="Outside window"></image-slot></div>
+    </div>
+    <div style="display:flex;justify-content:center;padding:12px;border-radius:8px;background:var(--bg1);border:1px solid var(--line)">
+      <svg width="250" height="300" viewBox="0 0 250 300">
+        <rect x="30" y="24" width="186" height="252" fill="var(--bg2)" stroke="var(--tx2)" stroke-width="3"></rect>
+        <rect x="34" y="28" width="178" height="36" fill="var(--bg3)" stroke="var(--line2)"></rect>
+        <text x="123" y="50" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="Geist">counter</text>
+        <rect x="170" y="210" width="42" height="62" fill="var(--bg3)" stroke="var(--line2)"></rect>
+        <text x="191" y="244" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="Geist">fridge</text>
+        <line x1="216" y1="84" x2="216" y2="156" stroke="var(--acc)" stroke-width="5"></line>
+        <text x="226" y="124" font-size="10" fill="var(--tx2)" font-family="Geist Mono" transform="rotate(90 226 124)" text-anchor="middle">window 1.2 m</text>
+        <line x1="30" y1="190" x2="30" y2="236" stroke="var(--bg1)" stroke-width="5"></line>
+        <text x="20" y="214" font-size="10" fill="var(--tx3)" font-family="Geist" transform="rotate(-90 20 214)" text-anchor="middle">door</text>
+        <rect x="80" y="64" width="8" height="8" fill="var(--warn)"></rect>
+        <text x="92" y="80" font-size="10" fill="var(--tx2)" font-family="Geist Mono">5 A</text>
+        <rect x="160" y="202" width="8" height="8" fill="var(--warn)"></rect>
+        <text x="130" y="200" font-size="10" fill="var(--tx2)" font-family="Geist Mono">15 A</text>
+        <text x="123" y="16" text-anchor="middle" font-size="11" fill="var(--tx)" font-family="Geist Mono">3.1 m</text>
+        <text x="8" y="150" text-anchor="middle" font-size="11" fill="var(--tx)" font-family="Geist Mono" transform="rotate(-90 8 150)">4.2 m</text>
+        <text x="123" y="292" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="Geist">N ↑ · ceiling 2.9 m</text>
+      </svg>
+    </div>
+    <div style="display:flex;flex-direction:column">
+      <sc-for list="{{ locRows }}" as="r" hint-placeholder-count="5">
+        <div style="display:flex;align-items:center;gap:8px;min-height:30px;border-bottom:1px solid var(--line)">
+          <span style="width:96px;color:var(--tx2)">{{ r.label }}</span>
+          <span style="flex:1;font-family:'Geist Mono',monospace">{{ r.val }}</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:10px;padding:1px 5px;border-radius:4px;border:{{ r.b.border }};background:{{ r.b.bg }};color:{{ r.b.color }}">{{ r.b.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="border-right:1px solid var(--line);overflow:auto;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0">
+    <div style="display:flex;align-items:flex-end;gap:8px">
+      <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+        <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">OUR KIT</span>
+        <span style="font-size:15px;font-weight:600">{{ kitCount }} items available</span>
+      </div>
+      <button onClick="{{ addKit }}" title="adapt.add_kit" style="height:28px;padding:0 10px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--tx2);cursor:pointer">+ Add item</button>
+    </div>
+    <sc-for list="{{ kitGroups }}" as="g" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column">
+        <span style="font-size:11px;color:var(--tx3);padding-bottom:4px">{{ g.name }}</span>
+        <sc-for list="{{ g.items }}" as="k" hint-placeholder-count="3">
+          <button onClick="{{ k.toggle }}" style="display:flex;align-items:center;gap:10px;min-height:32px;padding:0 6px;margin:0 -6px;border-radius:6px;background:none;border:none;color:{{ k.color }};cursor:pointer;text-align:left" style-hover="background:var(--bg1)">
+            <span style="width:14px;height:14px;border-radius:3px;border:1px solid {{ k.boxBorder }};background:{{ k.boxBg }};color:var(--acc-ink);font-size:10px;display:flex;align-items:center;justify-content:center;flex:none">{{ k.mark }}</span>
+            <span style="flex:1">{{ k.name }}</span>
+            <span style="font-family:'Geist Mono',monospace;color:var(--tx2)">{{ k.qty }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-for>
+  </section>
+
+  <section style="overflow:auto;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0;background:var(--bg1)">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">THE RECIPE · SHOT 12C</span>
+      <span style="font-size:15px;font-weight:600">How to get this look here</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onClick="{{ generate }}" disabled="{{ aiBlocked }}" title="adapt.generate_recipe" style="flex:1;height:34px;border-radius:8px;background:{{ genBg }};border:1px solid var(--line);color:{{ genColor }};cursor:pointer">{{ genLabel }}</button>
+      <button onClick="{{ writeSelf }}" title="adapt.write_recipe" style="flex:1;height:34px;border-radius:8px;background:{{ selfBg }};border:1px solid var(--line);color:var(--tx);cursor:pointer">Write it myself</button>
+    </div>
+    <sc-if value="{{ aiBlocked }}" hint-placeholder-val="{{ false }}">
+      <div style="color:var(--tx3);font-size:12px">{{ aiMsg }}. Write the recipe by hand; gaps and risks are still checked against your kit and power.</div>
+    </sc-if>
+
+    <sc-if value="{{ generating }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:16px;border-radius:8px;border:1px dashed var(--line2);color:var(--tx2)">Matching the breakdown against 11 kit items and the location…</div>
+    </sc-if>
+
+    <sc-if value="{{ showSteps }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+          <div style="display:flex;gap:12px;padding:12px;border-radius:8px;background:var(--bg2);border:1px solid var(--line)">
+            <span style="width:22px;height:22px;flex:none;border-radius:11px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:12px">{{ s.n }}</span>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-weight:600">{{ s.title }}</span>
+                <span style="flex:1"></span>
+                <span style="font-family:'Geist Mono',monospace;font-size:10px;padding:1px 5px;border-radius:4px;border:{{ s.b.border }};background:{{ s.b.bg }};color:{{ s.b.color }}">{{ s.b.label }}</span>
+              </div>
+              <sc-if value="{{ s.editable }}" hint-placeholder-val="{{ false }}">
+                <textarea defaultValue="{{ s.text }}" onBlur="{{ s.save }}" rows="3" style="width:100%;resize:vertical;padding:6px 8px;border-radius:6px;border:1px solid var(--line2);background:var(--bg0);color:var(--tx);font:inherit;outline:none"></textarea>
+              </sc-if>
+              <sc-if value="{{ s.readonly }}" hint-placeholder-val="{{ true }}">
+                <span style="color:var(--tx2);text-wrap:pretty">{{ s.text }}</span>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ manual }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ addStep }}" style="height:32px;border-radius:8px;border:1px dashed var(--line2);background:none;color:var(--tx2);cursor:pointer">+ Add step</button>
+        </sc-if>
+      </div>
+
+      <div style="padding:12px;border-radius:8px;background:var(--warn-soft);border:1px solid var(--warn);display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--warn)">GAPS · 1</span>
+        <span>Need a stand outside the window, head at 2.9 m: not in kit.</span>
+        <span style="color:var(--tx2);font-size:12px">Hire a 3 m combo stand, or rig the COB from the balcony rail with a clamp.</span>
+      </div>
+      <div style="padding:12px;border-radius:8px;background:var(--bg2);border:1px solid var(--line2);display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx2)">RISKS · 1</span>
+        <span>15 A point shared with the fridge.</span>
+        <span style="color:var(--tx2);font-size:12px">600 W COB draws ≈2.7 A. Unplug the fridge during takes, or run the COB from the 5 A point.</span>
+      </div>
+    </sc-if>
+
+    <div style="flex:1"></div>
+    <button onClick="{{ openPlan }}" title="adapt.open_in_plan" style="height:44px;border-radius:10px;background:var(--acc);border:none;color:var(--acc-ink);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">Open in Set Plan <span>→</span></button>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const B = {
+  measured: { label:'MEASURED', border:'1px solid var(--line2)', bg:'transparent', color:'var(--tx2)' },
+  manual: { label:'MANUAL', border:'1px solid transparent', bg:'var(--bg3)', color:'var(--tx)' },
+  ai: c => ({ label:`AI ${c}%`, border:'1px dashed var(--tx3)', bg:'transparent', color:'var(--tx2)' }),
+};
+const KIT = [
+  ['Lights', [['600 W bi-colour COB','×1'],['60 W LED panel','×2'],['4 ft RGB tube','×1']]],
+  ['Grip & modifiers', [['4×4 frame + ½ grid','×1'],['Flags','×2'],['CTO full, ½ gels','roll'],['Haze machine','×1']]],
+  ['Camera', [['Sony FX3','×1'],['Primes 24 / 35 / 50 / 85 mm','×4']]],
+  ['Crew', [['DP · gaffer · 1 spark','3']]],
+];
+const AI_STEPS = [
+  ['Key','600 W COB outside the window, 3 m back, full CTO + ½ CTS to reach ≈2000 K. Flag the ceiling spill.',78],
+  ['Fill','RGB tube bounced off the ceiling at 5600 K, 10%. Aim for 8:1 on the face.',70],
+  ['Lens','35 mm at T2 (closest prime to ≈40 mm). Camera 1.2 m, slight low angle.',84],
+];
+class Component extends DCLogic {
+  state = { mode:'ai', gen:false, off:{}, manualSteps:[['Key',''],['Fill',''],['Lens','']] };
+  componentWillUnmount() { clearTimeout(this._t); }
+  renderVals() {
+    const { mode, gen, off, manualSteps } = this.state;
+    const aiOk = this.props.aiOk ?? true;
+    const run = this.props.run || (() => {});
+    const manual = mode === 'manual';
+    let count = 0;
+    const kitGroups = KIT.map(([name, items]) => ({ name, items: items.map(([n, qty]) => {
+      const on = !off[n]; if (on) count++;
+      return { name:n, qty, color: on ? 'var(--tx)' : 'var(--tx3)', mark: on ? '✓' : '', boxBg: on ? 'var(--acc)' : 'transparent', boxBorder: on ? 'var(--acc)' : 'var(--line2)', toggle: () => this.setState(s => ({ off: { ...s.off, [n]: !s.off[n] } })) };
+    }) }));
+    const steps = manual
+      ? manualSteps.map(([title, text], i) => ({ n:i + 1, title, text, b:B.manual, editable:true, readonly:false, save: e => this.setState(s => { const m = s.manualSteps.slice(); m[i] = [title, e.target.value]; return { manualSteps:m }; }) }))
+      : AI_STEPS.map(([title, text, c], i) => ({ n:i + 1, title, text, b:B.ai(c), editable:false, readonly:true }));
+    return {
+      locRows: [['Floor','3.1 × 4.2 m',B.measured],['Ceiling','2.9 m',B.measured],['Window','east, 1.2 m wide',B.measured],['Power','5 A, 15 A (2 points)',B.manual],['Shoot window','19:00–02:00',B.manual]].map(([label,val,b]) => ({ label, val, b })),
+      kitGroups, kitCount: count,
+      addKit: () => run('adapt.add_kit', 'Kit item added'),
+      aiBlocked: !aiOk, aiMsg: this.props.aiMsg || '',
+      genLabel: gen ? 'Generating…' : 'Generate recipe (AI)',
+      genBg: !manual && aiOk ? 'var(--bg3)' : 'var(--bg2)', genColor: aiOk ? 'var(--tx)' : 'var(--tx3)',
+      selfBg: manual ? 'var(--bg3)' : 'var(--bg2)',
+      generate: () => { this.setState({ gen:true, mode:'ai' }); this._t = setTimeout(() => { this.setState({ gen:false }); run('adapt.generate_recipe', 'Recipe generated · 3 steps, 1 gap, 1 risk'); }, 1100); },
+      writeSelf: () => this.setState({ mode:'manual' }),
+      generating: gen, showSteps: !gen, manual, steps,
+      addStep: () => this.setState(s => ({ manualSteps:[...s.manualSteps, ['Step', '']] })),
+      openPlan: () => (this.props.nav || (() => {}))('plan'),
+    };
+  }
+}
+</script>
+</body>
+</html>

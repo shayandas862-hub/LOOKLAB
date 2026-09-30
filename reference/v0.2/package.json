@@ -1,0 +1,14 @@
+{
+  "name": "look-lab",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Look Lab: reverse-engineer a reference frame's look into knobs, then steer it in a live 3D scene.",
+  "scripts": {
+    "build": "python3 src/build.py",
+    "fetch:three": "sh scripts/fetch-three.sh",
+    "test:core": "node tests/core-fit.test.js",
+    "test:e2e": "node tests/live.e2e.js",
+    "test": "npm run build && npm run test:core && npm run test:e2e"
+  },
+  "devDependencies": { "playwright": "^1.45.0" }
+}

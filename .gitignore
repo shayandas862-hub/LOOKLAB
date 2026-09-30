@@ -1,0 +1,20 @@
+node_modules/
+dist/
+coverage/
+tests/out/
+*.log
+.DS_Store
+
+# Private working log (records convention §4): never committed
+docs/decision-log.local.md
+
+# Local secrets and machine state
+.env
+.env.*
+!.env.example
+
+# Bundles kept only as the original hand-offs; their contents are unpacked in design/ and reference/v0.2/
+*.zip
+
+# The old prototype's vendored three.js (downloaded by its own script)
+reference/v0.2/vendor/

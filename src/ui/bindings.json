@@ -1,0 +1,7 @@
+{
+  "Settings": {
+    "Claude Code runs Look Lab through its MCP connection. 42 Look Lab tools available.": "mcpBlurb",
+    "claude mcp add looklab -- looklab mcp serve": "mcpCommandText",
+    "sk-ant-•••• •••• •••• 7Qx2": "apiKeyText"
+  }
+}

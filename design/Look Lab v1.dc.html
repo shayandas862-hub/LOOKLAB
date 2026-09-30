@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+html,body{margin:0;background:#0B0E11;color:#E6EAEE;font-family:'Geist',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#22D3EE;text-decoration:none}a:hover{color:#67E8F9}
+input::placeholder{color:#5F6A74}
+</style>
+</helmet>
+<div data-screen-label="Look Lab — Breakdown" style="min-height:100vh;padding:20px;display:flex">
+  <div style="flex:1;display:grid;grid-template-rows:56px minmax(0,1fr);background:#111519;border:1px solid #1F262D;border-radius:16px;overflow:hidden;min-height:760px">
+
+    <header style="display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid #1F262D">
+      <div style="width:28px;height:28px;border-radius:8px;background:#1A2027;border:1px solid #2A323A;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:#22D3EE">L</div>
+      <nav style="display:flex;align-items:center;gap:8px;font-size:14px;color:#8A949E;min-width:0">
+        <span>Neel (short film)</span><span style="color:#3A434C">/</span>
+        <span>Scene 12 · Kitchen, night</span><span style="color:#3A434C">/</span>
+        <span style="color:#E6EAEE">Shot {{ shot.code }}</span>
+      </nav>
+      <div style="flex:1"></div>
+      <button style="display:flex;align-items:center;gap:10px;height:34px;padding:0 10px 0 12px;background:#161B20;border:1px solid #232A31;border-radius:9px;color:#8A949E;font:inherit;font-size:13px;cursor:pointer;width:220px" style-hover="border-color:#2F3841">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        <span style="flex:1;text-align:left">Search</span>
+        <span style="font-family:'Geist Mono',monospace;font-size:11px;padding:2px 6px;border-radius:5px;background:#1F262D;color:#8A949E">⌘K</span>
+      </button>
+    </header>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:0">
+
+      <main style="display:flex;flex-direction:column;gap:16px;padding:20px 24px;min-width:0;border-right:1px solid #1F262D">
+        <div style="display:flex;align-items:center;gap:12px">
+          <h1 style="margin:0;font-size:16px;font-weight:600;letter-spacing:0.01em">Breakdown</h1>
+          <span style="font-family:'Geist Mono',monospace;font-size:12px;color:#8A949E">Shot {{ shotNum }} of 7 · {{ shot.tc }}</span>
+          <div style="flex:1"></div>
+          <button onClick="{{ toggleOverlay }}" style="display:flex;align-items:center;gap:10px;background:none;border:none;color:#AEB6BE;font:inherit;font-size:13px;cursor:pointer;padding:4px">
+            Overlay
+            <span style="width:32px;height:18px;border-radius:9px;background:{{ toggleBg }};position:relative;transition:background .2s">
+              <span style="position:absolute;top:2px;left:{{ knobLeft }};width:14px;height:14px;border-radius:7px;background:#fff;transition:left .2s"></span>
+            </span>
+          </button>
+        </div>
+
+        <div style="position:relative;width:100%;aspect-ratio:16/9;max-height:calc(100vh - 360px);border-radius:12px;overflow:hidden;background:#0B0E11;border:1px solid #1F262D">
+          <image-slot id="frame-main" shape="rect" placeholder="Drop a frame from the shot"></image-slot>
+          <sc-if value="{{ overlay }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.07) 1px,transparent 1px);background-size:33.333% 33.333%;background-position:-1px -1px"></div>
+            <sc-for list="{{ dots }}" as="d" hint-placeholder-count="3">
+              <button onClick="{{ d.select }}" title="{{ d.hex }}" style="position:absolute;left:{{ d.left }};top:{{ d.top }};transform:translate(-50%,-50%);width:22px;height:22px;border-radius:11px;background:{{ d.hex }};border:2px solid {{ d.ring }};box-shadow:0 0 0 4px rgba(0,0,0,0.35);cursor:pointer;padding:0"></button>
+            </sc-for>
+            <sc-if value="{{ hasSelected }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:{{ selDot.left }};top:{{ selDot.top }};transform:translate(-50%,-44px);padding:4px 8px;border-radius:6px;background:rgba(11,14,17,0.85);border:1px solid #2A323A;font-family:'Geist Mono',monospace;font-size:12px;pointer-events:none;white-space:nowrap">{{ selDot.hex }}</div>
+            </sc-if>
+          </sc-if>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px">
+          <button onClick="{{ prev }}" style="width:32px;height:32px;flex:none;border-radius:8px;background:#161B20;border:1px solid #232A31;color:#AEB6BE;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="border-color:#3A434C">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"></path></svg>
+          </button>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px">
+            <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="7">
+              <button onClick="{{ t.go }}" style="height:44px;border-radius:8px;background:{{ t.bg }};border:1px solid {{ t.border }};color:{{ t.color }};font-family:'Geist Mono',monospace;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+                <span>{{ t.code }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <button onClick="{{ next }}" style="width:32px;height:32px;flex:none;border-radius:8px;background:#161B20;border:1px solid #232A31;color:#AEB6BE;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="border-color:#3A434C">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
+        </div>
+
+        <sc-if value="{{ showAskBar }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:10px;height:48px;padding:0 8px 0 14px;background:#161B20;border:1px solid #232A31;border-radius:12px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6A74" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Ask about this shot…" style="flex:1;min-width:0;background:none;border:none;outline:none;color:#E6EAEE;font:inherit;font-size:14px"></input>
+            <sc-for list="{{ chips }}" as="c" hint-placeholder-count="2">
+              <button onClick="{{ c.use }}" style="height:30px;padding:0 12px;border-radius:15px;background:#1D232A;border:1px solid #2A323A;color:#AEB6BE;font:inherit;font-size:12px;cursor:pointer;white-space:nowrap" style-hover="color:#E6EAEE;border-color:#3A434C">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </main>
+
+      <aside style="display:flex;flex-direction:column;min-height:0;overflow:auto">
+        <section style="padding:20px;border-bottom:1px solid #1F262D;display:flex;flex-direction:column;gap:12px">
+          <h2 style="margin:0;font-size:12px;font-weight:500;color:#8A949E;text-transform:uppercase;letter-spacing:0.08em">Palette</h2>
+          <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px">
+            <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="4">
+              <span style="flex:{{ s.pct }};background:{{ s.hex }}"></span>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="4">
+              <button onClick="{{ s.select }}" style="display:flex;align-items:center;gap:10px;padding:8px;margin:0 -8px;border-radius:8px;background:{{ s.rowBg }};border:none;color:#E6EAEE;font:inherit;cursor:pointer;text-align:left" style-hover="background:#171C21">
+                <span style="width:18px;height:18px;border-radius:5px;background:{{ s.hex }};border:1px solid rgba(255,255,255,0.12)"></span>
+                <span style="flex:1;font-family:'Geist Mono',monospace;font-size:13px">{{ s.hex }}</span>
+                <span style="font-family:'Geist Mono',monospace;font-size:13px;color:#8A949E">{{ s.pct }}%</span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="padding:20px;border-bottom:1px solid #1F262D;display:flex;flex-direction:column;gap:14px">
+          <h2 style="margin:0;font-size:12px;font-weight:500;color:#8A949E;text-transform:uppercase;letter-spacing:0.08em">Key light</h2>
+          <div style="display:flex;justify-content:center">
+            <svg width="150" height="150" viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r="62" fill="none" stroke="#232A31" stroke-width="6"></circle>
+              <circle cx="80" cy="80" r="44" fill="#161B20" stroke="#232A31"></circle>
+              <line x1="80" y1="80" x2="{{ dial.x2 }}" y2="{{ dial.y2 }}" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"></line>
+              <circle cx="{{ dial.x }}" cy="{{ dial.y }}" r="7" fill="#22D3EE"></circle>
+              <text x="80" y="12" text-anchor="middle" fill="#5F6A74" font-size="10" font-family="Geist Mono">0°</text>
+            </svg>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+            <sc-for list="{{ lightStats }}" as="l" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:8px;background:#161B20">
+                <span style="font-size:11px;color:#8A949E">{{ l.label }}</span>
+                <span style="font-family:'Geist Mono',monospace;font-size:14px">{{ l.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="padding:20px;display:flex;flex-direction:column;gap:10px">
+          <h2 style="margin:0;font-size:12px;font-weight:500;color:#8A949E;text-transform:uppercase;letter-spacing:0.08em">Lens</h2>
+          <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:#AEB6BE">Focal length</span><span style="font-family:'Geist Mono',monospace">≈{{ shot.focal }}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:#AEB6BE">Aperture</span><span style="font-family:'Geist Mono',monospace">{{ shot.aperture }}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:#AEB6BE">Confidence</span><span style="font-family:'Geist Mono',monospace;color:#22D3EE">AI {{ shot.conf }}%</span></div>
+        </section>
+
+        <div style="flex:1"></div>
+        <div style="padding:20px;border-top:1px solid #1F262D">
+          <button onClick="{{ adapt }}" style="width:100%;height:44px;border-radius:10px;background:#22D3EE;border:none;color:#062028;font:inherit;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 0 24px rgba(34,211,238,0.25)" style-hover="background:#67E8F9">
+            {{ adaptLabel }}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          </button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showAskBar&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const SHOTS = [
+  { code:'12A', tc:'00:01:04:12', az:-30, el:15, ratio:'4:1', kelvin:'3200K', focal:'32mm', aperture:'f/2.0', conf:81,
+    colors:[['#1C2733',45,30,22],['#D4D4D4',25,62,30],['#3B82F6',20,44,58],['#C98A4B',10,26,70]] },
+  { code:'12B', tc:'00:01:08:02', az:-45, el:20, ratio:'6:1', kelvin:'2800K', focal:'35mm', aperture:'f/1.8', conf:76,
+    colors:[['#141C24',50,20,30],['#3B82F6',25,52,40],['#757575',15,34,64],['#00E5FF',10,72,56]] },
+  { code:'12C', tc:'00:01:12:08', az:-60, el:25, ratio:'8:1', kelvin:'2000K', focal:'40mm', aperture:'f/2.8', conf:72,
+    colors:[['#D4D4D4',40,34,26],['#757575',0,32,68],['#3B82F6',35,43,66],['#00E5FF',25,72,68]] },
+  { code:'12D', tc:'00:01:18:20', az:-75, el:30, ratio:'8:1', kelvin:'2200K', focal:'50mm', aperture:'f/2.0', conf:68,
+    colors:[['#0F1720',55,18,40],['#3B82F6',20,58,34],['#E0B07A',15,40,60],['#00E5FF',10,78,62]] },
+  { code:'12E', tc:'00:01:23:05', az:10, el:40, ratio:'3:1', kelvin:'4300K', focal:'24mm', aperture:'f/4.0', conf:84,
+    colors:[['#2B3440',40,24,32],['#E6E1D8',30,60,24],['#6B7F99',20,46,62],['#C98A4B',10,80,70]] },
+  { code:'12F', tc:'00:01:29:14', az:45, el:20, ratio:'5:1', kelvin:'3000K', focal:'85mm', aperture:'f/1.4', conf:70,
+    colors:[['#10161C',50,22,50],['#B7C4D1',25,54,30],['#3B82F6',15,66,64],['#F2C48D',10,40,74]] },
+  { code:'12G', tc:'00:01:34:00', az:-15, el:10, ratio:'2:1', kelvin:'5600K', focal:'28mm', aperture:'f/5.6', conf:88,
+    colors:[['#3A4450',35,30,28],['#DADFE5',35,60,40],['#5B8DEF',20,44,66],['#00E5FF',10,74,58]] },
+];
+
+class Component extends DCLogic {
+  state = { idx: 2, sel: 2, overlay: true, query: '', adapting: 0 };
+
+  go(i) { this.setState({ idx: (i + 7) % 7, sel: null, adapting: 0 }); }
+
+  adapt = () => {
+    if (this.state.adapting) return;
+    this.setState({ adapting: 1 });
+    this._t = setTimeout(() => this.setState({ adapting: 2 }), 1400);
+  };
+  componentWillUnmount() { clearTimeout(this._t); }
+
+  renderVals() {
+    const { idx, sel, overlay, query, adapting } = this.state;
+    const shot = SHOTS[idx];
+    const colors = shot.colors.map(([hex, pct, x, y], i) => ({ hex, pct, x, y, i }));
+    const dots = colors.map(c => ({
+      hex: c.hex, left: c.x + '%', top: c.y + '%',
+      ring: sel === c.i ? '#22D3EE' : 'rgba(255,255,255,0.85)',
+      select: () => this.setState({ sel: sel === c.i ? null : c.i }),
+    }));
+    const r = 62, rad = shot.az * Math.PI / 180;
+    const pt = k => ({ x: 80 + k * Math.sin(rad), y: 80 - k * Math.cos(rad) });
+    const p = pt(r), q = pt(44);
+    const chipList = ['How is this lit?', 'Sample colours'];
+    return {
+      shot, shotNum: idx + 1, overlay,
+      showAskBar: this.props.showAskBar ?? true,
+      toggleOverlay: () => this.setState({ overlay: !overlay }),
+      toggleBg: overlay ? '#22D3EE' : '#2A323A',
+      knobLeft: overlay ? '16px' : '2px',
+      dots: dots.filter((_, i) => colors[i].pct > 0 || true),
+      hasSelected: sel !== null && sel !== undefined,
+      selDot: sel !== null && sel !== undefined ? dots[sel] : { left: '0', top: '0', hex: '' },
+      swatches: colors.filter(c => c.pct > 0).map(c => ({
+        hex: c.hex, pct: c.pct,
+        rowBg: sel === c.i ? '#1A2027' : 'transparent',
+        select: () => this.setState({ sel: sel === c.i ? null : c.i, overlay: true }),
+      })),
+      tiles: SHOTS.map((s, i) => ({
+        code: s.code, go: () => this.go(i),
+        bg: i === idx ? '#0E2A31' : '#161B20',
+        border: i === idx ? '#22D3EE' : '#232A31',
+        color: i === idx ? '#E6EAEE' : '#8A949E',
+      })),
+      prev: () => this.go(idx - 1),
+      next: () => this.go(idx + 1),
+      dial: { x: p.x, y: p.y, x2: q.x, y2: q.y },
+      lightStats: [
+        { label: 'Direction', value: (shot.az > 0 ? '+' : '') + shot.az + '°' },
+        { label: 'Ratio', value: shot.ratio },
+        { label: 'Temp', value: shot.kelvin },
+      ],
+      query,
+      onQuery: e => this.setState({ query: e.target.value }),
+      chips: chipList.map(label => ({ label, use: () => this.setState({ query: label }) })),
+      adapt: this.adapt,
+      adaptLabel: adapting === 1 ? 'Adapting…' : adapting === 2 ? 'Plan ready — view' : 'Adapt to our location',
+    };
+  }
+}
+</script>
+</body>
+</html>

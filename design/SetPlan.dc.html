@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+:root{--bg0:#0D0D0D;--bg1:#151515;--bg2:#1C1C1C;--bg3:#262626;--line:#2A2A2A;--line2:#3A3A3A;--tx:#EDEDED;--tx2:#A6A6A6;--tx3:#808080;--sur:#101010;--acc:#22D3EE;--acc-ink:#04232A;--acc-soft:rgba(34,211,238,.12);--warn:#F5A524;--warn-soft:rgba(245,165,36,.10);--err:#F05252;--sh:0 16px 48px rgba(0,0,0,.5)}
+html,body{margin:0;background:var(--bg0);color:var(--tx);font:13px/1.45 'Geist',system-ui,sans-serif}
+*{box-sizing:border-box}
+input[type=number]::-webkit-inner-spin-button{opacity:.4}
+</style>
+</helmet>
+<div data-screen-label="Set Plan" style="height:100%;min-height:760px;display:grid;grid-template-columns:232px minmax(0,1fr) 296px;grid-template-rows:minmax(0,1fr) 196px;background:var(--bg0);color:var(--tx)">
+
+  <aside style="grid-row:1 / 3;border-right:1px solid var(--line);background:var(--bg1);overflow:auto;padding:12px 8px">
+    <div style="display:flex;align-items:center;padding:0 8px 8px">
+      <span style="flex:1;font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">OUTLINER</span>
+      <button onClick="{{ addLight }}" title="plan.add_light" style="height:24px;padding:0 8px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--tx2);cursor:pointer;font-size:12px">+ Light</button>
+    </div>
+    <sc-for list="{{ tree }}" as="g" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;padding-bottom:8px">
+        <span style="padding:6px 8px 2px;font-size:11px;color:var(--tx3)">{{ g.name }}</span>
+        <sc-for list="{{ g.items }}" as="o" hint-placeholder-count="3">
+          <button onClick="{{ o.select }}" style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;background:{{ o.bg }};border:none;color:{{ o.color }};cursor:pointer;text-align:left" style-hover="background:var(--bg2)">
+            <span style="width:8px;height:8px;border-radius:{{ o.dotR }};background:{{ o.dot }};flex:none"></span>
+            <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.label }}</span>
+            <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--tx3)">{{ o.meta }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-for>
+  </aside>
+
+  <section style="grid-row:1;grid-column:2;position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--sur)">
+    <div style="position:absolute;left:12px;top:12px;z-index:3;display:flex;gap:4px;padding:3px;border-radius:8px;background:var(--bg1);border:1px solid var(--line)">
+      <sc-for list="{{ views }}" as="v" hint-placeholder-count="3">
+        <button onClick="{{ v.go }}" title="plan.set_view" style="height:26px;padding:0 10px;border-radius:6px;border:none;background:{{ v.bg }};color:{{ v.color }};cursor:pointer;font-size:12px">{{ v.label }}</button>
+      </sc-for>
+    </div>
+    <div style="position:absolute;right:12px;top:12px;z-index:3;font-size:12px;color:var(--tx3);padding:5px 8px;border-radius:6px;background:var(--bg1);border:1px solid var(--line)">{{ viewHint }}</div>
+
+    <sc-if value="{{ isCam }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:56px 24px 24px;display:flex;align-items:center;justify-content:center;container-type:size">
+        <div style="position:relative;width:min(100cqw, calc(100cqh * 2.39));aspect-ratio:2.39/1;border:1px solid var(--line2)">
+          <image-slot style="position:absolute;inset:0;width:100%;height:100%" id="plan-cam-view" shape="rect" fit="contain" placeholder="Camera view render · Cam A 35 mm"></image-slot>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSpatial }}" hint-placeholder-val="{{ true }}">
+      <div onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" onPointerLeave="{{ onUp }}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <div ref="{{ worldRef }}" style="position:relative;width:560px;height:480px;transform:{{ worldTf }};transform-style:preserve-3d;transition:transform .5s ease">
+          <div style="position:absolute;left:30px;top:30px;width:310px;height:420px;background:var(--bg2);border:2px solid var(--tx3);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:50px 50px"></div>
+          <sc-if value="{{ is3d }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:30px;top:30px;width:310px;height:290px;background:rgba(120,120,120,.18);border:1px solid var(--line2);transform-origin:top;transform:rotateX(90deg)"></div>
+            <div style="position:absolute;left:30px;top:30px;width:290px;height:420px;background:rgba(120,120,120,.12);border:1px solid var(--line2);transform-origin:left;transform:rotateY(-90deg)"></div>
+          </sc-if>
+          <div style="position:absolute;left:30px;top:390px;width:310px;height:60px;background:var(--bg3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:11px">counter</div>
+          <div style="position:absolute;left:30px;top:30px;width:70px;height:70px;background:var(--bg3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:11px">fridge</div>
+          <div style="position:absolute;left:260px;top:250px;width:70px;height:70px;border-radius:35px;background:var(--bg3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:11px">table</div>
+          <div style="position:absolute;left:337px;top:110px;width:6px;height:120px;background:var(--acc);opacity:.7"></div>
+          <span style="position:absolute;left:350px;top:162px;font-size:11px;color:var(--tx3)">window</span>
+          <svg width="560" height="480" viewBox="0 0 560 480" style="position:absolute;left:0;top:0;pointer-events:none;overflow:visible">
+            <path d="{{ keyCone }}" fill="rgba(34,211,238,.10)" stroke="rgba(34,211,238,.45)" stroke-dasharray="4 3"></path>
+            <path d="{{ camCone }}" fill="rgba(237,237,237,.05)" stroke="var(--tx2)"></path>
+            <line x1="{{ distLine.x1 }}" y1="{{ distLine.y1 }}" x2="{{ distLine.x2 }}" y2="{{ distLine.y2 }}" stroke="var(--tx3)" stroke-dasharray="2 3"></line>
+            <text x="{{ distLine.tx }}" y="{{ distLine.ty }}" font-size="11" fill="var(--tx2)" font-family="Geist Mono">{{ distLine.label }}</text>
+          </svg>
+          <sc-for list="{{ marks }}" as="m" hint-placeholder-count="2">
+            <div style="position:absolute;left:{{ m.left }};top:{{ m.top }};width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:12px;border:1px dashed var(--tx3)"></div>
+          </sc-for>
+          <sc-for list="{{ objs }}" as="o" hint-placeholder-count="6">
+            <div onPointerDown="{{ o.down }}" title="{{ o.label }}" style="position:absolute;left:{{ o.left }};top:{{ o.top }};width:30px;height:30px;margin:-30px 0 0 -15px;transform-origin:50% 100%;transform:{{ o.tf }};display:flex;flex-direction:column;align-items:center;cursor:{{ o.cursor }};z-index:2">
+              <div style="width:22px;height:22px;border-radius:{{ o.r }};background:{{ o.fill }};border:2px solid {{ o.ring }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--acc-ink)">{{ o.glyph }}</div>
+              <span style="position:absolute;top:30px;white-space:nowrap;font-size:11px;padding:1px 5px;border-radius:4px;background:rgba(13,13,13,.8);color:{{ o.labelColor }}">{{ o.label }}</span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ showGizmo }}" hint-placeholder-val="{{ false }}">
+            <svg width="80" height="80" viewBox="-40 -40 80 80" style="position:absolute;left:{{ gizmo.left }};top:{{ gizmo.top }};margin:-40px 0 0 -40px;pointer-events:none;overflow:visible">
+              <line x1="0" y1="0" x2="34" y2="0" stroke="#F05252" stroke-width="2"></line><path d="M34 -4 L40 0 L34 4z" fill="#F05252"></path>
+              <line x1="0" y1="0" x2="0" y2="34" stroke="#4ADE80" stroke-width="2"></line><path d="M-4 34 L0 40 L4 34z" fill="#4ADE80"></path>
+            </svg>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSpatial }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;right:12px;bottom:12px;width:264px;display:flex;flex-direction:column;gap:4px;padding:6px;border-radius:8px;background:var(--bg1);border:1px solid var(--line2);box-shadow:var(--sh);z-index:4">
+        <div style="width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="plan-cam-pip" shape="rect" fit="contain" placeholder="Camera view"></image-slot></div>
+        <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--tx2)">Cam A · 35 mm · T2 · 1.2 m</span>
+      </div>
+    </sc-if>
+  </section>
+
+  <aside style="grid-row:1 / 3;grid-column:3;border-left:1px solid var(--line);background:var(--bg1);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">PROPERTIES</span>
+      <span style="font-size:15px;font-weight:600">{{ selTitle }}</span>
+    </div>
+    <sc-for list="{{ props }}" as="p" hint-placeholder-count="10">
+      <div style="display:flex;align-items:center;gap:8px;min-height:30px">
+        <span style="width:92px;color:var(--tx2);flex:none">{{ p.label }}</span>
+        <sc-if value="{{ p.num }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;min-width:0;display:flex;align-items:center;height:28px;padding:0 8px;border-radius:6px;background:var(--bg0);border:1px solid var(--line)">
+            <input type="number" step="{{ p.step }}" value="{{ p.val }}" onChange="{{ p.set }}" style="flex:1;min-width:0;background:none;border:none;outline:none;color:var(--tx);font-family:'Geist Mono',monospace;font-size:13px"></input>
+            <span style="font-family:'Geist Mono',monospace;color:var(--tx3)">{{ p.unit }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ p.text }}" hint-placeholder-val="{{ true }}">
+          <span style="flex:1;min-width:0;font-family:'Geist Mono',monospace">{{ p.val }}</span>
+        </sc-if>
+        <span style="font-family:'Geist Mono',monospace;font-size:10px;padding:1px 5px;border-radius:4px;border:{{ p.b.border }};background:{{ p.b.bg }};color:{{ p.b.color }};white-space:nowrap">{{ p.b.label }}</span>
+      </div>
+    </sc-for>
+  </aside>
+
+  <section style="grid-row:2;grid-column:2;border-top:1px solid var(--line);background:var(--bg1);display:grid;grid-template-columns:auto auto 128px minmax(0,1fr) 200px;gap:16px;padding:14px 16px;align-items:stretch;min-width:0">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:11px;color:var(--tx3)">Reference</span>
+      <div style="width:220px;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden;border:1px solid var(--line)"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="ref-12c" shape="rect" fit="contain" placeholder="Reference 12C"></image-slot></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:11px;color:var(--tx3)">Camera view</span>
+      <div style="width:220px;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden;border:1px solid var(--line)"><image-slot style="position:absolute;inset:0;width:100%;height:100%" id="plan-cam-match" shape="rect" fit="contain" placeholder="Cam A render"></image-slot></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:2px;border-left:1px solid var(--line);padding-left:16px">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">LOOK MATCH</span>
+      <span style="font-family:'Geist Mono',monospace;font-size:40px;line-height:1.1;color:var(--acc)">{{ score }}%</span>
+      <span style="font-size:11px;color:var(--tx3)">{{ scoreDelta }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;min-width:0">
+      <div style="display:grid;grid-template-columns:88px 1fr 1fr 56px;gap:0 12px;font-size:11px;color:var(--tx3);padding-bottom:4px"><span></span><span>Plan</span><span>Reference</span><span style="text-align:right">Δ</span></div>
+      <sc-for list="{{ metrics }}" as="m" hint-placeholder-count="4">
+        <div style="display:grid;grid-template-columns:88px 1fr 1fr 56px;gap:0 12px;height:24px;align-items:center;border-top:1px solid var(--line)">
+          <span style="color:var(--tx2)">{{ m.label }}</span>
+          <span style="font-family:'Geist Mono',monospace">{{ m.plan }}</span>
+          <span style="font-family:'Geist Mono',monospace;color:var(--tx2)">{{ m.ref }}</span>
+          <span style="font-family:'Geist Mono',monospace;text-align:right;color:{{ m.dc }}">{{ m.d }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;justify-content:center">
+      <button onClick="{{ match }}" title="plan.match_light" style="height:34px;border-radius:8px;background:var(--acc);border:none;color:var(--acc-ink);font-weight:600;cursor:pointer">Match light to reference (auto)</button>
+      <div style="display:flex;gap:6px">
+        <button onClick="{{ undo }}" disabled="{{ noUndo }}" title="plan.undo" style="flex:1;height:32px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:{{ undoColor }};cursor:pointer">Undo</button>
+        <button onClick="{{ save }}" title="plan.save_plan" style="flex:1.4;height:32px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:var(--tx);cursor:pointer">Save as plan v3</button>
+      </div>
+      <button onClick="{{ toSheet }}" title="setsheet.generate" style="height:28px;border-radius:8px;background:none;border:none;color:var(--acc);cursor:pointer">Generate set sheet →</button>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const S0 = { x:1.5, y:2.9, face:1.45 };
+const INIT = {
+  key:{ x:4.5, y:1.5, z:2.9, power:80, kelvin:2150 },
+  fill:{ x:1.6, y:2.2, z:2.8, power:10, kelvin:5600 },
+  prac:{ x:2.65, y:2.55, z:2.2, power:0, kelvin:2700 },
+  cam:{ x:1.72, y:1.11, z:1.2 },
+  rhea:{ x:1.5, y:2.9 }, arjun:{ x:0.6, y:2.3 },
+};
+const META = {
+  key:{ label:'Key · window COB', group:'LIGHTS', glyph:'K', type:'light' },
+  fill:{ label:'Fill · tube bounce', group:'LIGHTS', glyph:'F', type:'light' },
+  prac:{ label:'Practical · pendant', group:'LIGHTS', glyph:'P', type:'light' },
+  cam:{ label:'Cam A · 35 mm', group:'CAMERA', glyph:'A', type:'cam' },
+  rhea:{ label:'Rhea · mark 1', group:'ACTORS', glyph:'R', type:'actor' },
+  arjun:{ label:'Arjun · mark 2', group:'ACTORS', glyph:'J', type:'actor' },
+};
+const PX = v => (v + 0.3) * 100;
+const deg = r => r * 180 / Math.PI, rad = d => d * Math.PI / 180;
+const MEAS = { label:'MEASURED', border:'1px solid var(--line2)', bg:'transparent', color:'var(--tx2)' };
+const MAN = { label:'MANUAL', border:'1px solid transparent', bg:'var(--bg3)', color:'var(--tx)' };
+const AIB = { label:'AI 80%', border:'1px dashed var(--tx3)', bg:'transparent', color:'var(--tx2)' };
+
+function solve(o) {
+  const S = { x:o.rhea.x, y:o.rhea.y };
+  const L = o.key, C = o.cam;
+  const cx = C.x - S.x, cy = C.y - S.y, lx = L.x - S.x, ly = L.y - S.y;
+  const az = -deg(Math.atan2(cx * ly - cy * lx, cx * lx + cy * ly));
+  const horiz = Math.hypot(lx, ly);
+  const el = deg(Math.atan2(L.z - S0.face, horiz));
+  const dist = Math.hypot(horiz, L.z - S0.face);
+  const f = (L.power / 80) * Math.pow(3.614 / dist, 2);
+  const ratio = 7.4 * f;
+  const expo = Math.log2(f) - 0.3;
+  const score = Math.max(0, Math.min(100, Math.round(100 - 0.8 * Math.abs(az + 60) - 0.8 * Math.abs(el - 25) - 25 * Math.abs(Math.log2(ratio / 8)) - Math.abs(L.kelvin - 2000) / 40 - 13 * Math.abs(expo))));
+  return { az, el, dist, ratio, expo, score, S, cAng: Math.atan2(cy, cx) };
+}
+function wedge(ox, oy, ang, spread, len) {
+  const a1 = ang - rad(spread / 2), a2 = ang + rad(spread / 2);
+  const p = (a) => `${PX(ox + len * Math.cos(a))} ${PX(oy + len * Math.sin(a))}`;
+  return `M${PX(ox)} ${PX(oy)} L${p(a1)} A${len * 100} ${len * 100} 0 0 1 ${p(a2)} Z`;
+}
+
+class Component extends DCLogic {
+  state = { o: JSON.parse(JSON.stringify(INIT)), sel:'key', view:'3d', hist:[], manual:{}, drag:null, extra:0 };
+  worldRef = React.createRef();
+  push() { this.setState(s => ({ hist:[...s.hist.slice(-20), JSON.parse(JSON.stringify(s.o))] })); }
+  setVal(id, k, v) { this.setState(s => ({ o:{ ...s.o, [id]:{ ...s.o[id], [k]:v } }, manual:{ ...s.manual, [id + '.' + k]:true } })); }
+
+  renderVals() {
+    const { o, sel, view, hist, manual, drag } = this.state;
+    const run = this.props.run || (() => {});
+    const nav = this.props.nav || (() => {});
+    const r = solve(o);
+    const base = solve(INIT).score;
+    const is3d = view === '3d', isTop = view === 'top';
+    const bill = h => is3d ? `translateZ(${h}px) rotateZ(35deg) rotateX(-60deg)` : 'none';
+    const objs = Object.keys(META).map(id => {
+      const m = META[id], p = o[id], selected = sel === id;
+      const isLight = m.type === 'light';
+      const off = id === 'prac' && p.power === 0;
+      return {
+        label: m.label, glyph: m.glyph, left: PX(p.x) + 'px', top: PX(p.y) + 'px',
+        tf: bill(isLight ? p.z * 60 : m.type === 'cam' ? p.z * 60 : 0),
+        r: m.type === 'actor' ? '11px' : m.type === 'cam' ? '4px' : '6px',
+        fill: off ? 'var(--bg3)' : isLight ? '#EDEDED' : m.type === 'cam' ? 'var(--tx2)' : 'var(--bg3)',
+        ring: selected ? 'var(--acc)' : 'var(--line2)',
+        labelColor: selected ? 'var(--tx)' : 'var(--tx2)',
+        cursor: isTop ? 'grab' : 'pointer',
+        down: e => { e.stopPropagation(); this.setState({ sel:id }); if (isTop) { this.push(); this.setState({ drag:id }); } },
+      };
+    });
+    const onMove = e => {
+      if (!drag || !this.worldRef.current) return;
+      const b = this.worldRef.current.getBoundingClientRect();
+      const x = Math.round(((e.clientX - b.left) / 100 - 0.3) * 100) / 100;
+      const y = Math.round(((e.clientY - b.top) / 100 - 0.3) * 100) / 100;
+      this.setState(s => ({ o:{ ...s.o, [drag]:{ ...s.o[drag], x: Math.max(-0.2, Math.min(5.2, x)), y: Math.max(-0.2, Math.min(4.4, y)) } }, manual:{ ...s.manual, [drag + '.x']:true, [drag + '.y']:true } }));
+    };
+    const lAng = Math.atan2(r.S.y - o.key.y, r.S.x - o.key.x);
+    const cAng = Math.atan2(r.S.y - o.cam.y, r.S.x - o.cam.x);
+    const tree = ['LIGHTS','CAMERA','ACTORS'].map(g => ({ name:g, items: Object.keys(META).filter(id => META[id].group === g).map(id => ({
+      label: META[id].label, meta: META[id].type === 'light' ? (o[id].power === 0 ? 'off' : o[id].power + '%') : '',
+      bg: sel === id ? 'var(--bg3)' : 'transparent', color: sel === id ? 'var(--tx)' : 'var(--tx2)',
+      dot: META[id].type === 'light' ? (o[id].power === 0 ? 'var(--line2)' : '#EDEDED') : 'var(--tx3)', dotR: META[id].type === 'actor' ? '4px' : '2px',
+      select: () => this.setState({ sel:id }),
+    })) })).concat([{ name:'SET', items:['Counter','Table','Window','Fridge'].map(l => ({ label:l, meta:'', bg:'transparent', color:'var(--tx3)', dot:'var(--line2)', dotR:'1px', select: () => {} })) }]);
+
+    const num = (id, k, label, unit, step) => ({ label, num:true, text:false, val: o[id][k], unit, step, b: manual[id + '.' + k] ? MAN : MEAS, set: e => this.setVal(id, k, parseFloat(e.target.value) || 0) });
+    const txt = (label, val, b) => ({ label, num:false, text:true, val, b: b || MEAS });
+    const m = META[sel];
+    let props;
+    if (m.type === 'light') {
+      const lr = sel === 'key' ? r : null;
+      props = [
+        txt('Type', sel === 'key' ? '600 W bi-colour COB' : sel === 'fill' ? '4 ft RGB tube' : 'Pendant, 60 W', MAN),
+        num(sel, 'power', 'Power', '%', 5), num(sel, 'kelvin', 'Colour temp', 'K', 50),
+        txt('Gel', sel === 'key' ? 'full CTO + ½ CTS' : 'none', MAN), txt('Modifier', sel === 'fill' ? 'ceiling bounce' : 'none', MAN),
+        num(sel, 'x', 'Position x', 'm', 0.05), num(sel, 'y', 'Position y', 'm', 0.05), num(sel, 'z', 'Height z', 'm', 0.05),
+      ];
+      if (lr) props.push(txt('To subject', lr.dist.toFixed(1) + ' m'), txt('Azimuth', Math.round(lr.az) + '° (rel. cam)'), txt('Elevation', Math.round(lr.el) + '°'), txt('Beam', '55°', MAN));
+    } else if (m.type === 'cam') {
+      props = [txt('Body', 'Sony FX3', MAN), txt('Lens', '35 mm', MAN), txt('Aperture', 'T2', MAN), num('cam','x','Position x','m',0.05), num('cam','y','Position y','m',0.05), num('cam','z','Height','m',0.05), txt('Tilt', '+4° (low)', AIB), txt('Move', 'static', MAN)];
+    } else {
+      props = [txt('Mark', sel === 'rhea' ? 'mark 1' : 'mark 2', MAN), num(sel,'x','Position x','m',0.05), num(sel,'y','Position y','m',0.05), txt('Eye line', sel === 'rhea' ? '1.45 m' : '1.62 m', MEAS), txt('Facing', 'counter, south', MAN)];
+    }
+    const dd = (v, good) => ({ d: v, dc: good ? 'var(--tx2)' : 'var(--warn)' });
+    const K = o.key.kelvin;
+    const metrics = [
+      { label:'Contrast', plan: r.ratio.toFixed(1) + ':1', ref:'8:1', ...dd((r.ratio - 8 >= 0 ? '+' : '') + (r.ratio - 8).toFixed(1), Math.abs(r.ratio - 8) < 0.5) },
+      { label:'Warmth', plan: K + ' K', ref:'2000 K', ...dd((K - 2000 >= 0 ? '+' : '') + (K - 2000), Math.abs(K - 2000) < 100) },
+      { label:'Brightness', plan: (r.expo >= 0 ? '+' : '') + r.expo.toFixed(1) + ' st', ref:'0.0 st', ...dd(r.expo.toFixed(1), Math.abs(r.expo) < 0.25) },
+      { label:'Direction', plan: `${Math.round(r.az)}° / ${Math.round(r.el)}°`, ref:'−60° / 25°', ...dd(`${Math.round(r.az + 60)}°`, Math.abs(r.az + 60) < 3) },
+    ];
+    return {
+      tree,
+      views: [['3d','3D'],['top','Top-down plot'],['cam','Camera view']].map(([id,label]) => ({ label, go: () => this.setState({ view:id }), bg: view === id ? 'var(--bg3)' : 'transparent', color: view === id ? 'var(--tx)' : 'var(--tx3)' })),
+      viewHint: isTop ? 'Drag lights, camera and actors · 1 grid = 0.5 m' : is3d ? 'Select to edit · switch to Top-down to drag' : 'Cam A · 35 mm · T2',
+      is3d, isCam: view === 'cam', isSpatial: view !== 'cam',
+      worldTf: is3d ? 'perspective(1600px) rotateX(60deg) rotateZ(-35deg) scale(.82)' : 'none',
+      worldRef: this.worldRef, objs, onMove, onUp: () => drag && this.setState({ drag:null }),
+      marks: [{ left: PX(INIT.rhea.x) + 'px', top: PX(INIT.rhea.y) + 'px' }, { left: PX(INIT.arjun.x) + 'px', top: PX(INIT.arjun.y) + 'px' }],
+      keyCone: wedge(o.key.x, o.key.y, lAng, 55, 3.8),
+      camCone: wedge(o.cam.x, o.cam.y, cAng, 54, 2.6),
+      distLine: { x1: PX(o.key.x), y1: PX(o.key.y), x2: PX(r.S.x), y2: PX(r.S.y), tx: (PX(o.key.x) + PX(r.S.x)) / 2 + 6, ty: (PX(o.key.y) + PX(r.S.y)) / 2 - 8, label: r.dist.toFixed(1) + ' m' },
+      showGizmo: META[sel].type !== 'actor' && isTop, gizmo: { left: PX(o[sel].x) + 'px', top: PX(o[sel].y) + 'px' },
+      selTitle: META[sel].label, props,
+      score: r.score, scoreDelta: r.score === base ? 'plan v2 · last saved 19:42' : (r.score > base ? '+' : '') + (r.score - base) + ' since plan v2',
+      metrics,
+      addLight: () => run('plan.add_light', 'Light added (60 W LED panel)'),
+      match: () => {
+        this.push();
+        const ang = r.cAng + rad(60), h = 1.45 / Math.tan(rad(25));
+        const nx = +(r.S.x + h * Math.cos(ang)).toFixed(2), ny = +(r.S.y + h * Math.sin(ang)).toFixed(2);
+        const dist = Math.hypot(h, 1.45);
+        const power = Math.round(80 * (8 / 7.4) * Math.pow(dist / 3.614, 2));
+        this.setState(s => ({ o:{ ...s.o, key:{ ...s.o.key, x:nx, y:ny, power } }, sel:'key' }));
+        run('plan.match_light', 'Key moved to −60° / 25°, power set for 8:1');
+      },
+      undo: () => { if (!hist.length) return; this.setState({ o: hist[hist.length - 1], hist: hist.slice(0, -1) }); },
+      noUndo: hist.length === 0, undoColor: hist.length ? 'var(--tx)' : 'var(--tx3)',
+      save: () => run('plan.save_plan', `Saved plan v3 · match ${r.score}%`),
+      toSheet: () => nav('sheet'),
+    };
+  }
+}
+</script>
+</body>
+</html>

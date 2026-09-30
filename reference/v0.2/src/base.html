@@ -1,0 +1,662 @@
+<title>Look Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0e0d; --panel:#171513; --panel2:#201d1a; --line:#2d2926; --fg:#ece6de; --muted:#9a9187;
+  --accent:#f2a24a; --accent-ink:#1b1206; --t0:#7dc59a; --t1:#78aee0; --t2:#b7a2e6; --t3:#f2a24a; --rt:#c9c2b8;
+  --bad:#e2725b; --grid:rgba(255,255,255,.32); --focus:#ffd08f; --fill:#78aee0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;margin:0;padding-inline:16px;padding-block:20px 48px}
+.app{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1,h2,p{margin:0}
+h1{font-size:20px;letter-spacing:.01em;font-weight:700}
+h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.chip{font:500 11px/1 'IBM Plex Mono',monospace;padding:6px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.mock{border-style:dashed;color:var(--accent)}
+.vision{max-width:70ch;color:var(--fg);font-size:15px;line-height:1.5;text-wrap:pretty}
+.vision b{color:var(--accent);font-weight:600}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.stage{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);grid-template-areas:"view" "ctrl" "log" "lib"}
+.view{grid-area:view}.ctrl{grid-area:ctrl}.logp{grid-area:log}.lib{grid-area:lib}
+@media (min-width:920px){
+  .stage{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);grid-template-areas:"view ctrl" "log ctrl" "lib lib"}
+}
+
+.refbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font:600 13px/1 'Instrument Sans',sans-serif;color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,input:focus-visible,canvas:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.btn[aria-pressed="true"],.btn[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:default}
+
+.match{display:grid;grid-template-columns:auto auto 1fr auto;gap:10px;align-items:center}
+.match b{font-size:20px;font-weight:500}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;min-width:40px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+.match .resid{font-size:11px}
+
+.frames{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.frame{margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.cv{position:relative;aspect-ratio:4/5;max-width:100%;border-radius:6px;overflow:hidden;background:#000;border:1px solid var(--line)}
+.cv canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#cRes{opacity:.0;transition:opacity .15s;mix-blend-mode:screen}
+.showres #cRes{opacity:.9}
+.thirds{position:absolute;inset:0;pointer-events:none;display:none;
+  background:linear-gradient(90deg,transparent 33.2%,var(--grid) 33.2% 33.6%,transparent 33.6% 66.4%,var(--grid) 66.4% 66.8%,transparent 66.8%),
+             linear-gradient(0deg,transparent 33.2%,var(--grid) 33.2% 33.6%,transparent 33.6% 66.4%,var(--grid) 66.4% 66.8%,transparent 66.8%)}
+.showthirds .thirds{display:block}
+.capline{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.capline b{font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.capline span{font-size:12px;color:var(--muted)}
+.zones{display:flex;gap:3px;align-items:flex-end;height:26px}
+.zones i{flex:1;background:var(--muted);opacity:.75;border-radius:2px 2px 0 0;min-height:2px}
+.zones i:nth-child(1){background:#5c554e}.zones i:nth-child(2){background:#7b736a}.zones i:nth-child(3){background:#9c9388}.zones i:nth-child(4){background:#c2b9ac}.zones i:nth-child(5){background:#ece6de}
+.kv{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.kv b{color:var(--fg);font-weight:500}
+.sw{display:flex;gap:4px}.sw i{width:14px;height:14px;border-radius:3px;border:1px solid var(--line)}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.actions .spacer{flex:1}
+
+.ctrl h2{margin-top:2px}
+.plan{position:relative;width:100%;max-width:360px;margin:0 auto;aspect-ratio:1/1}
+.plan canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab;border-radius:8px;background:var(--panel2);border:1px solid var(--line)}
+.plan canvas:active{cursor:grabbing}
+.hint{font-size:12px;color:var(--muted);text-align:center}
+.grp{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center}
+.row label{font-size:13px}
+.row output{font:500 12px 'IBM Plex Mono',monospace;color:var(--accent);text-align:right}
+.row input[type=range]{grid-column:1/-1}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;margin:0;min-width:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(to right,var(--accent) var(--pct,50%),var(--line) var(--pct,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--fg);border:2px solid var(--bg);margin-top:-6px;box-shadow:0 0 0 1px var(--muted)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--fg);border:2px solid var(--bg)}
+input[type=range]:disabled{opacity:.55}
+.switch{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px}
+
+.logp .note{font-size:12px;color:var(--muted);max-width:75ch}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;max-height:340px;overflow-y:auto;border-top:1px solid var(--line)}
+.log li{display:grid;grid-template-columns:2.4ch auto minmax(0,1fr);gap:8px;padding:7px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.log .n{font:400 11px 'IBM Plex Mono',monospace;color:var(--muted)}
+.tier{font:600 10px/1 'IBM Plex Mono',monospace;padding:3px 5px;border-radius:4px;border:1px solid currentColor;min-width:2.6em;text-align:center}
+.tier.T0{color:var(--t0)}.tier.T1{color:var(--t1)}.tier.T2{color:var(--t2)}.tier.T3{color:var(--t3)}.tier.RT{color:var(--rt)}
+.msg{font-size:13px;overflow-wrap:anywhere}
+.meta{display:block;font:400 11px 'IBM Plex Mono',monospace;color:var(--muted);margin-top:1px}
+.meta .smp{border:1px dashed var(--muted);border-radius:3px;padding:0 4px;margin-left:4px}
+
+.libhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.card h3{margin:0;font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card h3 small{font:400 10px 'IBM Plex Mono',monospace;color:var(--muted);white-space:nowrap}
+.tags{display:flex;gap:5px;flex-wrap:wrap}
+.tags span{font-size:11px;padding:3px 7px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--fg)}
+.card .btn{align-self:flex-start;padding:7px 10px;font-size:12px}
+.foot{font-size:12px;color:var(--muted);max-width:80ch;text-wrap:pretty}
+.foot b{color:var(--fg);font-weight:600}
+@media (max-width:420px){.match{grid-template-columns:auto auto 1fr}.match .resid{grid-column:1/-1}}
+@media (prefers-reduced-motion:reduce){.bar i,#cRes{transition:none}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="15" r="6" fill="none" stroke="#ece6de" stroke-width="1.6"/><path d="M4 4l6 6M13 2v6M22 4l-6 6" stroke="#f2a24a" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <h1>Look Lab</h1>
+    </div>
+    <span class="chip mock">MOCK · sample frames · no model running</span>
+  </header>
+  <p class="vision">Feed it a <b>reference frame</b>. It measures the light, the lens and the set, turns them into <b>knobs</b>, then lets you move the key, swing the camera and watch the look change. Every look you fit goes into a <b>taste library</b> you can apply to a new scene.</p>
+
+  <div class="stage" id="stage">
+    <section class="panel view" aria-label="Reference and reconstruction">
+      <div class="refbar">
+        <span class="lbl">Reference</span>
+        <div class="seg" id="refSeg" role="radiogroup" aria-label="Sample reference"></div>
+      </div>
+      <div class="match" aria-live="polite">
+        <span class="lbl">Match</span><b class="mono" id="matchPct">—</b>
+        <div class="bar" aria-hidden="true"><i id="matchBar"></i></div>
+        <span class="mono muted resid" id="resid">residual —</span>
+      </div>
+      <div class="frames" id="frames">
+        <figure class="frame">
+          <div class="cv"><canvas id="cRef" width="240" height="300" role="img" aria-label="Reference frame"></canvas><div class="thirds"></div></div>
+          <figcaption>
+            <div class="capline"><b>Reference</b><span class="mono" id="refMeta"></span></div>
+            <div class="zones" id="refZones" title="Luminance zones, shadow to highlight"></div>
+            <div class="kv mono"><span>lit : shadow <b id="refRatio"></b></span><span class="sw" id="refSw"></span></div>
+          </figcaption>
+        </figure>
+        <figure class="frame">
+          <div class="cv"><canvas id="cRec" width="240" height="300" role="img" aria-label="Reconstruction"></canvas><canvas id="cRes" width="240" height="300" aria-hidden="true"></canvas><div class="thirds"></div></div>
+          <figcaption>
+            <div class="capline"><b>Reconstruction</b><span class="mono" id="recMeta"></span></div>
+            <div class="zones" id="recZones" title="Luminance zones, shadow to highlight"></div>
+            <div class="kv mono"><span>lit : shadow <b id="recRatio"></b></span><span class="sw" id="recSw"></span></div>
+          </figcaption>
+        </figure>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="btnFit" type="button">Auto-fit</button>
+        <button class="btn" id="btnReset" type="button">Reset light</button>
+        <span class="spacer"></span>
+        <button class="btn" id="btnThirds" type="button" aria-pressed="false">Thirds</button>
+        <button class="btn" id="btnRes" type="button" aria-pressed="false">Residual</button>
+      </div>
+    </section>
+
+    <section class="panel ctrl" aria-label="Scene controls">
+      <h2>Scene · top view</h2>
+      <div class="plan"><canvas id="cPlan" tabindex="0" role="img" aria-label="Top view of the scene. Drag the key light or the camera."></canvas></div>
+      <p class="hint">Drag the amber <b>KEY</b> around the subject or swing the <b>camera</b>. Sliders below do the same, plus the rest.</p>
+      <div class="grp" id="gLight"><h2>Light</h2></div>
+      <div class="grp" id="gCam"><h2>Camera</h2></div>
+      <div class="grp" id="gSet"><h2>Set</h2></div>
+    </section>
+
+    <section class="panel logp" aria-label="Decision log">
+      <div class="libhead"><h2>Decision log</h2><span class="chip mono" id="logCount">0 rows</span></div>
+      <p class="note">Every row is a routing decision. <b>T0</b> instruments (deterministic) · <b>T2</b> language model (semantic, fallible) · <b>T3</b> you. Rows tagged R# are rules today; each one is a slot where a small decision model can take over once enough of these are logged.</p>
+      <ol class="log" id="log"></ol>
+    </section>
+
+    <section class="panel lib" aria-label="Taste library">
+      <div class="libhead"><h2>Taste library</h2><button class="btn" id="btnSave" type="button">Save current look</button></div>
+      <div class="cards" id="cards"></div>
+    </section>
+  </div>
+
+  <p class="foot"><b>Real in this page:</b> the scene renderer, the fit search, the routing log for the fit, the fingerprints and the tags. <b>Mocked:</b> the FFmpeg ingest and the language-model label (sample text). The reference frames are synthetic on purpose: the true light is hidden, so the fit can be graded against a known answer, which is how the real pipeline would be validated too.</p>
+</div>
+
+<script>
+/*CORE-START*/
+const D2R=Math.PI/180;
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+function kelvinRGB(k){
+  const t=k/100;let r,g,b;
+  if(t<=66){r=255;g=99.4708025861*Math.log(t)-161.1195681661;b=t<=19?0:138.5177312231*Math.log(t-10)-305.0447927307;}
+  else{r=329.698727446*Math.pow(t-60,-0.1332047592);g=288.1221695283*Math.pow(t-60,-0.0755148492);b=255;}
+  return [clamp(r,0,255)/255,clamp(g,0,255)/255,clamp(b,0,255)/255];
+}
+const K5600=kelvinRGB(5600);
+function keyColor(k){const c=kelvinRGB(k);return [c[0]/K5600[0],c[1]/K5600[1],c[2]/K5600[2]];}
+function hash2(x,y){let h=(Math.imul(x|0,374761393)+Math.imul(y|0,668265263))|0;h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967295;}
+const SKIN=[0.86,0.63,0.52],HAIR=[0.07,0.055,0.05],CLOTH=[0.11,0.12,0.15];
+
+function renderScene(p,w,h,grain){
+  const rgb=new Float32Array(w*h*3),head=new Uint8Array(w*h);
+  const azv=(p.az-p.yaw)*D2R,el=p.el*D2R,ce=Math.cos(el);
+  const L=[Math.sin(azv)*ce,Math.sin(el),Math.cos(azv)*ce];
+  const fe=0.14,fcs=Math.cos(fe);
+  const FL=[Math.sin(-azv)*fcs,Math.sin(fe),Math.cos(-azv)*fcs];
+  let Hx=L[0],Hy=L[1],Hz=L[2]+1;const hl=Math.hypot(Hx,Hy,Hz)||1;Hx/=hl;Hy/=hl;Hz/=hl;
+  const kc=keyColor(p.kel),fcol=keyColor(6500),lcol=keyColor(2700);
+  const wrapK=0.12+0.55*p.soft,specK=0.26*(1-0.7*p.soft),shin=90-70*p.soft;
+  const fillI=p.int/Math.pow(2,p.fill);
+  const lampOn=p.lamp?1:0,lampI=0.12*lampOn;
+  const lv=[0.82,0.12,0.4],ln=Math.hypot(lv[0],lv[1],lv[2]),ll=[lv[0]/ln,lv[1]/ln,lv[2]/ln];
+  const s=p.lens/85,rx=0.62*s,ry=0.80*s,cy=-0.14+p.tilt*0.05;
+  const ta=rx*2.1,tb=ry,tcy=cy+ry*0.72+tb,cz=(rx+ry)*0.45;
+  const lampX=0.70-Math.sin(p.yaw*D2R)*1.3,lampY=-0.28,lampR=0.16*Math.sqrt(s);
+  const aspect=h/w,sinA=Math.sin(azv),cosA=Math.cos(azv);
+  const wb=[0.34*p.wall,0.37*p.wall,0.40*p.wall];
+  const nx0=-Math.sin(p.yaw*D2R)*0.85;
+  const pxH=Math.min(rx,ry)*(w/2),pxT=Math.min(ta,tb)*(w/2);
+  let sR=0,sG=0,sB=0;
+  function lit(nx,ny,nz,al,spec){
+    const nl=nx*L[0]+ny*L[1]+nz*L[2];
+    const d=Math.max(0,(nl+wrapK)/(1+wrapK));
+    const nf=nx*FL[0]+ny*FL[1]+nz*FL[2];
+    const df=Math.max(0,(nf+0.6)/1.6);
+    const nh=nx*Hx+ny*Hy+nz*Hz;
+    const sp=(nl>0&&nh>0)?spec*specK*Math.pow(nh,shin):0;
+    const nlp=Math.max(0,nx*ll[0]+ny*ll[1]+nz*ll[2]);
+    const key=p.int*d,fil=fillI*df,lam=lampI*nlp;
+    sR=al[0]*(key*kc[0]+fil*fcol[0]+lam*lcol[0]+0.025)+sp*p.int*kc[0];
+    sG=al[1]*(key*kc[1]+fil*fcol[1]+lam*lcol[1]+0.025)+sp*p.int*kc[1];
+    sB=al[2]*(key*kc[2]+fil*fcol[2]+lam*lcol[2]+0.025)+sp*p.int*kc[2];
+  }
+  for(let j=0;j<h;j++){
+    const py=((j+0.5)/h*2-1)*aspect;
+    for(let i=0;i<w;i++){
+      const px=(i+0.5)/w*2-1,o=(j*w+i)*3;
+      const wl=0.5+0.5*clamp(px*sinA*1.4+0.25*cosA,-1,1);
+      const wallL=(0.06+0.85*p.int*wl)*(1-0.10*(py+aspect)/(2*aspect));
+      let R=wb[0]*wallL*kc[0],G=wb[1]*wallL*kc[1],B=wb[2]*wallL*kc[2];
+      if(lampOn){
+        const dx=px-lampX,dy=py-lampY,d2=dx*dx+dy*dy;
+        const g=1.7*Math.exp(-d2/(lampR*lampR))+0.5*Math.exp(-d2/(12.25*lampR*lampR));
+        R+=lcol[0]*g;G+=lcol[1]*g;B+=lcol[2]*g;
+      }
+      { // torso
+        const ex=px/ta,ey=(py-tcy)/tb,r2=ex*ex+ey*ey;
+        if(r2<1.1){
+          const m=clamp((1-Math.sqrt(r2))*pxT+0.5,0,1);
+          if(m>0){
+            const sq=Math.sqrt(Math.max(1-r2,0.04));
+            let nx=0.6*ex/sq,ny=-0.6*(ta/tb)*ey/sq,nz=1;const nn=Math.hypot(nx,ny,nz);nx/=nn;ny/=nn;nz/=nn;
+            lit(nx,ny,nz,CLOTH,0.3);
+            R=R*(1-m)+sR*m;G=G*(1-m)+sG*m;B=B*(1-m)+sB*m;
+          }
+        }
+      }
+      { // head
+        const ex=px/rx,ey=(py-cy)/ry,r2=ex*ex+ey*ey;
+        if(r2<1.1){
+          const m=clamp((1-Math.sqrt(r2))*pxH+0.5,0,1);
+          if(m>0){
+            const sq=Math.sqrt(Math.max(1-r2,0.03)),u=ex-nx0;
+            let gx=0,gy=0,g,vv,su,sv;
+            su=0.14;sv=0.30;vv=ey-0.14;g=0.24*Math.exp(-(u*u/(su*su)+vv*vv/(sv*sv)));gx+=g*(-2*u/(su*su));gy+=g*(-2*vv/(sv*sv));
+            for(let k=0;k<2;k++){
+              const uu=u-(k?0.36:-0.36);su=0.17;sv=0.09;vv=ey+0.16;
+              g=-0.10*Math.exp(-(uu*uu/(su*su)+vv*vv/(sv*sv)));gx+=g*(-2*uu/(su*su));gy+=g*(-2*vv/(sv*sv));
+            }
+            su=0.6;sv=0.07;vv=ey+0.30;g=0.10*Math.exp(-(u*u/(su*su)+vv*vv/(sv*sv)));gx+=g*(-2*u/(su*su));gy+=g*(-2*vv/(sv*sv));
+            let nx=cz/rx*(ex/sq-gx),ny=cz/ry*(-ey/sq+gy),nz=1;
+            const nn=Math.hypot(nx,ny,nz);nx/=nn;ny/=nn;nz/=nn;
+            const hm=sstep(-0.5,0.5,(-ey)-(0.42-0.20*ex*ex));
+            const al=[SKIN[0]*(1-hm)+HAIR[0]*hm,SKIN[1]*(1-hm)+HAIR[1]*hm,SKIN[2]*(1-hm)+HAIR[2]*hm];
+            lit(nx,ny,nz,al,1);
+            R=R*(1-m)+sR*m;G=G*(1-m)+sG*m;B=B*(1-m)+sB*m;
+            if(m>0.9&&hm<0.1&&ey<0.7&&Math.abs(ex)<0.85)head[j*w+i]=1;
+          }
+        }
+      }
+      const v=1-0.32*(px*px*0.55+py*py*0.35);
+      R=1-Math.exp(-1.15*R*v);G=1-Math.exp(-1.15*G*v);B=1-Math.exp(-1.15*B*v);
+      if(grain){const n=(hash2(i,j)-0.5)*2*grain;R+=n;G+=n*0.9+(hash2(i+91,j+7)-0.5)*grain*0.4;B+=n;}
+      rgb[o]=clamp(R,0,1);rgb[o+1]=clamp(G,0,1);rgb[o+2]=clamp(B,0,1);
+    }
+  }
+  return {rgb,head};
+}
+function downsample(src,w,h,f){
+  const ow=w/f,oh=h/f,out=new Float32Array(ow*oh*3),inv=1/(f*f);
+  for(let j=0;j<oh;j++)for(let i=0;i<ow;i++){
+    let r=0,g=0,b=0;
+    for(let y=0;y<f;y++)for(let x=0;x<f;x++){const o=((j*f+y)*w+i*f+x)*3;r+=src[o];g+=src[o+1];b+=src[o+2];}
+    const q=(j*ow+i)*3;out[q]=r*inv;out[q+1]=g*inv;out[q+2]=b*inv;
+  }
+  return out;
+}
+function errFn(a,b){let s=0;for(let i=0;i<a.length;i++)s+=Math.abs(a[i]-b[i]);return s/a.length;}
+const lumD=(r,g,b)=>0.2126*r+0.7152*g+0.0722*b;
+function shotLabel(lens){const f=0.64*lens/85;return {frac:f,label:f>=1?'ECU':f>=0.6?'CU':f>=0.4?'MCU':f>=0.26?'MS':'WS'};}
+
+function fingerprint(rgb,head,w,h){
+  const n=w*h,z=[0,0,0,0,0],idx=[],lum=new Float32Array(n);
+  for(let i=0;i<n;i++){
+    const o=i*3,y=lumD(rgb[o],rgb[o+1],rgb[o+2]);lum[i]=Math.pow(y,2.2);
+    z[Math.min(4,(y*5)|0)]++;if(head[i])idx.push(i);
+  }
+  const css=c=>`rgb(${(c[0]*255)|0},${(c[1]*255)|0},${(c[2]*255)|0})`;
+  const mean=(list)=>{let r=0,g=0,b=0;for(const i of list){r+=rgb[i*3];g+=rgb[i*3+1];b+=rgb[i*3+2];}const k=list.length||1;return [r/k,g/k,b/k];};
+  const wallIdx=[];for(let i=0;i<w*3;i++)wallIdx.push(i);
+  let ratio=1,lit=null,shade=null;
+  if(idx.length>8){
+    idx.sort((a,b)=>lum[a]-lum[b]);
+    const k=idx.length,p10=lum[idx[Math.floor(k*0.1)]],p90=lum[idx[Math.floor(k*0.9)]];
+    ratio=p90/Math.max(p10,0.002);
+    lit=mean(idx.slice(Math.floor(k*0.8)));shade=mean(idx.slice(0,Math.ceil(k*0.2)));
+  }
+  const wall=mean(wallIdx);
+  return {zones:z.map(v=>v/n),ratio:Math.min(ratio,99),sw:[css(lit||wall),css(shade||wall),css(wall)]};
+}
+function tagsFor(p){
+  const t=[],a=Math.abs(p.az);
+  t.push(a<15?'frontal':a<70?'three-quarter key':a<110?'side light':'back / rim');
+  if(p.fill>=2.5)t.push('low-key');else if(p.fill<=1)t.push('high-key');
+  t.push(p.soft>0.65?'soft':p.soft<0.3?'hard':'medium-soft');
+  if(p.kel<4200)t.push('warm');else if(p.kel>6000)t.push('cool');else t.push('neutral');
+  if(p.el>45)t.push('top-heavy');else if(p.el<10)t.push('low angle');
+  return t;
+}
+
+const KNOBS=[
+  {k:'az',lo:-170,hi:170,s0:20,min:1.5,name:'key azimuth',u:'°'},
+  {k:'el',lo:-10,hi:80,s0:12,min:1.5,name:'key elevation',u:'°'},
+  {k:'int',lo:0.2,hi:2.2,s0:0.3,min:0.02,name:'key intensity',u:''},
+  {k:'soft',lo:0,hi:1,s0:0.25,min:0.03,name:'softness',u:''},
+  {k:'kel',lo:2800,hi:7000,s0:700,min:60,name:'colour temp',u:' K'},
+  {k:'fill',lo:0,hi:3.5,s0:0.5,min:0.06,name:'fill ratio',u:' stops'}
+];
+function measureInit(ref,w,h,base){
+  const m=renderScene({...base,az:0,el:20,soft:.5,int:1,kel:5600,fill:1},w,h,0).head;
+  let sx=0,sy=0,n=0;
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++)if(m[j*w+i]){sx+=i;sy+=j;n++;}
+  if(!n)return {az:0,el:25,fill:1.5,int:1,soft:.5,kel:5000,note:'no face found, using defaults'};
+  const cx=sx/n,cy=sy/n;let sl=0,nl=0,sr=0,nr=0,st=0,nt=0,sb=0,nb=0;const ls=[];
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++)if(m[j*w+i]){
+    const o=(j*w+i)*3,y=Math.pow(lumD(ref[o],ref[o+1],ref[o+2]),2.2);ls.push(y);
+    if(i<cx){sl+=y;nl++;}else{sr+=y;nr++;}
+    if(j<cy){st+=y;nt++;}else{sb+=y;nb++;}
+  }
+  const mL=sl/(nl||1),mR=sr/(nr||1),mT=st/(nt||1),mB=sb/(nb||1);
+  ls.sort((a,b)=>a-b);
+  const p10=ls[Math.floor(ls.length*0.1)],p90=ls[Math.floor(ls.length*0.9)];
+  const lr=(mR-mL)/((mR+mL)||1),tb=(mT-mB)/((mT+mB)||1);
+  const az=clamp(lr*95,-150,150),el=clamp(22+70*tb,0,70),fill=clamp(0.55*Math.log2(p90/Math.max(p10,0.002)),0.3,3.2);
+  return {az,el,fill,int:1,soft:.5,kel:5000,lr,tb,ratio:p90/Math.max(p10,0.002)};
+}
+function createFit(ref,w,h,base){
+  const E=q=>errFn(renderScene(q,w,h,0).rgb,ref);
+  let stage=0,p=null,cur=Infinity,iter=0,steps={};
+  KNOBS.forEach(k=>steps[k.k]=k.s0);
+  return {step(){
+    const logs=[];
+    if(stage===0){
+      const m=measureInit(ref,w,h,base);
+      p={...base,az:m.az,el:m.el,fill:m.fill,int:m.int,soft:m.soft,kel:m.kel};cur=E(p);
+      logs.push({tier:'T0',rule:'R4',text:`skin split L/R ${m.lr>=0?'+':''}${(m.lr||0).toFixed(2)}, top/bottom ${(m.tb||0)>=0?'+':''}${(m.tb||0).toFixed(2)} → first guess az ${Math.round(m.az)}°, el ${Math.round(m.el)}°, fill 1:${Math.pow(2,m.fill).toFixed(1)}`});
+      stage=1;return {done:false,p:{...p},err:cur,logs};
+    }
+    if(stage===1){
+      let bestE=cur,best=null,n=0;
+      for(let az=-150;az<=150;az+=30)for(const el of [5,25,45,65]){n++;const q={...p,az,el};const e=E(q);if(e<bestE){bestE=e;best=q;}}
+      if(best){p=best;cur=bestE;}
+      logs.push({tier:'T0',rule:'R6',text:`coarse sweep, ${n} renders over azimuth × elevation → best az ${Math.round(p.az)}°, el ${Math.round(p.el)}° · residual ${cur.toFixed(3)}`});
+      stage=2;return {done:false,p:{...p},err:cur,logs};
+    }
+    let best=null,bestE=cur;
+    for(const kn of KNOBS)for(const d of [-1,1]){
+      const q={...p};q[kn.k]=clamp(p[kn.k]+d*steps[kn.k],kn.lo,kn.hi);
+      if(q[kn.k]===p[kn.k])continue;
+      const e=E(q);if(e<bestE-1e-9){bestE=e;best={kn,d,q};}
+    }
+    iter++;let done=false;
+    if(best&&cur-bestE>3e-5){
+      if(cur-bestE>0.0008)logs.push({tier:'T0',rule:'R7',text:`iter ${String(iter).padStart(2,'0')} · next knob: ${best.kn.name} ${best.d>0?'+':'−'}${best.kn.k==='kel'?Math.round(steps[best.kn.k]):+steps[best.kn.k].toFixed(2)}${best.kn.u} · residual ${cur.toFixed(3)} → ${bestE.toFixed(3)}`});
+      p=best.q;cur=bestE;
+    }else{
+      let allMin=true;
+      for(const kn of KNOBS){steps[kn.k]=Math.max(kn.min,steps[kn.k]/2);if(steps[kn.k]>kn.min*1.001)allMin=false;}
+      logs.push({tier:'T0',rule:'R7',text:`iter ${String(iter).padStart(2,'0')} · no knob improves → step sizes halved`});
+      if(allMin)done=true;
+    }
+    if(iter>=90)done=true;
+    return {done,p:{...p},err:cur,logs};
+  }};
+}
+/*CORE-END*/
+
+/* ---------------- UI ---------------- */
+const W=240,H=300,FW=40,FH=50;
+const REFS=[
+  {name:'Warm Rembrandt',p:{az:-52,el:28,soft:.35,int:1.15,kel:3800,fill:2,lens:85,yaw:6,tilt:0,lamp:1,wall:.7},
+    vlm:{text:'low-key portrait, single warm key camera-left, practical lamp back-right, intimate mood',conf:0.82}},
+  {name:'Clean beauty',p:{az:8,el:32,soft:.9,int:1.0,kel:5600,fill:.6,lens:100,yaw:-3,tilt:1,lamp:0,wall:1.0},
+    vlm:{text:'high-key beauty light, large soft frontal source, neutral white balance, minimal set',conf:0.93}},
+  {name:'Noir side light',p:{az:78,el:8,soft:.12,int:1.3,kel:4600,fill:3,lens:50,yaw:-10,tilt:-1,lamp:0,wall:.35},
+    vlm:{text:'hard side light from frame-right, deep shadow side, dark wall, low ambient',conf:0.71}}
+];
+const NEUTRAL={az:0,el:20,soft:.5,int:1,kel:5600,fill:1};
+const LIGHTKEYS=['az','el','soft','int','kel','fill'];
+const CTRL={
+  gLight:[
+    {k:'az',l:'Key azimuth',min:-170,max:170,step:1,f:v=>`${v>0?'+':''}${Math.round(v)}° ${v<-2?'left':v>2?'right':'front'}`},
+    {k:'el',l:'Key elevation',min:-10,max:80,step:1,f:v=>`${Math.round(v)}°`},
+    {k:'soft',l:'Softness',min:0,max:1,step:.01,f:v=>`${Math.round(v*100)}%`},
+    {k:'int',l:'Key intensity',min:.2,max:2.2,step:.01,f:v=>`${v.toFixed(2)}×`},
+    {k:'kel',l:'Colour temperature',min:2800,max:7000,step:50,f:v=>`${Math.round(v)} K`},
+    {k:'fill',l:'Fill ratio',min:0,max:3.5,step:.05,f:v=>`1 : ${Math.pow(2,v).toFixed(1)}`}],
+  gCam:[
+    {k:'lens',l:'Focal length',min:24,max:135,step:1,f:v=>`${Math.round(v)} mm`},
+    {k:'yaw',l:'Orbit',min:-40,max:40,step:1,f:v=>`${v>0?'+':''}${Math.round(v)}°`},
+    {k:'tilt',l:'Headroom / tilt',min:-10,max:10,step:.5,f:v=>`${v>0?'+':''}${v.toFixed(1)}°`}],
+  gSet:[
+    {k:'wall',l:'Wall tone',min:.2,max:1.2,step:.01,f:v=>`${Math.round(v*100)}%`}]
+};
+const $=id=>document.getElementById(id);
+const cRef=$('cRef'),cRec=$('cRec'),cRes=$('cRes'),cPlan=$('cPlan');
+const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let refIdx=0,refImg,refLow,refHead,p,running=false,fitObj=null,lib=[],logRows=0,drawQ=false,err=1,showRes=false,fitted=false,savedN=0;
+const inputs={},outs={};
+
+function paint(cv,rgb,w,h){
+  const ctx=cv.getContext('2d'),im=ctx.createImageData(w,h),d=im.data;
+  for(let i=0,n=w*h;i<n;i++){d[i*4]=rgb[i*3]*255;d[i*4+1]=rgb[i*3+1]*255;d[i*4+2]=rgb[i*3+2]*255;d[i*4+3]=255;}
+  ctx.putImageData(im,0,0);
+}
+function paintResidual(a,b){
+  const ctx=cRes.getContext('2d'),im=ctx.createImageData(W,H),d=im.data;
+  for(let i=0,n=W*H;i<n;i++){
+    const e=(Math.abs(a[i*3]-b[i*3])+Math.abs(a[i*3+1]-b[i*3+1])+Math.abs(a[i*3+2]-b[i*3+2]))/3;
+    const t=clamp(e*5,0,1);
+    d[i*4]=255*Math.min(1,t*2);d[i*4+1]=255*clamp(t*2-0.6,0,1)*0.8;d[i*4+2]=255*(1-t)*0.3;d[i*4+3]=255*clamp(t*2,0,1);
+  }
+  ctx.putImageData(im,0,0);
+}
+function zonesHTML(z){const mx=Math.max(...z,0.001);return z.map(v=>`<i style="height:${Math.max(6,v/mx*100)}%"></i>`).join('');}
+function swHTML(sw){return sw.map(c=>`<i style="background:${c}"></i>`).join('');}
+
+/* controls */
+function buildControls(){
+  for(const g in CTRL){
+    const host=$(g);
+    for(const c of CTRL[g]){
+      const row=document.createElement('div');row.className='row';
+      const id='in_'+c.k;
+      row.innerHTML=`<label for="${id}">${c.l}</label><output id="out_${c.k}" class="mono"></output><input id="${id}" type="range" min="${c.min}" max="${c.max}" step="${c.step}">`;
+      host.appendChild(row);
+      const inp=row.querySelector('input');inputs[c.k]=inp;outs[c.k]=row.querySelector('output');
+      inp.addEventListener('input',()=>{p[c.k]=+inp.value;syncOne(c);schedule();});
+      inp.addEventListener('change',()=>{if(!running)addLog({tier:'T3',rule:'human',text:`you set ${c.l.toLowerCase()} → ${c.f(+inp.value)}`});});
+    }
+  }
+  const sw=document.createElement('div');sw.className='switch';
+  sw.innerHTML=`<span>Practical lamp</span><button class="btn" id="btnLamp" type="button" role="switch" aria-checked="false">Off</button>`;
+  $('gSet').appendChild(sw);
+  $('btnLamp').addEventListener('click',()=>{p.lamp=p.lamp?0:1;syncControls();schedule();if(!running)addLog({tier:'T3',rule:'human',text:`you switched the practical lamp ${p.lamp?'on':'off'}`});});
+}
+function syncOne(c){const v=p[c.k];inputs[c.k].value=v;outs[c.k].textContent=c.f(v);inputs[c.k].style.setProperty('--pct',((v-c.min)/(c.max-c.min)*100)+'%');}
+function syncControls(){
+  for(const g in CTRL)for(const c of CTRL[g])syncOne(c);
+  const b=$('btnLamp');b.setAttribute('aria-checked',p.lamp?'true':'false');b.textContent=p.lamp?'On':'Off';
+}
+function setDisabled(d){for(const k in inputs)inputs[k].disabled=d;$('btnLamp').disabled=d;$('btnFit').disabled=d;$('btnReset').disabled=d;$('btnSave').disabled=d;}
+
+/* plan view */
+let planS=320;
+function sizePlan(){
+  const r=cPlan.getBoundingClientRect(),dpr=window.devicePixelRatio||1;planS=r.width||320;
+  cPlan.width=Math.round(planS*dpr);cPlan.height=Math.round(planS*dpr);
+}
+function planGeom(){return {cx:planS/2,cy:planS*0.42,R:planS*0.34};}
+function polar(az,r){const g=planGeom();return [g.cx+r*Math.sin(az*D2R),g.cy+r*Math.cos(az*D2R)];}
+function drawPlan(){
+  const ctx=cPlan.getContext('2d'),dpr=cPlan.width/planS,g=planGeom(),cs=getComputedStyle(document.documentElement);
+  const col=n=>cs.getPropertyValue(n).trim();
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,planS,planS);
+  ctx.font="10px 'IBM Plex Mono',monospace";ctx.textAlign='center';
+  ctx.strokeStyle=col('--line');ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  ctx.beginPath();ctx.arc(g.cx,g.cy,g.R,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  for(let a=-135;a<=180;a+=45){const [x1,y1]=polar(a,g.R-4),[x2,y2]=polar(a,g.R+4);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+  // camera wedge
+  const fov=2*Math.atan(18/p.lens),[camX,camY]=polar(p.yaw,g.R*1.02);
+  const toSub=Math.atan2(g.cx-camX,g.cy-camY);
+  ctx.fillStyle='rgba(236,230,222,.07)';ctx.beginPath();ctx.moveTo(camX,camY);
+  for(const s of [-1,1]){ctx.lineTo(camX+Math.sin(toSub+s*fov/2)*g.R*1.5,camY+Math.cos(toSub+s*fov/2)*g.R*1.5);}
+  ctx.closePath();ctx.fill();
+  // subject
+  ctx.fillStyle=col('--panel');ctx.strokeStyle=col('--muted');ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(g.cx,g.cy,planS*0.07,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(g.cx-5,g.cy+planS*0.07-1);ctx.lineTo(g.cx,g.cy+planS*0.07+7);ctx.lineTo(g.cx+5,g.cy+planS*0.07-1);ctx.stroke();
+  // lamp
+  if(p.lamp){const [lx,ly]=[g.cx+g.R*0.95,g.cy-g.R*0.72];ctx.strokeStyle=col('--accent');ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(lx,ly,6,0,Math.PI*2);ctx.stroke();ctx.fillStyle=col('--muted');ctx.fillText('LAMP',lx,ly-11);}
+  // fill
+  const [fx,fy]=polar(2*p.yaw-p.az,g.R*0.92);
+  ctx.fillStyle=col('--fill');ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(fx,fy,6,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  ctx.fillStyle=col('--muted');ctx.fillText('FILL',fx,fy-11);
+  // key
+  const [kx,ky]=polar(p.az,g.R),halo=12+p.soft*16;
+  const grd=ctx.createRadialGradient(kx,ky,2,kx,ky,halo+8);grd.addColorStop(0,'rgba(242,162,74,.55)');grd.addColorStop(1,'rgba(242,162,74,0)');
+  ctx.fillStyle=grd;ctx.beginPath();ctx.arc(kx,ky,halo+8,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=col('--accent');ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(kx,ky);ctx.lineTo(g.cx,g.cy);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=col('--accent');ctx.beginPath();ctx.arc(kx,ky,8,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=col('--fg');ctx.fillText('KEY',kx,ky-(halo>18?halo-2:16));
+  // camera
+  ctx.save();ctx.translate(camX,camY);ctx.rotate(-toSub+Math.PI);
+  ctx.fillStyle=col('--fg');ctx.fillRect(-9,-6,18,12);ctx.beginPath();ctx.moveTo(-4,-6);ctx.lineTo(0,-12);ctx.lineTo(4,-6);ctx.closePath();ctx.fill();
+  ctx.restore();ctx.fillStyle=col('--muted');ctx.fillText('CAMERA',camX,camY+22);
+}
+let drag=null;
+function planPos(e){const r=cPlan.getBoundingClientRect();return [(e.clientX-r.left)*planS/r.width,(e.clientY-r.top)*planS/r.height];}
+cPlan.addEventListener('pointerdown',e=>{
+  if(running)return;
+  const [x,y]=planPos(e),g=planGeom(),[kx,ky]=polar(p.az,g.R),[cx,cy]=polar(p.yaw,g.R*1.02);
+  const dk=Math.hypot(x-kx,y-ky),dc=Math.hypot(x-cx,y-cy);
+  if(Math.min(dk,dc)>32)return;
+  drag=dk<=dc?'az':'yaw';cPlan.setPointerCapture(e.pointerId);e.preventDefault();
+});
+cPlan.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const [x,y]=planPos(e),g=planGeom(),a=Math.atan2(x-g.cx,y-g.cy)/D2R;
+  if(drag==='az')p.az=clamp(Math.round(a),-170,170);else p.yaw=clamp(Math.round(a),-40,40);
+  syncControls();schedule();
+});
+function endDrag(){if(!drag)return;const k=drag;drag=null;addLog({tier:'T3',rule:'human',text:k==='az'?`you dragged the key to ${p.az>0?'+':''}${p.az}°`:`you orbited the camera to ${p.yaw>0?'+':''}${p.yaw}°`});}
+cPlan.addEventListener('pointerup',endDrag);cPlan.addEventListener('pointercancel',endDrag);
+
+/* log */
+function addLog(r){
+  logRows++;
+  const li=document.createElement('li'),ol=$('log');
+  const conf=r.conf!=null?` · conf ${r.conf.toFixed(2)}`:'';
+  li.innerHTML=`<span class="n">${String(logRows).padStart(2,'0')}</span><span class="tier ${r.tier}">${r.tier}</span><div class="msg">${r.text}<span class="meta">${r.rule||''}${conf}${r.sample?'<span class="smp">sample</span>':''}</span></div>`;
+  ol.appendChild(li);ol.scrollTop=ol.scrollHeight;
+  $('logCount').textContent=`${logRows} rows`;
+}
+function seedLog(){
+  $('log').innerHTML='';logRows=0;
+  const R=REFS[refIdx],sh=shotLabel(R.p.lens),fp=fingerprint(refLow,refHead,FW,FH);
+  addLog({tier:'T0',rule:'R1',sample:true,text:'ffmpeg scdet → 1 shot, 0 cuts · 1 keyframe + contact sheet pulled'});
+  addLog({tier:'T0',rule:'R2',text:`face found · head ≈ ${Math.round(sh.frac*100)}% of frame height → ${sh.label}, ${R.p.lens} mm-equivalent`});
+  addLog({tier:'T0',rule:'R2',text:`skin lit : shadow ≈ ${fp.ratio.toFixed(1)} : 1 · luminance zones measured`});
+  addLog({tier:'RT',rule:'R3',text:'router: one shot, one face → lighting goes to the analytic fit (T0). The language model is used for words only.'});
+  addLog({tier:'T2',rule:'R3',conf:R.vlm.conf,sample:true,text:`label: “${R.vlm.text}” (sample text, not a live call)`});
+  if(R.vlm.conf<0.90)addLog({tier:'RT',rule:'R5',text:`T2 confidence ${R.vlm.conf.toFixed(2)} < 0.90 → label queued for your check (T3)`});
+  else addLog({tier:'RT',rule:'R5',text:`T2 confidence ${R.vlm.conf.toFixed(2)} ≥ 0.90 → label accepted, spot-check only`});
+}
+
+/* rendering */
+function schedule(){if(drawQ)return;drawQ=true;requestAnimationFrame(()=>{drawQ=false;draw();});}
+function draw(){
+  const r=renderScene(p,W,H,0);paint(cRec,r.rgb,W,H);
+  if(showRes)paintResidual(r.rgb,refImg);
+  const lo=renderScene(p,FW,FH,0);err=errFn(lo.rgb,refLow);
+  const m=clamp(1-err/0.18,0,1);
+  $('matchPct').textContent=`${Math.round(m*100)}%`;$('matchBar').style.width=`${m*100}%`;$('resid').textContent=`residual ${err.toFixed(3)}`;
+  const fp=fingerprint(lo.rgb,lo.head,FW,FH),sh=shotLabel(p.lens);
+  $('recMeta').textContent=`${sh.label} · ${Math.round(p.lens)} mm · ${Math.round(p.kel)} K`;
+  $('recZones').innerHTML=zonesHTML(fp.zones);$('recRatio').textContent=`${fp.ratio.toFixed(1)} : 1`;$('recSw').innerHTML=swHTML(fp.sw);
+  drawPlan();
+}
+function loadRef(i){
+  refIdx=i;const R=REFS[i];
+  refImg=renderScene(R.p,W,H,0.012).rgb;refLow=downsample(refImg,W,H,6);
+  refHead=renderScene({...R.p,...NEUTRAL},FW,FH,0).head;
+  paint(cRef,refImg,W,H);
+  const sh=shotLabel(R.p.lens),fp=fingerprint(refLow,refHead,FW,FH);
+  $('refMeta').textContent=`${sh.label} · ${R.p.lens} mm`;$('refZones').innerHTML=zonesHTML(fp.zones);$('refRatio').textContent=`${fp.ratio.toFixed(1)} : 1`;$('refSw').innerHTML=swHTML(fp.sw);
+  p={...NEUTRAL,lens:R.p.lens,yaw:R.p.yaw,tilt:R.p.tilt,lamp:R.p.lamp,wall:R.p.wall};
+  fitted=false;seedLog();syncControls();
+  document.querySelectorAll('#refSeg .btn').forEach((b,k)=>b.setAttribute('aria-checked',k===i?'true':'false'));
+  schedule();
+}
+
+/* fit */
+function runFit(){
+  if(running)return;running=true;setDisabled(true);
+  const R=REFS[refIdx];
+  p={...p,lens:R.p.lens,yaw:R.p.yaw,tilt:R.p.tilt,lamp:R.p.lamp,wall:R.p.wall};
+  addLog({tier:'T0',rule:'R2',sample:true,text:`camera + set assumed known: ${R.p.lens} mm, orbit ${R.p.yaw}°, lamp ${R.p.lamp?'on':'off'} (real pipeline: face-size ratio + vidstab)`});
+  fitObj=createFit(refLow,FW,FH,p);
+  const tick=()=>{
+    const r=fitObj.step();
+    r.logs.forEach(addLog);p={...p,...r.p};syncControls();
+    if(r.done){finishFit();return;}
+    if(reduced){tick();}else{schedule();setTimeout(tick,75);}
+  };
+  tick();
+}
+function finishFit(){
+  const R=REFS[refIdx].p;
+  draw();
+  if(err<0.02)addLog({tier:'RT',rule:'R8',text:`residual ${err.toFixed(3)} < 0.020 → fit accepted`});
+  else if(err<0.05)addLog({tier:'RT',rule:'R8',text:`residual ${err.toFixed(3)} between 0.020 and 0.050 → accepted with a warning`});
+  else addLog({tier:'RT',rule:'R9',text:`residual ${err.toFixed(3)} > 0.050 → escalate: ask T2 to re-label, then you review (T3)`});
+  addLog({tier:'T0',rule:'validation',sample:true,text:`vs hidden truth (synthetic reference only): az Δ${Math.abs(Math.round(p.az-R.az))}° · el Δ${Math.abs(Math.round(p.el-R.el))}° · softness Δ${Math.abs(p.soft-R.soft).toFixed(2)} · kelvin Δ${Math.abs(Math.round(p.kel-R.kel))} K · fill Δ${Math.abs(p.fill-R.fill).toFixed(2)} stops`});
+  fitted=true;running=false;setDisabled(false);schedule();
+}
+
+/* library */
+function libParams(q){return {...q};}
+function renderLib(){
+  const host=$('cards');host.innerHTML='';
+  lib.forEach((e,i)=>{
+    const fp=fingerprint(...(()=>{const r=renderScene(e.p,FW,FH,0);return [r.rgb,r.head,FW,FH];})());
+    const tags=tagsFor(e.p),card=document.createElement('div');card.className='card';
+    card.innerHTML=`<h3><span>${e.name}</span><small>${e.saved?'saved':'sample'}</small></h3>
+      <div class="tags">${tags.map(t=>`<span>${t}</span>`).join('')}</div>
+      <div class="zones">${zonesHTML(fp.zones)}</div>
+      <div class="kv mono"><span>lit : shadow <b>${fp.ratio.toFixed(1)} : 1</b></span><span class="sw">${swHTML(fp.sw)}</span></div>
+      <div class="kv mono"><span>key <b>${e.p.az>0?'+':''}${Math.round(e.p.az)}° / ${Math.round(e.p.el)}°</b></span><span><b>${Math.round(e.p.kel)} K</b></span></div>
+      <button class="btn" type="button" data-i="${i}">Apply to my scene</button>`;
+    host.appendChild(card);
+  });
+  host.querySelectorAll('button[data-i]').forEach(b=>b.addEventListener('click',()=>{
+    if(running)return;const e=lib[+b.dataset.i];
+    LIGHTKEYS.forEach(k=>p[k]=e.p[k]);syncControls();schedule();
+    addLog({tier:'T3',rule:'library',text:`you applied “${e.name}” to the scene: ${tagsFor(e.p).join(', ')}`});
+  }));
+}
+function seedLib(){
+  lib=[
+    {name:'Golden-hour window',saved:false,p:{...NEUTRAL,az:70,el:12,soft:.75,int:1.1,kel:3200,fill:1.4,lens:85,yaw:0,tilt:0,lamp:0,wall:.8}},
+    {name:'Overcast north light',saved:false,p:{...NEUTRAL,az:-25,el:40,soft:.95,int:.9,kel:6500,fill:.8,lens:85,yaw:0,tilt:0,lamp:0,wall:.9}},
+    {name:'Hard top-down',saved:false,p:{...NEUTRAL,az:0,el:65,soft:.1,int:1.4,kel:5000,fill:3.2,lens:85,yaw:0,tilt:0,lamp:0,wall:.5}}
+  ];
+}
+
+/* init */
+function init(){
+  const seg=$('refSeg');
+  REFS.forEach((R,i)=>{const b=document.createElement('button');b.className='btn';b.type='button';b.setAttribute('role','radio');b.textContent=R.name;b.addEventListener('click',()=>{if(!running)loadRef(i);});seg.appendChild(b);});
+  buildControls();seedLib();renderLib();sizePlan();loadRef(0);
+  $('btnFit').addEventListener('click',runFit);
+  $('btnReset').addEventListener('click',()=>{LIGHTKEYS.forEach(k=>p[k]=NEUTRAL[k]);syncControls();schedule();addLog({tier:'T3',rule:'human',text:'you reset the light to neutral'});});
+  $('btnThirds').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);$('frames').classList.toggle('showthirds',on);});
+  $('btnRes').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);showRes=on;$('frames').classList.toggle('showres',on);schedule();});
+  $('btnSave').addEventListener('click',()=>{
+    savedN++;const tg=tagsFor(p);
+    lib.push({name:`${REFS[refIdx].name} · fit ${savedN}`,saved:true,p:{...p}});renderLib();
+    addLog({tier:'T3',rule:'library',text:`you saved this look to the library: ${tg.join(', ')}`});
+  });
+  window.addEventListener('resize',()=>{sizePlan();drawPlan();});
+  if('ResizeObserver' in window)new ResizeObserver(()=>{sizePlan();drawPlan();}).observe(cPlan.parentElement);
+  setTimeout(runFit,reduced?0:700);
+}
+init();
+</script>

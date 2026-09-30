@@ -1,0 +1,44 @@
+{
+  "name": "look-lab",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Technical pre-production brain for film: break down a reference, adapt it to our location and kit, plan it in 3D, run the set from the plan.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "bin": {
+    "looklab": "./bin/looklab.mjs"
+  },
+  "scripts": {
+    "start": "node bin/looklab.mjs start",
+    "dev": "node bin/looklab.mjs dev",
+    "build": "vite build",
+    "port-design": "node scripts/port-design.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vite build --logLevel warn && vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "engine": "node --experimental-strip-types --no-warnings=ExperimentalWarning src/engine/main.ts",
+    "test:unit": "vitest run --exclude \"tests/ui/app.e2e.test.ts\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/coverage-v8": "^5.0.3",
+    "htmlparser2": "^12.0.0",
+    "playwright-core": "^1.63.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.3"
+  }
+}

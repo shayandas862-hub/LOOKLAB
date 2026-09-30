@@ -1,0 +1,166 @@
+
+  <div id="tabLive" class="tabpanel" role="tabpanel" aria-labelledby="tabLiveBtn" hidden>
+    <p class="vision">Your <b>location plate</b>, <b>cast</b> and <b>props</b> become layers in one 3D scene. Drag anything anywhere, swap outfits, move the key light, then <b>match the light to a reference</b>. This real-time view is a cheap proxy. The image model makes the parts and the final frame (see tab 3).</p>
+    <div class="live">
+      <section class="panel a-vp" aria-label="Live 3D scene">
+        <div class="libhead"><h2>Live scene</h2><span class="chip mono" id="lvStatus">loading…</span></div>
+        <div class="vpwrap" id="vpWrap">
+          <canvas id="lvCanvas" tabindex="0" aria-label="3D scene. Drag an element to move it, drag empty space to orbit, scroll or pinch to zoom. Arrow keys nudge the selection."></canvas>
+          <div class="thirds"></div>
+          <span class="badge">REAL-TIME PROXY · three.js</span>
+          <canvas id="lvRefThumb" class="thumb" width="240" height="300" aria-label="Reference frame"></canvas>
+          <div class="vpmsg" id="vpMsg"></div>
+        </div>
+        <div class="actions">
+          <div class="seg" id="lvMode" role="radiogroup" aria-label="What dragging an element does">
+            <button class="btn" type="button" role="radio" aria-checked="true" data-mode="floor">Floor</button>
+            <button class="btn" type="button" role="radio" aria-checked="false" data-mode="lift">Lift</button>
+            <button class="btn" type="button" role="radio" aria-checked="false" data-mode="turn">Turn</button>
+          </div>
+          <span class="spacer"></span>
+          <button class="btn" id="lvThirds" type="button" aria-pressed="false">Thirds</button>
+          <button class="btn" id="lvFace" type="button" aria-pressed="true" title="Cards always face the camera. Turn off to see where a flat card breaks.">Cards face camera</button>
+          <button class="btn" id="lvPlate" type="button" aria-pressed="true" title="As shot: the photo's own baked light. Relit: the plate reacts to your key light.">Relit plate</button>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="lvMatch" type="button">Match light to reference</button>
+          <button class="btn" id="lvHero" type="button">Hero render</button>
+          <span class="spacer"></span>
+          <button class="btn" id="lvReset" type="button">Reset scene</button>
+        </div>
+        <p class="hint left">Drag an element to move it (Floor / Lift / Turn sets what dragging does). Drag empty space to orbit, wheel or pinch to zoom. The amber bulb is the key light. Arrow keys nudge the selection.</p>
+      </section>
+
+      <section class="panel a-side" aria-label="Scene controls">
+        <h2>Elements</h2>
+        <div class="els" id="lvEls"></div>
+        <div class="addrow"><select id="lvAddSel" aria-label="Prop to add"><option value="armchair">Armchair</option><option value="table">Side table</option><option value="lamp">Floor lamp</option><option value="crate">Crate</option></select><button class="btn" id="lvAdd" type="button">Add prop</button></div>
+        <hr class="sep">
+        <h2 id="lvSelTitle">Selected</h2>
+        <div class="grp" id="lvSel"></div>
+        <hr class="sep">
+        <div class="grp" id="lvLight"><h2>Light rig</h2></div>
+        <div class="grp" id="lvCam"><h2>Camera</h2></div>
+        <div class="grp" id="lvPlateG"><h2>Plate</h2></div>
+      </section>
+
+      <section class="panel a-ref" aria-label="Reference and matching">
+        <div class="libhead"><h2>Reference and light match</h2><span class="chip mono" id="lvMatchChip">match —</span></div>
+        <div class="seg" id="lvRefSeg" role="radiogroup" aria-label="Reference"></div>
+        <div class="bar" aria-hidden="true"><i id="lvMatchBar"></i></div>
+        <div class="stat mono" id="lvStats"></div>
+        <p class="hint left" id="lvMatchNote">Match measures the hero's cheeks with a close measurement camera: lit : shadow, key brightness and warmth, against the same numbers measured on the reference's cheeks. It does not compare composition.</p>
+        <hr class="sep">
+        <div class="libhead"><h2>Hero render</h2><span class="chip mono" id="lvJobChip">idle</span></div>
+        <div class="jobbar" aria-hidden="true"><i id="lvJobBar"></i></div>
+        <div class="cmp" id="lvCmp" hidden>
+          <figure><canvas id="lvProxyOut" width="640" height="360"></canvas><figcaption>Proxy · real-time</figcaption></figure>
+          <figure><canvas id="lvHeroOut" width="640" height="360"></canvas><figcaption>Hero stand-in · colour transfer to the reference, bloom, grain</figcaption></figure>
+        </div>
+        <p class="hint left">Stand-in only. In production this pass is a diffusion relight / harmonise model fed this proxy's depth, normals, light rig and the reference (tab 3).</p>
+      </section>
+
+      <section class="panel logp a-log" aria-label="Pipeline log">
+        <div class="libhead"><h2>Pipeline log</h2><span class="chip mono" id="lvLogCount">0 rows</span></div>
+        <p class="note">Same tiers as tab 1. Rows tagged <span class="mono">sample</span> are things a real model would do; here they are stand-ins.</p>
+        <ol class="log" id="lvLog"></ol>
+      </section>
+
+      <section class="panel a-json" aria-label="Scene graph">
+        <div class="libhead"><h2>Scene graph (source of truth)</h2>
+          <div class="actions"><button class="btn" id="lvJsonCopy" type="button">Copy JSON</button><button class="btn" id="lvJsonApply" type="button">Apply JSON</button></div></div>
+        <p class="note muted">The viewer is just a renderer for this. Claude Code can write or edit it, and you can paste it back. Uploaded photos are not stored in the JSON.</p>
+        <textarea id="lvJson" spellcheck="false" aria-label="Scene graph JSON"></textarea>
+        <span class="chip mono" id="lvJsonMsg">in sync</span>
+      </section>
+    </div>
+  </div>
+
+  <div id="tabArch" class="tabpanel" role="tabpanel" aria-labelledby="tabArchBtn" hidden>
+    <div class="arch">
+      <section class="panel">
+        <h2>The short answer</h2>
+        <p class="lead">Yes, you need image models, but <b>not as the renderer</b>. On an 8 GB M1 nothing diffusion-based runs at interactive speed. So split it in two. A cheap 3D proxy gives you real-time drag, light and camera. The image models run <b>once per asset</b> (cutouts, outfits, 3D meshes) and <b>once per hero frame</b> (relight and harmonise), off the main loop.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Two loops around one scene graph</h2>
+        <div class="flow">
+          <div class="col"><span class="colh">1 · Raw inputs</span>
+            <div class="node"><h3>Plate</h3><ul><li>Location photos, one or several angles</li></ul></div>
+            <div class="node"><h3>Cast and props</h3><ul><li>Photos or generated images</li><li>Outfit requests in words</li></ul></div>
+            <div class="node"><h3>Reference</h3><ul><li>Frame or video whose look you want</li></ul></div></div>
+          <div class="col"><span class="colh">2 · Ingest, once per asset</span>
+            <div class="node"><h3>T1 · M1</h3><ul><li>Cutout (SAM-class)</li><li>Depth and normals</li><li>Plate → proxy room, de-lit albedo</li></ul></div>
+            <div class="node slow"><h3>T2 · cloud</h3><ul><li>Outfit edit (image model, identity-locked)</li><li>Image → 3D mesh</li></ul></div></div>
+          <div class="col"><span class="colh">3 · Scene graph</span>
+            <div class="node core"><h3>JSON, source of truth</h3><ul><li>Elements: asset, transform, outfit</li><li>Light rig, camera, plate state</li><li>Claude edits it, Blender can import it</li></ul></div></div>
+          <div class="col"><span class="colh">4 · Two loops</span>
+            <div class="node fast"><h3>Fast loop · M1 · now</h3><ul><li>three.js: normal-mapped cards, meshes, shadows</li><li>You drag, relight, orbit</li><li>T0 measures look match vs the reference</li></ul></div>
+            <div class="node slow"><h3>Hero loop · cloud · on demand</h3><ul><li>Diffusion relight / harmonise</li><li>Conditioned on proxy depth, normals, light, reference</li><li>Seconds to minutes per frame</li></ul></div></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Who does what</h2>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Stage</th><th>Model class</th><th>Where it runs</th><th>In this prototype</th></tr></thead>
+          <tbody>
+            <tr><td>Cutout</td><td>SAM-class promptable segmentation</td><td>M1 for small variants. SAM 3 size on 8 GB is unverified, so plan cloud as the fallback</td><td><span class="tag mock">stand-in</span> colour key on your upload</td></tr>
+            <tr><td>Depth and normals</td><td>Depth Anything-class depth, separate normal estimators</td><td>M1 (small models), cloud for the best</td><td><span class="tag mock">stand-in</span> normals from the cutout's shape</td></tr>
+            <tr><td>Outfit</td><td>Instruction-edit image model, given a reference image of the person</td><td>Cloud or API</td><td><span class="tag mock">stand-in</span> colour and garment words</td></tr>
+            <tr><td>Image → 3D</td><td>TRELLIS.2, SAM 3D, Hunyuan3D-class</td><td>Cloud GPU. The TRELLIS.2 Mac port reports ~18 GB peak and ~3.5 min on an M4 Pro, vertex colours only, so it is not an 8 GB option</td><td><span class="tag mock">stand-in</span> primitive meshes</td></tr>
+            <tr><td>Plate → room</td><td>Depth → proxy geometry, camera projection, or Blender</td><td>M1 and Blender</td><td><span class="tag real">real</span> textured room, photo de-lit by flattening low-frequency light</td></tr>
+            <tr><td>Relight and harmonise</td><td>DiffusionRenderer (inverse + forward), IC-Light-class</td><td>Cloud GPU</td><td><span class="tag mock">stand-in</span> colour transfer, bloom, grain</td></tr>
+            <tr><td>Real-time viewport</td><td>WebGL (three.js)</td><td>M1, browser</td><td><span class="tag real">real</span></td></tr>
+            <tr><td>Light matching</td><td>Measurement plus search (tab 1's fit)</td><td>M1</td><td><span class="tag real">real</span> face lit : shadow, brightness, warmth</td></tr>
+          </tbody></table></div>
+      </section>
+
+      <section class="panel">
+        <h2>Decision rules this mode adds</h2>
+        <div class="rules">
+          <div><code>R10</code><span>Person photo → cutout + normals (T1, M1) → <b>card</b>. Prop photo → image-to-3D (cloud) or a Blender asset → <b>mesh</b>.</span></div>
+          <div><code>R11</code><span>A card viewed more than 35° off its axis → flag it. Upgrade to a mesh or limit the orbit. <b>Live here:</b> turn off “Cards face camera” and orbit.</span></div>
+          <div><code>R12</code><span>Outfit or appearance change → edit model with the identity reference (T2, cloud), then a face-similarity check (T1) before it is accepted.</span></div>
+          <div><code>R13</code><span>Look match under 85% after refinement → escalate to a hero pass, or to you (T3). <b>Live here.</b></span></div>
+          <div><code>R14</code><span>Plate light contradicts the key (shadows point the wrong way) → de-light the plate, or move the key to agree with the plate.</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>What will go wrong</h2>
+        <ul class="list">
+          <li><b>The plate already has light in it.</b> Move the key and the baked window light still points the old way. Try “Relit plate” off and on.</li>
+          <li><b>Cards are paper.</b> A cutout holds up to roughly 35° of orbit. Past that you need a real mesh.</li>
+          <li><b>Identity drifts.</b> Every outfit edit and every hero frame can change the face. The edit model needs the person's reference image, and a face check decides whether to accept.</li>
+          <li><b>Contact shadows need contact.</b> Feet that float a few centimetres read as fake, so the floor and the footprint matter more than the model.</li>
+          <li><b>Video flickers.</b> Per-frame diffusion is not temporally stable. Use the proxy for motion and the image model for stills and keyframes.</li>
+          <li><b>Licences differ per model.</b> Check each one, including any territory or commercial limits, before client work.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>Build phases for Claude Code</h2>
+        <ol class="phases">
+          <li><div><b>Scene graph and viewer</b><small>This prototype. Test: JSON round-trips, transforms, match metric recovers a known light on synthetic scenes.</small></div></li>
+          <li><div><b>Ingest CLI on the M1</b><small>Photo → cutout + depth → card asset + JSON. Test: mask IoU against 10 hand-masked photos.</small></div></li>
+          <li><div><b>Cloud asset jobs</b><small>Outfit edit and image → 3D behind a job queue, with a cache and a cost log. Test: face-similarity gate.</small></div></li>
+          <li><div><b>Real reference matching</b><small>Tab 1's fit drives the rig from real footage. Test: Blender scenes with known lights.</small></div></li>
+          <li><div><b>Hero pass</b><small>Relight / harmonise on demand. Test: blind A/B against the proxy.</small></div></li>
+          <li><div><b>Blender bridge</b><small>Export glTF or USD and render finals in Blender when a client needs it.</small></div></li>
+        </ol>
+      </section>
+
+      <section class="panel">
+        <h2>Sources</h2>
+        <div class="srcs">
+          <a href="https://research.nvidia.com/labs/toronto-ai/DiffusionRenderer/index.html" target="_blank" rel="noopener">NVIDIA · DiffusionRenderer (inverse and forward rendering, relighting)</a>
+          <a href="https://lilting.ch/en/articles/trellis2-apple-silicon-mps-cuda-free" target="_blank" rel="noopener">TRELLIS.2 on Apple Silicon: memory, time, limits</a>
+          <a href="https://about.fb.com/news/2025/11/new-sam-models-detect-objects-create-3d-reconstructions/amp/" target="_blank" rel="noopener">Meta · SAM 3 and SAM 3D</a>
+          <a href="https://blog.roboflow.com/depth-anything-3/" target="_blank" rel="noopener">Depth Anything 3 overview</a>
+          <a href="https://arxiv.org/abs/2511.13684" target="_blank" rel="noopener">IC-Light multi-view extension for scene relighting (arXiv)</a>
+        </div>
+      </section>
+    </div>
+  </div>

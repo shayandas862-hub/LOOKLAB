@@ -1,0 +1,59 @@
+# Look Lab — Living Glossary (CONTEXT)
+
+> The project's shared vocabulary. Read it before inventing a term. Definitions
+> state what a term means **now**; supersede in place. Each entry cites the record
+> that settled it where there is one.
+
+## The work
+
+**Reference** — a frame or a video the team wants to learn a look from. Stored with its original file and extracted frames. Never uploaded unless the project allows cloud (standing rule 7).
+
+**Shot** — one continuous take inside a reference, or one planned shot in a scene (`12C`). A reference's shots are detected; a scene's shots are planned.
+
+**Breakdown** — the measured and estimated description of one shot's look: palette, tints, saturation, contrast, light, lens, framing, mood. Every leaf is a Value.
+
+**Value** — `{ value, unit?, source, confidence?, updated_by, updated_at }`. `source` is one of:
+- **measured** — computed by a T0 instrument from the actual pixels;
+- **ai** — a model's estimate, always with a confidence 0–100 (below 60 goes to review);
+- **manual** — typed or set by a person;
+- **sample** — placeholder data from the design or a stand-in. Never shown as anything else (D-LL-015).
+
+**Look** — a saved breakdown fingerprint in the Library (palette, key direction, ratio, colour temperature, tags, mood) that can be applied to another shot's targets.
+
+**Location** — the real place: photos, floor size, ceiling, windows, power points, shoot hours.
+
+**Kit** — what the team has: lights, modifiers, gels, camera, lenses, crew.
+
+**Recipe** — steps to get the reference's look at this location with this kit, plus **gaps** (what the kit lacks) and **risks** (what could go wrong: power, space, time).
+
+**Set Plan** — the 3D scene graph for a shot: lights, camera, actors and set pieces with positions and properties, in versions (`v3`). Source of truth for the Set Plan screen (D-LL-009).
+
+**Look match** — a 0–100 score comparing the plan's camera view with the reference, with the numbers behind it (contrast ratio, warmth, brightness, direction). Uses cheek windows only (D-LL-007).
+
+**Set Sheet** — the crew document for one shot: lighting plot, gear checklist, camera settings, setup order, power and safety notes. A4 and phone.
+
+## The system
+
+**Action** — a named, typed function in the registry (`breakdown.fit_light`). The only way state changes (AD-LL-002). Name format `<domain>.<verb_noun>`.
+
+**Registry** — the list of all actions. Buttons, ⌘K, MCP and the CLI are built from it.
+
+**Effect** — what an action does to the world: `read`, `write`, `spend` (costs money), `upload` (sends data off the machine), `delete`.
+
+**Confirm** — an action flag meaning a person approves before it writes. Refused over MCP for now (D-LL-017).
+
+**Engine** — the local Node process that hosts the registry, store, MCP endpoint and UI (AD-LL-001).
+
+**Tier** — who does the work: **T0** instrument (deterministic), **T1** fast learned model, **T2** language/vision/generative model, **T3** a person (D-LL-002).
+
+**Rule** — a numbered routing rule, `R1`…`R14` from v0.2, new ones from `R15`. Listed in `src/actions/rules.ts`.
+
+**Decision row** — one logged routing decision: time, action, tier, rule, inputs summary, result, confidence, cost, verdict.
+
+**Stand-in** — code that returns sample output where a real instrument or model will go. Always tagged `sample`.
+
+**Fast loop / hero loop** — the real-time three.js view you drag around, and the slow cloud image-model pass for final stills (D-LL-001).
+
+**No AI mode** — a setting that disables every T1/T2 action; every screen stays usable by hand.
+
+**View / logic (UI)** — a screen's generated template (`src/ui/views/*.view.tsx`, from `design/`) and its owned behaviour (`src/ui/logic/*.logic.ts`) (D-LL-014).

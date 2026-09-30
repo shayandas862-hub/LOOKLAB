@@ -1,0 +1,3 @@
+node_modules/
+vendor/three.min.js
+tests/out/

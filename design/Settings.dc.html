@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg0:#0D0D0D;--bg1:#151515;--bg2:#1C1C1C;--bg3:#262626;--line:#2A2A2A;--line2:#3A3A3A;--tx:#EDEDED;--tx2:#A6A6A6;--tx3:#808080;--sur:#101010;--acc:#22D3EE;--acc-ink:#04232A;--warn:#F5A524;--warn-soft:rgba(245,165,36,.10);--err:#F05252;--sh:0 16px 48px rgba(0,0,0,.5)}
+html,body{margin:0;background:var(--bg0);color:var(--tx);font:13px/1.45 'Geist',system-ui,sans-serif}
+*{box-sizing:border-box}
+</style>
+</helmet>
+<div data-screen-label="Settings" style="height:100%;min-height:760px;display:grid;grid-template-columns:220px minmax(0,1fr);background:var(--bg0);color:var(--tx)">
+  <aside style="border-right:1px solid var(--line);background:var(--bg1);padding:16px 8px;display:flex;flex-direction:column;gap:2px">
+    <span style="padding:0 8px 8px;font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--tx3)">SETTINGS</span>
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+      <button onClick="{{ t.go }}" style="height:32px;padding:0 10px;border-radius:6px;border:none;background:{{ t.bg }};color:{{ t.color }};cursor:pointer;text-align:left">{{ t.label }}</button>
+    </sc-for>
+  </aside>
+  <section style="overflow:auto;padding:24px 32px">
+    <div style="max-width:880px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <h1 style="margin:0;font-size:18px;font-weight:600">AI &amp; connections</h1>
+        <span style="color:var(--tx2)">AI is optional. Every screen works by hand, and every AI value is labelled with its confidence.</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="padding:16px;border-radius:10px;background:var(--bg1);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="flex:1;font-weight:600">Claude Code: your own subscription</span>
+            <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)"><span style="width:8px;height:8px;border-radius:4px;background:{{ cc.dot }}"></span>{{ cc.label }}</span></div>
+          <span style="color:var(--tx2);text-wrap:pretty">Claude Code runs Look Lab through its MCP connection. 42 Look Lab tools available.</span>
+          <div style="display:flex;align-items:center;gap:8px;height:36px;padding:0 6px 0 10px;border-radius:6px;background:var(--bg0);border:1px solid var(--line)">
+            <code style="flex:1;font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">claude mcp add looklab -- looklab mcp serve</code>
+            <button onClick="{{ copyCmd }}" title="settings.copy_mcp_command" style="height:26px;padding:0 10px;border-radius:6px;background:var(--bg2);border:1px solid var(--line2);color:var(--tx);cursor:pointer;font-size:12px">{{ copyLabel }}</button>
+          </div>
+        </div>
+
+        <div style="padding:16px;border-radius:10px;background:var(--bg1);border:1px solid {{ capBorder }};display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="flex:1;font-weight:600">Anthropic API key: for in-app AI buttons</span><span style="font-size:12px;color:{{ capColor }}">{{ capState }}</span></div>
+          <div style="display:flex;align-items:center;height:36px;padding:0 10px;border-radius:6px;background:var(--bg0);border:1px solid var(--line);font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx2)">sk-ant-•••• •••• •••• 7Qx2</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="color:var(--tx2)">Monthly cap</span>
+            <div style="display:flex;align-items:center;height:28px;padding:0 8px;border-radius:6px;background:var(--bg0);border:1px solid var(--line);width:120px"><span style="font-family:'Geist Mono',monospace;color:var(--tx3)">₹</span><input value="{{ cap }}" onChange="{{ onCap }}" title="settings.set_cap" style="flex:1;min-width:0;background:none;border:none;outline:none;color:var(--tx);font-family:'Geist Mono',monospace;font-size:13px"></input></div>
+            <span style="flex:1"></span><span style="font-family:'Geist Mono',monospace;color:var(--tx2)">used ₹{{ used }}</span>
+          </div>
+          <div style="height:6px;border-radius:3px;background:var(--bg3);overflow:hidden"><div style="width:{{ usedPct }};height:100%;background:{{ barColor }}"></div></div>
+        </div>
+
+        <div style="padding:16px;border-radius:10px;background:var(--bg1);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px">
+          <span style="font-weight:600">Other AI providers</span>
+          <span style="color:var(--tx2)">Image models and 3D reconstruction. None connected.</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ providers }}" as="p" hint-placeholder-count="2">
+              <button onClick="{{ p.add }}" style="height:30px;padding:0 12px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--tx);cursor:pointer">+ {{ p.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="padding:16px;border-radius:10px;background:var(--bg1);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px">
+          <span style="font-weight:600">Local models</span>
+          <sc-for list="{{ locals }}" as="m" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:10px;height:28px">
+              <span style="flex:1">{{ m.label }}</span>
+              <span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx2)">{{ m.meta }}</span>
+              <button onClick="{{ m.toggle }}" style="width:34px;height:20px;border-radius:10px;border:none;background:{{ m.tbg }};position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:3px;left:{{ m.knob }};width:14px;height:14px;border-radius:7px;background:#FFFFFF;transition:left .15s"></span></button>
+            </div>
+          </sc-for>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="height:6px;border-radius:3px;background:var(--bg3);overflow:hidden"><div style="width:{{ memPct }};height:100%;background:var(--tx2)"></div></div>
+            <span style="font-size:12px;color:var(--tx2)">Look Lab is using {{ memLabel }} of 8 GB</span>
+          </div>
+        </div>
+
+        <div style="padding:16px;border-radius:10px;background:var(--bg1);border:1px solid var(--line);display:flex;align-items:flex-start;gap:16px">
+          <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font-weight:600">Privacy</span><span style="color:var(--tx2);text-wrap:pretty">Client footage stays on this computer unless I allow cloud for a project.</span></div>
+          <button onClick="{{ togglePrivacy }}" title="settings.toggle_cloud" style="width:34px;height:20px;flex:none;border-radius:10px;border:none;background:{{ privBg }};position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:3px;left:{{ privKnob }};width:14px;height:14px;border-radius:7px;background:#FFFFFF;transition:left .15s"></span></button>
+        </div>
+
+        <div style="padding:16px;border-radius:10px;background:var(--bg1);border:1px solid var(--line);display:flex;align-items:flex-start;gap:16px">
+          <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font-weight:600">No AI mode</span><span style="color:var(--tx2);text-wrap:pretty">Turns off every AI call. Everything works by hand: measure, type values, write recipes.</span></div>
+          <button onClick="{{ toggleNoAi }}" title="settings.toggle_no_ai" style="width:34px;height:20px;flex:none;border-radius:10px;border:none;background:{{ noAiBg }};position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:3px;left:{{ noAiKnob }};width:14px;height:14px;border-radius:7px;background:#FFFFFF;transition:left .15s"></span></button>
+        </div>
+      </div>
+
+      <div style="padding:16px;border-radius:10px;background:var(--bg1);border:1px solid var(--line);display:flex;align-items:center;gap:16px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font-weight:600">Appearance</span><span style="color:var(--tx2)">Both themes are neutral grey with no colour tint.</span></div>
+        <div style="display:flex;gap:2px;padding:3px;border-radius:8px;background:var(--bg0);border:1px solid var(--line)">
+          <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+            <button onClick="{{ t.go }}" style="height:26px;padding:0 12px;border-radius:6px;border:none;background:{{ t.bg }};color:{{ t.color }};cursor:pointer">{{ t.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { tab:'ai', copied:false, cap:'2,000', cloud:false, depth:false, seg:true };
+  renderVals() {
+    const { tab, copied, cap, cloud, depth, seg } = this.state;
+    const run = this.props.run || (() => {});
+    const ai = this.props.aiState || 'connected';
+    const noAi = !!this.props.noAi;
+    const theme = this.props.theme || 'dark';
+    const capN = parseInt(String(cap).replace(/\D/g, '')) || 0;
+    const used = ai === 'cap' ? capN : 340;
+    const pct = capN ? Math.min(100, used / capN * 100) : 100;
+    const atCap = pct >= 100;
+    const sw = on => ({ bg: on ? 'var(--acc)' : 'var(--line2)', knob: on ? '17px' : '3px' });
+    const mem = 0.6 + (seg ? 0.48 : 0) + (depth ? 0.9 : 0);
+    return {
+      tabs: [['general','General'],['ai','AI & connections'],['units','Units & formats'],['storage','Storage'],['shortcuts','Shortcuts']].map(([id,label]) => ({ label, bg: tab === id ? 'var(--bg3)' : 'transparent', color: tab === id ? 'var(--tx)' : 'var(--tx2)', go: () => this.setState({ tab:id }) })),
+      cc: ai === 'offline' ? { dot:'var(--warn)', label:'Offline' } : ai === 'not-connected' ? { dot:'var(--tx3)', label:'Not connected' } : { dot:'var(--acc)', label:'Connected' },
+      copyLabel: copied ? 'Copied' : 'Copy setup command',
+      copyCmd: () => { try { navigator.clipboard.writeText('claude mcp add looklab -- looklab mcp serve'); } catch (e) {} this.setState({ copied:true }); run('settings.copy_mcp_command', 'Setup command copied'); setTimeout(() => this.setState({ copied:false }), 1800); },
+      cap, onCap: e => this.setState({ cap:e.target.value }),
+      used: used.toLocaleString('en-IN'), usedPct: pct + '%',
+      barColor: atCap ? 'var(--warn)' : 'var(--acc)', capBorder: atCap ? 'var(--warn)' : 'var(--line)',
+      capState: atCap ? 'Cap reached · AI buttons paused' : 'Active', capColor: atCap ? 'var(--warn)' : 'var(--tx2)',
+      providers: [{ label:'Image model', add: () => run('settings.add_provider', 'Provider setup opened') }, { label:'3D reconstruction', add: () => run('settings.add_provider', 'Provider setup opened') }],
+      locals: [['Segmentation','480 MB · loaded',seg,'seg'],['Depth','off',depth,'depth']].map(([label, meta, on, k]) => ({ label, meta: k === 'depth' && on ? '900 MB · loaded' : meta, tbg: sw(on).bg, knob: sw(on).knob, toggle: () => this.setState({ [k]: !on }) })),
+      memPct: (mem / 8 * 100) + '%', memLabel: mem.toFixed(1) + ' GB',
+      privBg: sw(!cloud).bg, privKnob: sw(!cloud).knob,
+      togglePrivacy: () => { this.setState({ cloud:!cloud }); run('settings.toggle_cloud', cloud ? 'Footage stays local' : 'Cloud allowed per project'); },
+      noAiBg: sw(noAi).bg, noAiKnob: sw(noAi).knob,
+      toggleNoAi: () => { this.props.setNoAi && this.props.setNoAi(!noAi); run('settings.toggle_no_ai', noAi ? 'AI turned back on' : 'No AI mode on'); },
+      themes: [['dark','Dark'],['light','Light']].map(([id,label]) => ({ label, bg: theme === id ? 'var(--bg3)' : 'transparent', color: theme === id ? 'var(--tx)' : 'var(--tx3)', go: () => this.props.setTheme && this.props.setTheme(id) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

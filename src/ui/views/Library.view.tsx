@@ -100,7 +100,7 @@ export function LibraryView(v: any): React.ReactElement {
             <React.Fragment key={i3}>
               <button onClick={l.select} style={sx(`display:flex;flex-direction:column;padding:0;border-radius:10px;overflow:hidden;background:var(--bg1);border:1px solid ${l.border};color:var(--tx);cursor:pointer;text-align:left`)} className="dch-10ylgrb">
                 <div style={sx("width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden")}>
-                  <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={l.slot} shape="rect" fit="contain" placeholder={l.name} />
+                  <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={l.slot} shape="rect" fit="contain" placeholder={l.name} {...v.slotProps?.(l.slot)} />
                 </div>
                 <div style={sx("display:flex;height:8px;width:100%")}>
                   {(l.pal ?? []).map((p: any, i4: number) => (
@@ -164,7 +164,7 @@ export function LibraryView(v: any): React.ReactElement {
       </section>
       <aside style={sx("border-left:1px solid var(--line);background:var(--bg1);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px")}>
         <div style={sx("width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden;border:1px solid var(--line)")}>
-          <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={v.cur.slot} shape="rect" fit="contain" placeholder={v.cur.name} />
+          <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={v.cur.slot} shape="rect" fit="contain" placeholder={v.cur.name} {...v.slotProps?.(v.cur.slot)} />
         </div>
         <div style={sx("display:flex;flex-direction:column;gap:2px")}>
           <span style={sx("font-size:15px;font-weight:600")}>

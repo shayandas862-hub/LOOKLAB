@@ -121,7 +121,8 @@ Total target for Look Lab's own processes: **≤ 1.5 GB** in normal use.
   system/settings.json         No AI mode, API provider and cap, cloud-allowed projects
   projects/<project_id>.json   the project: scenes, shots, cloud flag
   projects/<project_id>/
-    references/<ref_id>.json   (P2 adds the original file and frames/*.png beside it)
+    references/<ref_id>.json   file facts (name, size, SHA-256), sampling, detected shots
+    references/<ref_id>/frames/NNNNN.png   sampled frames, ≤ 512 px (P2); the original file is not copied (D-LL-027)
     breakdowns/<shot_id>.json  locations/<id>.json  kits/<id>.json  recipes/<shot_id>.json
     plans/<shot_id>.json       the current plan, its version number and its undo history
     setsheets/<shot_id>.json   boards/board.json

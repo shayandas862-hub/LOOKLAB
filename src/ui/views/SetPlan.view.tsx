@@ -60,7 +60,7 @@ export function SetPlanView(v: any): React.ReactElement {
           <>
             <div style={sx("position:absolute;inset:56px 24px 24px;display:flex;align-items:center;justify-content:center;container-type:size")}>
               <div style={sx("position:relative;width:min(100cqw, calc(100cqh * 2.39));aspect-ratio:2.39/1;border:1px solid var(--line2)")}>
-                <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="plan-cam-view" shape="rect" fit="contain" placeholder="Camera view render · Cam A 35 mm" />
+                <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="plan-cam-view" shape="rect" fit="contain" placeholder="Camera view render · Cam A 35 mm" {...v.slotProps?.("plan-cam-view")} />
               </div>
             </div>
           </>
@@ -132,7 +132,7 @@ export function SetPlanView(v: any): React.ReactElement {
           <>
             <div style={sx("position:absolute;right:12px;bottom:12px;width:264px;display:flex;flex-direction:column;gap:4px;padding:6px;border-radius:8px;background:var(--bg1);border:1px solid var(--line2);box-shadow:var(--sh);z-index:4")}>
               <div style={sx("width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden")}>
-                <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="plan-cam-pip" shape="rect" fit="contain" placeholder="Camera view" />
+                <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="plan-cam-pip" shape="rect" fit="contain" placeholder="Camera view" {...v.slotProps?.("plan-cam-pip")} />
               </div>
               <span style={sx("font-family:'Geist Mono',monospace;font-size:11px;color:var(--tx2)")}>
                 {"Cam A · 35 mm · T2 · 1.2 m"}
@@ -186,7 +186,7 @@ export function SetPlanView(v: any): React.ReactElement {
             {"Reference"}
           </span>
           <div style={sx("width:220px;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden;border:1px solid var(--line)")}>
-            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="ref-12c" shape="rect" fit="contain" placeholder="Reference 12C" />
+            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="ref-12c" shape="rect" fit="contain" placeholder="Reference 12C" {...v.slotProps?.("ref-12c")} />
           </div>
         </div>
         <div style={sx("display:flex;flex-direction:column;gap:6px")}>
@@ -194,7 +194,7 @@ export function SetPlanView(v: any): React.ReactElement {
             {"Camera view"}
           </span>
           <div style={sx("width:220px;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden;border:1px solid var(--line)")}>
-            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="plan-cam-match" shape="rect" fit="contain" placeholder="Cam A render" />
+            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="plan-cam-match" shape="rect" fit="contain" placeholder="Cam A render" {...v.slotProps?.("plan-cam-match")} />
           </div>
         </div>
         <div style={sx("display:flex;flex-direction:column;justify-content:center;gap:2px;border-left:1px solid var(--line);padding-left:16px")}>

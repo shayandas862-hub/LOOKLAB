@@ -41,6 +41,17 @@ test('views with typed source badges have logic that relabels them (D-LL-015)', 
   for (const f of readdirSync(VIEWS).filter((x) => x.endsWith('.view.tsx'))) {
     if (!readFileSync(join(VIEWS, f), 'utf8').includes('v.badgeText')) continue;
     const logic = readFileSync(join(LOGIC, f.replace('.view.tsx', '.logic.tsx')), 'utf8');
-    expect(logic, f).toContain('badgeText: sampleBadgeText');
+    // Either every typed badge reads SAMPLE, or a partly real screen routes the rest through sampleBadgeText
+    // (Breakdown in P2: the palette's badge follows its real source; the AI badges stay SAMPLE).
+    expect(logic, f).toMatch(/badgeText: sampleBadgeText|badgeText: \(label\) => [^\n]*sampleBadgeText\(label\)/);
   }
+});
+
+test('the Breakdown shows each value\'s own source, not the design\'s badge (P2)', () => {
+  const s = readFileSync(join(LOGIC, 'Breakdown.logic.tsx'), 'utf8');
+  expect(s).not.toMatch(/const PAL = \[/);
+  expect(s).not.toMatch(/'ai',\s*\d{2}\]/);
+  expect(s).toContain("run('breakdown.analyse'");
+  expect(s).toContain("run('breakdown.add_frame'");
+  expect(s).toContain("run('breakdown.set_subject'");
 });

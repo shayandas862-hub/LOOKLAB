@@ -6,7 +6,9 @@ import { ALL_ACTIONS, buildRegistry, defineAction, Registry } from '../../src/ac
 import { RULE_IDS } from '../../src/actions/rules.ts';
 import { seedSampleIfEmpty } from '../../src/actions/seed.ts';
 import { SCREENS } from '../../src/actions/domains/system.ts';
+import { encodePng } from '../../src/engine/png.ts';
 import { memoryContext } from './memory-context.ts';
+import { stripes } from '../core/synth.ts';
 
 const ROOT = join(import.meta.dirname, '..', '..');
 
@@ -70,7 +72,25 @@ const REQUIRED: Record<string, Record<string, unknown>> = {
   'settings.set_cap': { amount_inr: 1500 },
   'settings.toggle_cloud': { on: true },
   'settings.toggle_no_ai': { on: false },
+  'breakdown.set_subject': { x: 0.3, y: 0.4 },
+  // Imports into another shot, so shot 12C keeps the reference imported by importOneFrame().
+  'breakdown.import_reference': {
+    shot_id: '12D', file_name: 'other.png', media: 'image', mime: 'image/png', size_bytes: 10, sha256: 'b'.repeat(64),
+    last_modified: null, width: 8, height: 8, duration_s: 0, sample_fps: 0, frame_count: 1,
+  },
 };
+
+const ONE_FRAME = Buffer.from(encodePng(stripes(64, 36, [['#2A3F66', 60], ['#D9A441', 40]]).px)).toString('base64');
+
+/** Shot 12C gets a real one-frame reference, so the P2 actions have pixels to measure. Returns its id. */
+async function importOneFrame(registry: Registry, ctx: ReturnType<typeof memoryContext>): Promise<string> {
+  const { reference_id } = (await registry.invoke('breakdown.import_reference', {
+    file_name: 'frame.png', media: 'image', mime: 'image/png', size_bytes: 10, sha256: 'a'.repeat(64),
+    last_modified: null, width: 64, height: 36, duration_s: 0, sample_fps: 0, frame_count: 1,
+  }, ctx.for('ui'))).result as { reference_id: string };
+  await registry.invoke('breakdown.add_frame', { reference_id, index: 0, png_base64: ONE_FRAME }, ctx.for('ui'));
+  return reference_id;
+}
 
 function sources(x: unknown, out: string[] = []): string[] {
   if (Array.isArray(x)) x.forEach((v) => sources(v, out));
@@ -94,8 +114,14 @@ describe('every action runs on the sample project', () => {
 
   test('each action accepts its default or minimal input from the UI', async () => {
     const failures: string[] = [];
+    const ref = await importOneFrame(registry, ctx);
+    const byRef: Record<string, Record<string, unknown>> = {
+      'breakdown.add_frame': { reference_id: ref, index: 0, png_base64: ONE_FRAME },
+      'breakdown.get_frame': { reference_id: ref, index: 0 },
+      'breakdown.get_reference': { reference_id: ref },
+    };
     for (const a of registry.list()) {
-      let input = REQUIRED[a.name] ?? {};
+      let input = byRef[a.name] ?? REQUIRED[a.name] ?? {};
       if (a.name === 'log.set_verdict') input = { decision_id: ctx.decisions.at(-1)!.id, verdict: 'agreed' };
       await registry.invoke(a.name, input, ctx.for('ui')).catch((e) => failures.push(`${a.name}: ${e.message}`));
     }

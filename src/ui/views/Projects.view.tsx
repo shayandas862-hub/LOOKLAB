@@ -32,7 +32,7 @@ export function ProjectsView(v: any): React.ReactElement {
             <React.Fragment key={i1}>
               <button onClick={p.open} style={sx(`display:flex;flex-direction:column;text-align:left;padding:0;border-radius:10px;overflow:hidden;background:var(--bg1);border:1px solid ${p.border};color:var(--tx);cursor:pointer`)} className="dch-10ylgrb">
                 <div style={sx("width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden")}>
-                  <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={p.slot} shape="rect" fit="contain" placeholder="Poster frame" />
+                  <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={p.slot} shape="rect" fit="contain" placeholder="Poster frame" {...v.slotProps?.(p.slot)} />
                 </div>
                 <div style={sx("padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;width:100%")}>
                   <div style={sx("display:flex;align-items:baseline;gap:8px")}>

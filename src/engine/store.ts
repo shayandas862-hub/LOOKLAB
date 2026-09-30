@@ -9,9 +9,19 @@ export interface Store {
   remove(collection: string, id: string): Promise<void>;
   append(stream: string, row: unknown): Promise<void>;
   readStream<T = unknown>(stream: string, limit?: number): Promise<T[]>;
+  /** Binary files (analysis frames, P2). Names are `<id>.png`. */
+  putBlob(collection: string, name: string, bytes: Uint8Array): Promise<void>;
+  getBlob(collection: string, name: string): Promise<Uint8Array | null>;
+  listBlobs(collection: string): Promise<string[]>;
+  removeBlobs(collection: string): Promise<void>;
 }
 
 const SEGMENT = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
+const BLOB = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}\.png$/;
+
+function checkBlob(name: string): void {
+  if (!BLOB.test(name)) throw new Error(`invalid file name "${name}"`);
+}
 
 function checkCollection(c: string): void {
   if (!c || !c.split('/').every((s) => SEGMENT.test(s))) throw new Error(`invalid collection name "${c}"`);
@@ -58,6 +68,29 @@ export class MemoryStore implements Store {
     checkCollection(s);
     const rows = (this.streams.get(s) ?? []) as T[];
     return clone(limit ? rows.slice(-limit) : rows);
+  }
+
+  private blobs = new Map<string, Map<string, Uint8Array>>();
+
+  async putBlob(c: string, name: string, bytes: Uint8Array): Promise<void> {
+    checkCollection(c);
+    checkBlob(name);
+    if (!this.blobs.has(c)) this.blobs.set(c, new Map());
+    this.blobs.get(c)!.set(name, new Uint8Array(bytes));
+  }
+  async getBlob(c: string, name: string): Promise<Uint8Array | null> {
+    checkCollection(c);
+    checkBlob(name);
+    const b = this.blobs.get(c)?.get(name);
+    return b ? new Uint8Array(b) : null;
+  }
+  async listBlobs(c: string): Promise<string[]> {
+    checkCollection(c);
+    return [...(this.blobs.get(c)?.keys() ?? [])].sort();
+  }
+  async removeBlobs(c: string): Promise<void> {
+    checkCollection(c);
+    this.blobs.delete(c);
   }
 }
 
@@ -134,5 +167,42 @@ export class FileStore implements Store {
     }
     const rows = text.split('\n').filter(Boolean).map((l) => JSON.parse(l) as T);
     return limit ? rows.slice(-limit) : rows;
+  }
+
+  private dir(c: string): string {
+    checkCollection(c);
+    return join(this.root, ...c.split('/'));
+  }
+
+  async putBlob(c: string, name: string, bytes: Uint8Array): Promise<void> {
+    checkBlob(name);
+    const dir = this.dir(c);
+    await mkdir(dir, { recursive: true, mode: 0o700 });
+    const tmp = join(dir, `.${name}.${process.pid}.${Date.now()}.tmp`);
+    await writeFile(tmp, bytes, { mode: 0o600 });
+    await rename(tmp, join(dir, name));
+  }
+
+  async getBlob(c: string, name: string): Promise<Uint8Array | null> {
+    checkBlob(name);
+    try {
+      return new Uint8Array(await readFile(join(this.dir(c), name)));
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null;
+      throw e;
+    }
+  }
+
+  async listBlobs(c: string): Promise<string[]> {
+    try {
+      return (await readdir(this.dir(c))).filter((n) => BLOB.test(n)).sort();
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code === 'ENOENT') return [];
+      throw e;
+    }
+  }
+
+  async removeBlobs(c: string): Promise<void> {
+    await rm(this.dir(c), { recursive: true, force: true });
   }
 }

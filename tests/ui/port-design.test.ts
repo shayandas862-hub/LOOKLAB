@@ -61,9 +61,12 @@ describe('port-design: template → TSX', () => {
     expect(r.tsx).toContain('<screens.Breakdown nav={v.nav} aiOk={v.aiOk} />');
   });
 
-  test('image-slot becomes the ImageSlot component', () => {
+  test('image-slot becomes the ImageSlot component, and the logic can fill it by slot id', () => {
     const r = convertTemplate(wrap('<image-slot id="{{ l.slot }}" shape="rect" fit="contain" placeholder="Drop"></image-slot>'), 'T');
-    expect(r.tsx).toContain('<ImageSlot id={v.l.slot} shape="rect" fit="contain" placeholder="Drop" />');
+    expect(r.tsx).toContain('<ImageSlot id={v.l.slot} shape="rect" fit="contain" placeholder="Drop" {...v.slotProps?.(v.l.slot)} />');
+    const s = convertTemplate(wrap('<image-slot id="ref-12c" shape="rect"></image-slot>'), 'T');
+    expect(s.tsx).toContain('{...v.slotProps?.("ref-12c")}');
+    expect(compiles(s.tsx)).toEqual([]);
   });
 
   test('braces in literal text are escaped and void elements self-close', () => {

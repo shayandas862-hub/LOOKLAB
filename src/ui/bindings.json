@@ -3,5 +3,16 @@
     "Claude Code runs Look Lab through its MCP connection. 42 Look Lab tools available.": "mcpBlurb",
     "claude mcp add looklab -- looklab mcp serve": "mcpCommandText",
     "sk-ant-•••• •••• •••• 7Qx2": "apiKeyText"
+  },
+  "Breakdown": {
+    "Key −60° az · 25° el · 2000 K": "keyOverlay",
+    "6 samples": "paletteCount",
+    "MOV, MP4, ProRes, JPG, PNG, TIFF. Stays on this computer.": "dropHint",
+    "Importing ref_kitchen_night.mov": "importTitle",
+    "Copying to local project folder. Nothing is uploaded to the cloud.": "importNote",
+    "Analysis stopped at “Light”": "errTitle",
+    "The model returned an invalid response for shot 3. Shots, colour and framing were kept. Nothing was lost.": "errBody",
+    "breakdown.fit_light · error 502 · 19:42:07": "errMeta",
+    "Enter light by hand": "errManual"
   }
 }

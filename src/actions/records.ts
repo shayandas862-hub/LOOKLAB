@@ -10,6 +10,8 @@ export const col = {
   looks: 'looks',
   system: 'system',
   references: (p: string) => `projects/${p}/references`,
+  /** Sampled analysis frames of one reference, beside its record (architecture §8). */
+  frames: (p: string, ref: string) => `projects/${p}/references/${ref}/frames`,
   breakdowns: (p: string) => `projects/${p}/breakdowns`,
   locations: (p: string) => `projects/${p}/locations`,
   kits: (p: string) => `projects/${p}/kits`,

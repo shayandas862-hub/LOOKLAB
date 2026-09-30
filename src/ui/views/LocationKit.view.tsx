@@ -22,16 +22,16 @@ export function LocationKitView(v: any): React.ReactElement {
         </div>
         <div style={sx("display:grid;grid-template-columns:1fr 1fr;gap:6px")}>
           <div style={sx("aspect-ratio:3/2;background:var(--sur);border-radius:6px;overflow:hidden;position:relative")}>
-            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="loc-1" shape="rect" placeholder="Wide, from door" />
+            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="loc-1" shape="rect" placeholder="Wide, from door" {...v.slotProps?.("loc-1")} />
           </div>
           <div style={sx("aspect-ratio:3/2;background:var(--sur);border-radius:6px;overflow:hidden;position:relative")}>
-            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="loc-2" shape="rect" placeholder="Window, east" />
+            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="loc-2" shape="rect" placeholder="Window, east" {...v.slotProps?.("loc-2")} />
           </div>
           <div style={sx("aspect-ratio:3/2;background:var(--sur);border-radius:6px;overflow:hidden;position:relative")}>
-            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="loc-3" shape="rect" placeholder="Counter" />
+            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="loc-3" shape="rect" placeholder="Counter" {...v.slotProps?.("loc-3")} />
           </div>
           <div style={sx("aspect-ratio:3/2;background:var(--sur);border-radius:6px;overflow:hidden;position:relative")}>
-            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="loc-4" shape="rect" placeholder="Outside window" />
+            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="loc-4" shape="rect" placeholder="Outside window" {...v.slotProps?.("loc-4")} />
           </div>
         </div>
         <div style={sx("display:flex;justify-content:center;padding:12px;border-radius:8px;background:var(--bg1);border:1px solid var(--line)")}>

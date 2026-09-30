@@ -32,7 +32,32 @@ export const Project = Meta.extend({
 });
 export type Project = z.infer<typeof Project>;
 
-export const ReferenceShot = z.object({ code: z.string(), in_s: z.number(), out_s: z.number() });
+export const ReferenceShot = z.object({
+  code: z.string(),
+  in_s: z.number(),
+  out_s: z.number(),
+  /** Sampled frames this shot covers, and the one a breakdown measures by default (P2). */
+  first: z.number().int().nonnegative().optional(),
+  last: z.number().int().nonnegative().optional(),
+  key_frame: z.number().int().nonnegative().optional(),
+});
+
+/** Most sampled frames one reference keeps: 5 minutes at 2 per second (D-LL-027). */
+export const MAX_FRAMES = 600;
+/** Longest side of an analysis frame, in pixels (D-LL-027). */
+export const ANALYSIS_MAX_SIDE = 512;
+
+/**
+ * The imported file, identified by what the browser can see: name, type, size, date and content hash.
+ * A web page is never told a file's path, so none is stored (D-LL-027). The file itself is not copied.
+ */
+export const MediaFile = z.object({
+  name: z.string().min(1).max(255),
+  mime: z.string().max(100),
+  size_bytes: z.number().int().nonnegative(),
+  last_modified: z.string().nullable(),
+  sha256: z.string().regex(/^[0-9a-f]{64}$/, 'sha256 is 64 lowercase hex characters'),
+});
 
 export const Reference = Meta.extend({
   project_id: Id,
@@ -42,6 +67,15 @@ export const Reference = Meta.extend({
   duration_s: z.number().nonnegative().default(0),
   aspect: z.string().default(''),
   shots: z.array(ReferenceShot).default([]),
+  /** `sample` for the design's reference; null until cuts are detected; then `measured`. */
+  shots_source: z.enum(['measured', 'sample']).nullable().default('sample'),
+  file: MediaFile.nullable().default(null),
+  /** The original's pixel size, as the browser decoded it. */
+  width: z.number().int().nonnegative().default(0),
+  height: z.number().int().nonnegative().default(0),
+  /** Frames sampled per second (0 for an image) and how many the import planned; frame i is at i / sample_fps. */
+  sample_fps: z.number().nonnegative().max(30).default(0),
+  frame_count: z.number().int().nonnegative().max(MAX_FRAMES).default(0),
   sample: z.boolean().default(false),
 });
 export type Reference = z.infer<typeof Reference>;

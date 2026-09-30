@@ -6,7 +6,15 @@
 
 ## The work
 
-**Reference** — a frame or a video the team wants to learn a look from. Stored with its original file and extracted frames. Never uploaded unless the project allows cloud (standing rule 7).
+**Reference** — a frame or a video the team wants to learn a look from. Known by its file's name, type, size, date and SHA-256; the file itself is not copied and its path is not known (D-LL-027). Its sampled frames are stored. Never uploaded unless the project allows cloud (standing rule 7).
+
+**Sampled frame** (also **analysis frame**) — one frame of a reference, taken at 2 per second (fewer past 5 minutes, at most 600), scaled to at most 512 px on its long side and stored as PNG. Frame i is at i / sample_fps seconds. Every T0 instrument measures sampled frames, never the original (D-LL-027).
+
+**Cut** — a boundary between two shots of a reference, found from colour-histogram distance with an adaptive threshold; a fade or dissolve is not a cut (D-LL-026).
+
+**Key frame** — the middle sampled frame of a reference shot. A breakdown measures the longest shot's key frame unless another frame is chosen (D-LL-026).
+
+**Active picture** — the part of a frame inside letterbox or pillarbox bars. Palette, tone and aspect are measured on it (D-LL-029).
 
 **Shot** — one continuous take inside a reference, or one planned shot in a scene (`12C`). A reference's shots are detected; a scene's shots are planned.
 

@@ -5,10 +5,12 @@ A technical pre-production brain for film. Break down a reference frame or video
 kit, plan lights, camera and actors in 3D, and hand the crew a set sheet.
 
 **Status: v0.3, internal.** Every screen of the design runs on a local engine, and
-every button calls a real action that Claude Code can also call. The screens still
-show the design's sample project: nothing is measured from a real reference yet
-(phase P2), and no AI provider is connected (phase P4). Screens on sample data say
-so at the top. See [`docs/phases.md`](docs/phases.md).
+every button calls a real action that Claude Code can also call. On Breakdown, drop
+an image or video: Chrome reads it on your Mac, and Look Lab measures the shots, the
+palette (exact hex and share), shadow/mid/highlight tint, saturation, contrast in
+stops and aspect from its pixels (phase P2). Light, lens and mood are still the
+design's sample values (phases P3/P4), and so are the other screens; no AI provider
+is connected (phase P4). Anything on sample data says so. See [`docs/phases.md`](docs/phases.md).
 
 ## Run it
 
@@ -31,7 +33,7 @@ With Look Lab running, print the setup command and run it once:
 node bin/looklab.mjs mcp-setup
 ```
 
-Claude Code then has one tool for each Look Lab action (68 today). Actions that need
+Claude Code then has one tool for each Look Lab action (72 today). Actions that need
 a person's approval are refused over MCP; run those from the Look Lab window.
 Look Lab never asks for your Claude login.
 

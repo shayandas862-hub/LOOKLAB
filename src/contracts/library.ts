@@ -5,7 +5,10 @@ export const Look = Meta.extend({
   name: z.string().min(1).max(120),
   project_id: Id,
   shot_id: Id,
+  /** The palette's source. Light (key and ratio) and mood carry their own (D-LL-030). */
   source: Source,
+  light_source: Source.default('sample'),
+  mood_source: Source.default('sample'),
   palette: z.array(z.object({ hex: Hex, share: z.number().min(0).max(100) })),
   key: z.object({ az: z.number(), el: z.number(), kelvin: z.number(), hardness: z.string() }),
   ratio: z.number().positive(),

@@ -5,8 +5,11 @@ import { join } from 'node:path';
 import { request } from 'node:http';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { createHash } from 'node:crypto';
 import { startEngine, type Engine } from '../../src/engine/engine.ts';
 import { buildRegistry, mcpName } from '../../src/actions/index.ts';
+import { encodePng } from '../../src/engine/png.ts';
+import { addNoise, blank } from '../core/synth.ts';
 
 let home: string;
 let engine: Engine;
@@ -112,6 +115,44 @@ describe('engine API', () => {
   });
 });
 
+describe('frame import over HTTP (D-LL-027)', () => {
+  let ref = '';
+  beforeAll(async () => {
+    const r = await raw('POST', '/api/actions/breakdown.import_reference', ui(), JSON.stringify({
+      file_name: 'noise.mp4', media: 'video', mime: 'video/mp4', size_bytes: 1, sha256: createHash('sha256').update('noise').digest('hex'),
+      last_modified: null, width: 1920, height: 1080, duration_s: 1, sample_fps: 2, frame_count: 2,
+    }));
+    expect(r.status, r.body).toBe(200);
+    ref = JSON.parse(r.body).result.reference_id;
+  });
+
+  test('a full-size noisy 512 × 512 frame (the worst case for PNG size) is accepted', async () => {
+    const png = Buffer.from(encodePng(addNoise(blank(512, 512, [128, 128, 128]), 127)));
+    const body = JSON.stringify({ reference_id: ref, index: 0, png_base64: png.toString('base64') });
+    expect(body.length).toBeGreaterThan(1_000_000);
+    const r = await raw('POST', '/api/actions/breakdown.add_frame', ui(), body);
+    expect(r.status, r.body).toBe(200);
+    expect(JSON.parse(r.body).result).toMatchObject({ index: 0, width: 512, height: 512 });
+  });
+
+  test('a body over 2 MB to add_frame is refused with 413 before it is parsed', async () => {
+    const r = await raw('POST', '/api/actions/breakdown.add_frame', ui(), JSON.stringify({ reference_id: ref, index: 1, png_base64: 'A'.repeat(2_100_000) }));
+    expect(r.status).toBe(413);
+    expect(JSON.parse(r.body)).toMatchObject({ code: 'too_large' });
+  });
+
+  test('every other action keeps the 1 MB limit', async () => {
+    const r = await raw('POST', '/api/actions/breakdown.edit_value', ui(), JSON.stringify({ field: 'lens.dof', value: 'x'.repeat(1_100_000) }));
+    expect(r.status).toBe(413);
+  });
+
+  test('a frame that is not a PNG is a 400 that says so', async () => {
+    const r = await raw('POST', '/api/actions/breakdown.add_frame', ui(), JSON.stringify({ reference_id: ref, index: 1, png_base64: Buffer.from('GIF89a' + 'x'.repeat(100)).toString('base64') }));
+    expect(r.status).toBe(400);
+    expect(JSON.parse(r.body).message).toMatch(/PNG/);
+  });
+});
+
 describe('MCP (AD-LL-003, D-LL-016, D-LL-017)', () => {
   async function connect() {
     const client = new Client({ name: 'test', version: '1.0.0' });
@@ -128,6 +169,10 @@ describe('MCP (AD-LL-003, D-LL-016, D-LL-017)', () => {
     const expected = buildRegistry().list().map((a) => mcpName(a.name)).sort();
     expect(tools.map((t) => t.name).sort()).toEqual(expected);
     for (const t of tools) expect(t.name).toMatch(/^[a-zA-Z0-9_-]{1,64}$/);
+    for (const p2 of ['breakdown_add_frame', 'breakdown_get_frame', 'breakdown_get_reference', 'breakdown_set_subject']) {
+      expect(tools.map((t) => t.name), p2).toContain(p2);
+    }
+    expect(tools.find((t) => t.name === 'breakdown_analyse')?.description).not.toContain('STAND-IN');
     await client.close();
   });
 

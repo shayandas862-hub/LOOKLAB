@@ -177,7 +177,9 @@ export function convertTemplate(html, viewName, bindings = {}) {
     }
     if (el.name === 'image-slot') {
       used.ImageSlot = true;
-      return `<ImageSlot ${genAttrs(el, scope).join(' ')} />`;
+      // The logic may fill a slot (image, click handler) by its id: slotProps(id) returns extra props (P2).
+      const id = el.attribs.id ? valueExpr(el.attribs.id, scope) : 'undefined';
+      return `<ImageSlot ${genAttrs(el, scope).join(' ')} {...v.slotProps?.(${id})} />`;
     }
     const tag = el.name;
     const attrs = genAttrs(el, scope);

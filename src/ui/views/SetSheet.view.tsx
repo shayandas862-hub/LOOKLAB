@@ -46,7 +46,7 @@ export function SetSheetView(v: any): React.ReactElement {
               </div>
               <div style={sx("width:210px;display:flex;flex-direction:column;gap:6px")}>
                 <div style={sx("width:210px;aspect-ratio:2.39/1;background:#DDD;position:relative;overflow:hidden")}>
-                  <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="ref-12c" shape="rect" fit="contain" placeholder="Reference" />
+                  <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id="ref-12c" shape="rect" fit="contain" placeholder="Reference" {...v.slotProps?.("ref-12c")} />
                 </div>
                 <span style={sx("font-family:'Geist Mono',monospace;font-size:12px")}>
                   {"Target: key 2000 K · ratio 8:1 · −60° / 25°"}

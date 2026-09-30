@@ -23,6 +23,105 @@ Cited by number. Fixed at the start of v1.
 
 ---
 
+## 2026-09-30 — P2 built: the deterministic breakdown (no AI)
+
+- **D-LL-032 — A partly real screen names exactly what is still sample, and every value shows its own source.**
+  **Chose:** once a shot's palette is measured, the Breakdown's marker reads "SAMPLE: light, lens and mood
+  (until P3/P4) · colour, tone and aspect measured", and each value's badge comes from its own record
+  (MEASURED, MANUAL, SAMPLE). The design's typed "MEASURED" on palette rows follows the palette's real
+  source; its typed "AI n%" badges stay SAMPLE. Before any import the whole screen keeps the plain
+  "SAMPLE DATA" marker. **Rejected:** adding Breakdown to `REAL_SCREENS` (it would drop the marker while
+  light, lens and mood are placeholders), and keeping every badge SAMPLE (it would hide real measurements).
+  **Why:** D-LL-015 and standing rule 2 at the level of each value, not each screen. The Shell's ⌘K entry for
+  `breakdown.import_reference` opens the drop zone, because the action needs a file.
+
+- **D-LL-031 — The engine reads PNG with its own decoder on `node:zlib`; no image library.**
+  **Chose:** `src/engine/png.ts` (139 lines): 8-bit greyscale, RGB and RGBA, non-interlaced, every row
+  filter, checksums verified; anything else is refused with the reason. **Rejected:** `pngjs` (MIT) and
+  `jpeg-js` (BSD-3-Clause), both checked on npm 2026-09-30, so licence was not the obstacle; and sending raw
+  RGBA (a 512 × 512 frame is 1 MiB before base64). **Why:** frames come from Chrome's canvas, which wrote
+  8-bit RGBA, non-interlaced PNG in every frame inspected, so a general decoder buys nothing; no dependency
+  means no licence to track (standing rule 8) and nothing to update. PNG is lossless, so what the engine
+  measures is exactly what the browser drew. JPEG frames are not accepted.
+
+- **D-LL-030 — A saved look's `source` is its palette's; light and mood carry their own.**
+  **Chose:** `Look.source` is the weakest source among the palette's shares, plus `light_source` (key
+  direction, kelvin, hardness, ratio) and `mood_source`. A look saved from a measured palette is "measured"
+  with `light_source: "sample"` until P3. **Rejected:** one source for the whole look (in P2 it would stay
+  "sample" for ever, or call sample light measured). **Why:** `library.list` must say what is real without
+  overstating anything. Existing looks read `light_source` and `mood_source` as "sample" by default.
+
+- **D-LL-029 — Letterbox and pillarbox bars are not picture: the instruments measure the active area, and aspect is taken from it.**
+  **Chose:** rows (then columns) where no channel is brighter than code 28 count as bars only when they come
+  in a matching pair (each at least 2% of the frame, within 2% of each other, together under 60%). Palette,
+  contrast, saturation and tints use the picture inside them; aspect is its width over height, snapped to a
+  standard ratio (1.33 … 2.39, 2.76) when within 1%, otherwise given to two decimals. **Rejected:** measuring
+  the whole frame (a 2.39 picture in a 16:9 file would get a large black swatch, contrast pinned at the noise
+  floor and an aspect of 1.78), and any one-sided dark area as a bar (a night sky is picture). **Why:** the
+  aspect a DP means is the picture's. **Limit:** a frame whose picture really is black at top and bottom in
+  equal measure would be cropped; stated, not solved.
+
+- **D-LL-028 — Subject position is set by hand in P2; a detector is later T1 work.**
+  **Chose:** `breakdown.set_subject` records a click on the frame as x, y (fractions of the frame) and a text
+  such as "left third (x 0.31, y 0.40)", source "manual". `breakdown.fit_framing` stays a stand-in and now
+  returns only what it would estimate (shot size and lead room); aspect is measured by `breakdown.analyse`.
+  **Rejected:** a face or saliency detector now (a model, with its licence and memory, for one number a
+  person gives in one click), and deriving lead room from the position (lead room depends on where the
+  subject looks). **Why:** P2 is deterministic. **Revisit:** when a T1 model is chosen (licence first).
+
+- **D-LL-027 — The browser reads the file; the engine keeps its facts and the sampled frames, never the file or its path.**
+  **Chose:** Chrome decodes the image or video (AD-LL-007), samples 2 frames per second (fewer past 5
+  minutes: at most 600 frames), scales each to at most 512 px on the long side, and sends it as PNG through
+  `breakdown.add_frame`, one call per frame, bodies up to 2 MB (every other action keeps 1 MB). The engine
+  stores the frames as `references/<ref_id>/frames/NNNNN.png` beside the reference record, and records name,
+  type, size, date and a SHA-256 of the whole file, computed in the browser in 8 MB pieces. The reference id
+  is `ref-` plus the first 12 hex of that hash, so the same file imported twice is one reference; importing
+  it again replaces its frames. Frame i is at i / sample_fps seconds. **Rejected:** copying the original into
+  `~/LookLab` (a 60 s 1080p clip is hundreds of MB on an 8 GB laptop's disk, and the frames are what is
+  measured), storing the path (a web page is never told a file's path; only a future CLI or FFmpeg import
+  could know it), hashing with Web Crypto (it has no streaming digest, so a long video would sit in the tab's
+  memory whole), and one request with every frame (tens of MB in one body). **Why:** light and local. **Limit:**
+  if the original is moved or edited, Look Lab cannot find it again; the hash says whether a file is the same.
+  `add_frame` writes no decision row per frame (a 60 s clip would add 120 rows); its failures still do.
+
+- **D-LL-026 — Shot cuts: colour-histogram distance with an adaptive threshold; the default frame is the longest shot's.**
+  **Chose:** each sampled frame becomes an 8 × 8 × 8 RGB histogram filled with trilinear weights (so noise does
+  not flip pixels between bins); the distance between neighbours is half the L1 difference (0 to 1). A cut
+  between frames i − 1 and i needs a distance of at least 0.12 and at least 3 × the mean of the two distances
+  on each side of it. A shot's key frame is its middle sampled frame; a breakdown measures the key frame of the
+  longest shot unless told otherwise (B-LL-002). **Rejected:** a fixed threshold (a slow fade crosses any
+  fixed line one step at a time, and similar-palette cuts fall under it), and edge or motion features
+  (more cost for P2's need). **Why:** during a fade or dissolve every step looks alike, so none stands out
+  from its neighbours; a cut is a lone spike. **Limits:** a dissolve shorter than about 1.5 s (3 sampled frames
+  at 2 fps) can read as a cut; a fade from one shot to the next reports no boundary at all; two shots with the
+  same colours and a cut between them are one shot to this detector.
+
+- **D-LL-025 — Contrast in stops, saturation and tints: definitions.**
+  **Chose:** contrast is log2 of the 98th over the 2nd percentile of linear luminance (sRGB decoded, Rec. 709
+  weights), each clamped to a noise floor of 2^-10 (about sRGB code 3), so it tops out at 10 stops.
+  Saturation is the mean of C*/√(C*² + L*²) in CIELAB, in percent, over pixels at or above L* 5 (darker
+  pixels carry no reliable colour); the screen adds low (< 25), medium (≤ 50) or high. Tints are the mean a*,
+  b* of pixels with L* < 30 (shadow), 30–70 (mid) and > 70 (highlight), named on the stronger axis ("cool −6",
+  "warm +9", "green −4", "magenta +5"), with the other axis added when it is at least 3, "neutral" under a
+  mean chroma of 2, and "none in frame" when a zone holds under 0.5% of the picture. **Rejected:** min/max
+  luminance (one specular highlight or dead pixel sets it), HSV saturation (not perceptual), zones by
+  percentile (a dark frame's "highlights" would be mid-greys). **Why:** each is a plain measurement of the
+  frame. **Limit, stated on purpose:** these describe the frame as encoded (display-referred), not the light on
+  set; they say nothing about light direction or the scene's real dynamic range (P3).
+
+- **D-LL-024 — Palette: k-means in CIELAB, seeded, with 3 × 3 median sampling, merging and folding.**
+  **Chose:** sample the active picture on a grid (at most 65,536 points), each sample the per-channel median
+  of its 3 × 3 neighbourhood; k-means++ seeding from a fixed PRNG seed, k = 8, Euclidean distance in CIELAB
+  (D65), up to 40 iterations; then merge the closest pair of clusters while their CIEDE2000 difference is under
+  5 (pixel-weighted mean); then fold any cluster under 1% of the picture into its nearest swatch's share (its
+  colour is not reported). Hex is the cluster mean in sRGB; share has one decimal. **Rejected:** RGB k-means
+  (distances are not perceptual), median-cut (not a mean, so its hex is not the region's colour), no
+  denoising (with ±6 code values of noise, 9 of 60 random test palettes split one flat colour into two
+  swatches about 5.5 ΔE apart), a 3 × 3 mean (it invents blended colours along edges: 3 of 60 palettes got
+  a sliver swatch). **Why:** the same frame always gives the same palette (tested), and on synthetic patches
+  every colour comes back within ΔE00 2 and 2 points of share. **Limit:** measured on synthetic frames only;
+  noise of ±10 or more per channel still splits some colours (3 of 60 at ±10, 15 of 60 at ±14).
+
 ## 2026-09-30 — P1 built: how the engine runs, how the UI gets its token, and where approval sits
 
 - **D-LL-023 — The UI's click is the approval; any local program with the token has the person's access.**

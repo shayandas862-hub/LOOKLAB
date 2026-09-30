@@ -1,0 +1,27 @@
+{
+  "about": "Five flat vertical stripes, left to right, each as wide as its share of the frame (P2 palette fixture).",
+  "width": 1195,
+  "height": 500,
+  "patches": [
+    [
+      "#1B2230",
+      36
+    ],
+    [
+      "#C7803A",
+      24
+    ],
+    [
+      "#3E4A52",
+      18
+    ],
+    [
+      "#E9C9A0",
+      12
+    ],
+    [
+      "#6E5B4A",
+      10
+    ]
+  ]
+}

@@ -44,7 +44,7 @@ export function MoodBoardView(v: any): React.ReactElement {
                     <React.Fragment key={i2}>
                       <div style={sx("display:flex;flex-direction:column;gap:4px")}>
                         <div style={sx("width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden;border:1px solid var(--line)")}>
-                          <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={f.slot} shape="rect" fit="contain" placeholder={f.ph} />
+                          <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={f.slot} shape="rect" fit="contain" placeholder={f.ph} {...v.slotProps?.(f.slot)} />
                         </div>
                         <div style={sx("display:flex;height:8px;border-radius:2px;overflow:hidden")}>
                           {(f.pal ?? []).map((p: any, i3: number) => (

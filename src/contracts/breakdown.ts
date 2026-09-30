@@ -1,14 +1,24 @@
 import { z } from 'zod';
 import { Hex, Id, Meta, NumValue, TextValue, valueOf } from './value.ts';
 
-export const Swatch = z.object({ hex: Hex, share: NumValue });
+/** A point on the frame as a fraction of its width and height (0 = left / top). */
+export const FramePoint = z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) });
+
+/** `at`: where on the analysis frame the swatch was sampled (P2; absent on the design's sample palette). */
+export const Swatch = z.object({ hex: Hex, share: NumValue, at: FramePoint.optional() });
 
 export const Breakdown = Meta.extend({
   project_id: Id,
   shot_id: Id,
   reference_id: Id.nullable(),
+  /** The sampled frame of the reference that was measured (P2). */
+  frame_index: z.number().int().nonnegative().nullable().default(null),
+  /** Where a person clicked the subject (D-LL-028). */
+  subject: FramePoint.nullable().default(null),
   palette: z.array(Swatch).max(12),
   tints: z.object({ shadow: TextValue, mid: TextValue, highlight: TextValue }),
+  /** Mean colour of each tint zone, when measured. */
+  tint_hex: z.object({ shadow: Hex.nullable(), mid: Hex.nullable(), highlight: Hex.nullable() }).nullable().default(null),
   saturation: NumValue,
   contrast_stops: NumValue,
   light: z.object({

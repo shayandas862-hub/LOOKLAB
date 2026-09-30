@@ -42,6 +42,14 @@ _None._
 
 ## Closed
 
+### B-LL-002 · The recorded test clip reported a cut half a second in that was not there
+- **Phase:** P2, 2026-09-30, the first run of the Chrome video test (`tests/ui/breakdown.e2e.test.ts`).
+- **Found by:** the test: shots started at 0, 0.5, 2.5 and 8.5 s where the clip had cuts only at 2 and 8 s.
+- **Cause:** in the test's clip, not in the import. Chrome's canvas recorder (`captureStream` + `MediaRecorder`, VP8, VP9 and H.264 alike, headless Chrome on the M1) writes a file's first frame with a different colour conversion from every frame after it: the source colour (176, 80, 42) decodes as (175, 80, 43) in frame 0 and (183, 76, 35) from frame 1 on, and an off-white clips to 255. Decoding was checked and is consistent: each timestamp gives the same pixels whatever order it is sought in, and in playback. Frame 0 against frame 1 was a histogram distance of 0.34, which the detector correctly called a cut. The two real cuts landed one sampled frame late for a second reason: the script's clock started before the recorder did.
+- **Fix:** the test clip opens on one second of black (black decodes as black under either conversion, and black to picture is a real cut the test now expects), and the clip's timeline starts at the recorder's `start` event. Separately, the default measured frame became the key frame of the longest shot rather than the first, so a black leader is never what a breakdown measures (D-LL-026).
+- **Guard:** the comment above the video test in `tests/ui/breakdown.e2e.test.ts` names this bug; `tests/actions/breakdown.test.ts` ("a short black leader is never the default frame") guards the default frame.
+- **Could it return?** MEDIUM: any new test that records a clip in Chrome and expects its first frame to match the rest will see it again. Real footage is not affected as far as measured: the decode path is consistent.
+
 ### B-LL-001 · The engine would not start under plain Node although every test passed
 - **Phase:** P1, 2026-09-30, first launch of the engine for the browser preview.
 - **Found by:** a live run: `node --experimental-strip-types src/engine/main.ts` exited with `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX`.

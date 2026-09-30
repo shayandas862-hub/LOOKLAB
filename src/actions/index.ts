@@ -17,5 +17,5 @@ export function buildRegistry(): Registry {
   return new Registry(ALL_ACTIONS);
 }
 
-export { Registry, ActionError, mcpName, defineAction } from './registry.ts';
+export { Registry, ActionError, mcpName, defineAction, DEFAULT_MAX_BYTES } from './registry.ts';
 export type { AnyAction, Envelope } from './registry.ts';

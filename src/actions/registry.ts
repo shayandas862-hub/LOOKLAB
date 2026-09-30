@@ -22,12 +22,18 @@ export interface ActionDef<I extends z.ZodObject = z.ZodObject, O extends z.ZodT
   /** Keyboard shortcut shown in ⌘K. */
   key?: string;
   rules?: string[];
+  /** Largest request body the engine reads for this action over HTTP. Default 1 MB (DEFAULT_MAX_BYTES). */
+  maxBytes?: number;
+  /** False for high-volume plumbing (one call per video frame) that makes no decision; failures are still logged. */
+  logged?: boolean;
   input: I;
   output: O;
   handler: (ctx: ActionContext, input: z.output<I>) => Promise<z.input<O>>;
 }
 
 export type AnyAction = ActionDef<z.ZodObject, z.ZodType>;
+
+export const DEFAULT_MAX_BYTES = 1_000_000;
 
 export type ErrorCode =
   | 'unknown_action'
@@ -138,6 +144,7 @@ export class Registry {
 
   /** Writes, model calls and stand-ins are decisions worth a row; plain reads are not. */
   private logged(a: AnyAction): boolean {
+    if (a.logged === false) return false;
     return a.effect !== 'read' || !!a.ai || !!a.standIn || a.tier === 'T3';
   }
 

@@ -41,7 +41,7 @@ export function BreakdownView(v: any): React.ReactElement {
           <div style={sx("position:relative;width:min(calc(100cqw - 32px), calc((100cqh - 32px) * 2.39));aspect-ratio:2.39/1")}>
             {v.showFrame ? (
               <>
-                <ImageSlot id="ref-12c" shape="rect" fit="contain" placeholder="Drop the reference frame (2.39:1)" />
+                <ImageSlot id="ref-12c" shape="rect" fit="contain" placeholder="Drop the reference frame (2.39:1)" {...v.slotProps?.("ref-12c")} />
               </>
             ) : null}
             {v.isReadyOverlay.thirds ? (
@@ -55,7 +55,7 @@ export function BreakdownView(v: any): React.ReactElement {
                   <line x1="14" y1="22" x2="62" y2="44" stroke="#FFFFFF" strokeWidth=".6" strokeDasharray="2 1.5" vectorEffect="non-scaling-stroke" />
                 </svg>
                 <div style={sx("position:absolute;left:3%;top:10%;display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.72);color:#EDEDED;font-family:'Geist Mono',monospace;font-size:11px;pointer-events:none")}>
-                  {"Key −60° az · 25° el · 2000 K"}
+                  {v.keyOverlay ?? "Key −60° az · 25° el · 2000 K"}
                 </div>
               </>
             ) : null}
@@ -85,7 +85,7 @@ export function BreakdownView(v: any): React.ReactElement {
                     {"Drag in a video or image"}
                   </div>
                   <div style={sx("color:var(--tx3)")}>
-                    {"MOV, MP4, ProRes, JPG, PNG, TIFF. Stays on this computer."}
+                    {v.dropHint ?? "MOV, MP4, ProRes, JPG, PNG, TIFF. Stays on this computer."}
                   </div>
                   <div style={sx("display:flex;gap:8px")}>
                     <button onClick={v.upload} title="breakdown.import_reference" style={sx("height:32px;padding:0 14px;border-radius:8px;background:var(--acc);border:none;color:var(--acc-ink);font-weight:600;cursor:pointer")}>
@@ -102,7 +102,7 @@ export function BreakdownView(v: any): React.ReactElement {
               <>
                 <div style={sx("position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg1);border-radius:8px")}>
                   <div style={sx("font-size:14px;font-weight:500")}>
-                    {"Importing ref_kitchen_night.mov"}
+                    {v.importTitle ?? "Importing ref_kitchen_night.mov"}
                   </div>
                   <div style={sx("width:320px;height:4px;border-radius:2px;background:var(--bg3);overflow:hidden")}>
                     <div style={sx(`width:${v.upPct};height:100%;background:var(--acc);transition:width .3s`)} />
@@ -111,7 +111,7 @@ export function BreakdownView(v: any): React.ReactElement {
                     {v.upText}
                   </div>
                   <div style={sx("font-size:12px;color:var(--tx3)")}>
-                    {"Copying to local project folder. Nothing is uploaded to the cloud."}
+                    {v.importNote ?? "Copying to local project folder. Nothing is uploaded to the cloud."}
                   </div>
                 </div>
               </>
@@ -145,20 +145,20 @@ export function BreakdownView(v: any): React.ReactElement {
                 <div style={sx("position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(13,13,13,.7)")}>
                   <div style={sx("width:400px;padding:16px;border-radius:10px;background:var(--bg1);border:1px solid var(--err);display:flex;flex-direction:column;gap:10px")}>
                     <div style={sx("font-weight:600;color:var(--err)")}>
-                      {"Analysis stopped at “Light”"}
+                      {v.errTitle ?? "Analysis stopped at “Light”"}
                     </div>
                     <div style={sx("color:var(--tx2)")}>
-                      {"The model returned an invalid response for shot 3. Shots, colour and framing were kept. Nothing was lost."}
+                      {v.errBody ?? "The model returned an invalid response for shot 3. Shots, colour and framing were kept. Nothing was lost."}
                     </div>
                     <div style={sx("font-family:'Geist Mono',monospace;font-size:11px;color:var(--tx3)")}>
-                      {"breakdown.fit_light · error 502 · 19:42:07"}
+                      {v.errMeta ?? "breakdown.fit_light · error 502 · 19:42:07"}
                     </div>
                     <div style={sx("display:flex;gap:8px")}>
                       <button onClick={v.retry} title="breakdown.fit_light" style={sx("height:32px;padding:0 14px;border-radius:8px;background:var(--acc);border:none;color:var(--acc-ink);font-weight:600;cursor:pointer")}>
                         {"Retry"}
                       </button>
                       <button onClick={v.skipToManual} style={sx("height:32px;padding:0 14px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:var(--tx2);cursor:pointer")}>
-                        {"Enter light by hand"}
+                        {v.errManual ?? "Enter light by hand"}
                       </button>
                     </div>
                   </div>
@@ -275,7 +275,7 @@ export function BreakdownView(v: any): React.ReactElement {
                 {"COLOUR"}
                 <span style={sx("flex:1")} />
                 <span title="breakdown.sample_palette" style={sx("font-weight:400;letter-spacing:0;color:var(--tx3)")}>
-                  {"6 samples"}
+                  {v.paletteCount ?? "6 samples"}
                 </span>
               </button>
               {v.sec.colour.open ? (

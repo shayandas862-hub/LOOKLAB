@@ -48,7 +48,7 @@ node bin/looklab.mjs mcp-setup   # prints the `claude mcp add` command for this 
 
 ## Where things are
 ```
-src/core/        pure maths (colour, palette, image stats, cuts, light fit, match); empty until P2
+src/core/        pure maths: colour (CIELAB, CIEDE2000), palette, tone stats, active picture, cuts, SHA-256 (P2); light fit and match come in P3/P6
 src/contracts/   zod schemas, versioned
 src/actions/     registry + one module per domain + rules (R1..)
 src/engine/      server, security, store, events, MCP, secrets, AI provider
@@ -70,4 +70,6 @@ tests/           records/, core/, actions/, engine/, ui/
 - `pgrep -f src/engine/main.ts` finds the shell wrapper first; measure the `node` pid's RSS.
 - The design's `run(cmd, text)` only showed a toast. In the app it calls the registry; a toast is not proof an action ran.
 - MCP tool names cannot contain dots: `breakdown.fit_light` is exposed as `breakdown_fit_light` (D-LL-016).
+- A clip recorded in Chrome with `canvas.captureStream` + `MediaRecorder` has a first frame with different colours from the rest (B-LL-002). Test clips open on black. Chrome's decoding itself is consistent.
+- A web page is never told a dropped file's path; a reference is known by name, size, date and SHA-256 (D-LL-027).
 - From v0.2: render targets need `sRGBEncoding` (now `colorSpace = SRGBColorSpace`) or readback is linear and the match metric is wrong; capture a WebGL canvas in the same tick as `render()`; whole-face statistics fail (painted eyes and brows dominate): cheeks only.

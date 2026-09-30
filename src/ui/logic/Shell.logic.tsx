@@ -98,9 +98,10 @@ export class Shell extends DCLogic {
     const screen = open ? open[1] : SCREEN_OF[c.name.split('.')[0]];
     this.setState({ palette:false, ...(screen ? { screen } : {}) });
     if (c.name === 'app.command_palette') return this.openP();
+    // Importing needs a file: ⌘K opens the Breakdown's drop zone, and the file drop runs the action (P2).
+    if (c.name === 'breakdown.import_reference') return this.setState({ bstate:'empty' });
     const needs = (c.input && c.input.required) || [];
     if (needs.length) return this.toast(`Set ${needs.join(', ')} on the ${TITLES[screen] || 'screen'} to run this`, c.name);
-    if (c.name === 'breakdown.import_reference') this.setState({ bstate:'empty' });
     this.run(c.name, c.title);
   }
 
@@ -117,7 +118,7 @@ export class Shell extends DCLogic {
     const view = super.render();
     const { screen, preview, engineUp } = this.state;
     return React.createElement(React.Fragment, null, view,
-      React.createElement(StatusLayer, { sample: !REAL_SCREENS.has(screen), engineUp, preview: !!(preview.ai || preview.b) }));
+      React.createElement(StatusLayer, { sample: !REAL_SCREENS.has(screen), screen, engineUp, preview: !!(preview.ai || preview.b) }));
   }
 
   renderVals() {

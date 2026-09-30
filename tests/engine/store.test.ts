@@ -54,6 +54,29 @@ describe.each(stores)('%s', (_name, make) => {
       await expect(s.put('ok', bad, {})).rejects.toThrow(/invalid/);
     }
   });
+
+  test('stores binary frames beside records, lists them sorted, and removes a folder of them (P2)', async () => {
+    const s = make();
+    const col = 'projects/neel/references/ref-1/frames';
+    await s.putBlob(col, '00001.png', new Uint8Array([4, 5, 6]));
+    await s.putBlob(col, '00000.png', new Uint8Array([1, 2, 3]));
+    expect([...(await s.getBlob(col, '00000.png'))!]).toEqual([1, 2, 3]);
+    expect(await s.getBlob(col, '00009.png')).toBeNull();
+    expect(await s.listBlobs(col)).toEqual(['00000.png', '00001.png']);
+    await s.put('projects/neel/references', 'ref-1', { id: 'ref-1' });
+    expect(await s.list('projects/neel/references')).toEqual([{ id: 'ref-1' }]);
+    await s.removeBlobs(col);
+    expect(await s.listBlobs(col)).toEqual([]);
+    expect(await s.listBlobs('nothing/here')).toEqual([]);
+  });
+
+  test('refuses frame names that are not <id>.png or could escape the store', async () => {
+    const s = make();
+    for (const bad of ['../x.png', 'a/b.png', '.png', 'x.json', 'x.png/..', 'x']) {
+      await expect(s.putBlob('ok', bad, new Uint8Array([1]))).rejects.toThrow(/invalid/);
+    }
+    await expect(s.putBlob('../up', 'x.png', new Uint8Array([1]))).rejects.toThrow(/invalid/);
+  });
 });
 
 describe('FileStore on disk', () => {
@@ -67,5 +90,14 @@ describe('FileStore on disk', () => {
     const s = new FileStore(dir);
     await s.put('projects', 'neel', { name: 'Neel' });
     expect(statSync(join(dir, 'projects', 'neel.json')).mode & 0o777).toBe(0o600);
+  });
+
+  test('frames are private too (file 0600, folder 0700), with no temp files left behind', async () => {
+    const s = new FileStore(dir);
+    await s.putBlob('projects/neel/references/ref-1/frames', '00000.png', new Uint8Array([1]));
+    const folder = join(dir, 'projects', 'neel', 'references', 'ref-1', 'frames');
+    expect(readdirSync(folder)).toEqual(['00000.png']);
+    expect(statSync(join(folder, '00000.png')).mode & 0o777).toBe(0o600);
+    expect(statSync(folder).mode & 0o777).toBe(0o700);
   });
 });

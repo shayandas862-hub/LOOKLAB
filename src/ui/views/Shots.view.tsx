@@ -25,7 +25,7 @@ export function ShotsView(v: any): React.ReactElement {
             <React.Fragment key={i1}>
               <button onClick={s.select} style={sx(`display:flex;flex-direction:column;padding:0;border-radius:10px;overflow:hidden;background:var(--bg1);border:1px solid ${s.border};color:var(--tx);cursor:pointer;text-align:left`)} className="dch-10ylgrb">
                 <div style={sx("width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden")}>
-                  <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={s.slot} shape="rect" fit="contain" placeholder={s.ph} />
+                  <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={s.slot} shape="rect" fit="contain" placeholder={s.ph} {...v.slotProps?.(s.slot)} />
                   <span style={sx("position:absolute;left:8px;top:8px;padding:2px 6px;border-radius:4px;background:rgba(13,13,13,.8);font-family:'Geist Mono',monospace;font-size:12px;color:#EDEDED;pointer-events:none")}>
                     {s.code}
                   </span>
@@ -87,7 +87,7 @@ export function ShotsView(v: any): React.ReactElement {
             {"LINKED REFERENCE"}
           </span>
           <div style={sx("width:100%;aspect-ratio:2.39/1;background:var(--sur);position:relative;overflow:hidden;border:1px solid var(--line)")}>
-            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={v.cur.refSlot} shape="rect" fit="contain" placeholder="Reference frame" />
+            <ImageSlot style={sx("position:absolute;inset:0;width:100%;height:100%")} id={v.cur.refSlot} shape="rect" fit="contain" placeholder="Reference frame" {...v.slotProps?.(v.cur.refSlot)} />
           </div>
           <span style={sx("font-family:'Geist Mono',monospace;font-size:12px;color:var(--tx2)")}>
             {v.cur.refText}

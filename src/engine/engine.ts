@@ -4,7 +4,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { join, normalize, extname, sep } from 'node:path';
 import { userInfo } from 'node:os';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { ActionError, buildRegistry, mcpName, type Registry } from '../actions/index.ts';
+import { ActionError, buildRegistry, DEFAULT_MAX_BYTES, mcpName, type Registry } from '../actions/index.ts';
 import type { ActionContext } from '../actions/context.ts';
 import { seedSampleIfEmpty } from '../actions/seed.ts';
 import { Decision, Settings, type Via } from '../contracts/index.ts';
@@ -37,7 +37,16 @@ const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.json': 'application/json',
 };
-const MAX_BODY = 1_000_000;
+/** An oversized body is read and discarded up to this size so the 413 reaches the client; beyond it the socket is dropped. */
+const DRAIN_CAP = 16_000_000;
+
+class TooLarge extends Error {
+  limit: number;
+  constructor(limit: number) {
+    super(`request body is larger than ${limit / 1_000_000} MB`);
+    this.limit = limit;
+  }
+}
 
 function send(res: ServerResponse, status: number, body: unknown) {
   const text = JSON.stringify(body);
@@ -45,14 +54,28 @@ function send(res: ServerResponse, status: number, body: unknown) {
   res.end(text);
 }
 
-async function readBody(req: IncomingMessage): Promise<string> {
+/** Reads a request body up to `limit` bytes; past it, nothing more is kept and TooLarge is thrown. */
+async function readBody(req: IncomingMessage, limit = DEFAULT_MAX_BYTES): Promise<string> {
+  if (Number(req.headers['content-length']) > DRAIN_CAP) {
+    req.destroy();
+    throw new TooLarge(limit);
+  }
   let size = 0;
+  let over = false;
   const chunks: Buffer[] = [];
   for await (const c of req) {
     size += (c as Buffer).length;
-    if (size > MAX_BODY) throw new ActionError('invalid_input', '', 'request body is larger than 1 MB');
+    if (size > limit) {
+      over = true;
+      if (size > DRAIN_CAP) {
+        req.destroy();
+        break;
+      }
+      continue;
+    }
     chunks.push(c as Buffer);
   }
+  if (over) throw new TooLarge(limit);
   return Buffer.concat(chunks).toString('utf8');
 }
 
@@ -107,10 +130,11 @@ export async function startEngine(opts: EngineOptions): Promise<Engine> {
     if (m && req.method === 'POST') {
       let input: unknown;
       try {
-        const body = await readBody(req);
+        const body = await readBody(req, registry.get(m[1])?.maxBytes ?? DEFAULT_MAX_BYTES);
         input = body.trim() ? JSON.parse(body) : {};
       } catch (e) {
-        return send(res, 400, { code: 'invalid_input', message: e instanceof ActionError ? e.message : 'body is not valid JSON' });
+        if (e instanceof TooLarge) return send(res, 413, { code: 'too_large', action: m[1], message: e.message });
+        return send(res, 400, { code: 'invalid_input', message: 'body is not valid JSON' });
       }
       try {
         const via: Via = req.headers['x-looklab-via'] === 'cli' ? 'cli' : 'ui';
@@ -142,7 +166,8 @@ export async function startEngine(opts: EngineOptions): Promise<Engine> {
     if (req.method === 'POST') {
       try {
         body = JSON.parse(await readBody(req));
-      } catch {
+      } catch (e) {
+        if (e instanceof TooLarge) return send(res, 413, { code: 'too_large', message: e.message });
         return send(res, 400, { code: 'invalid_input', message: 'body is not valid JSON' });
       }
     }

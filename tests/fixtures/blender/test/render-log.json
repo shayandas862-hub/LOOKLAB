@@ -1,0 +1,246 @@
+{
+  "blender": "5.1.1",
+  "device": "CPU",
+  "scenes": [
+    {
+      "id": "test-01-light",
+      "seconds": 5.75,
+      "face_box_blender": {
+        "x": 0.6165,
+        "y": 0.2788,
+        "w": 0.1594,
+        "h": 0.3132
+      }
+    },
+    {
+      "id": "test-01-dark",
+      "seconds": 5.5,
+      "face_box_blender": {
+        "x": 0.6165,
+        "y": 0.2788,
+        "w": 0.1594,
+        "h": 0.3132
+      }
+    },
+    {
+      "id": "test-02-light",
+      "seconds": 3.54,
+      "face_box_blender": {
+        "x": 0.2494,
+        "y": 0.2414,
+        "w": 0.2204,
+        "h": 0.4265
+      }
+    },
+    {
+      "id": "test-02-dark",
+      "seconds": 3.34,
+      "face_box_blender": {
+        "x": 0.2494,
+        "y": 0.2414,
+        "w": 0.2204,
+        "h": 0.4265
+      }
+    },
+    {
+      "id": "test-03-light",
+      "seconds": 5.38,
+      "face_box_blender": {
+        "x": 0.2271,
+        "y": 0.3013,
+        "w": 0.1924,
+        "h": 0.3715
+      }
+    },
+    {
+      "id": "test-03-dark",
+      "seconds": 5.23,
+      "face_box_blender": {
+        "x": 0.2271,
+        "y": 0.3013,
+        "w": 0.1924,
+        "h": 0.3715
+      }
+    },
+    {
+      "id": "test-04-light",
+      "seconds": 6.56,
+      "face_box_blender": {
+        "x": 0.4012,
+        "y": 0.1976,
+        "w": 0.2276,
+        "h": 0.4615
+      }
+    },
+    {
+      "id": "test-04-dark",
+      "seconds": 6.51,
+      "face_box_blender": {
+        "x": 0.4012,
+        "y": 0.1976,
+        "w": 0.2276,
+        "h": 0.4615
+      }
+    },
+    {
+      "id": "test-05-light",
+      "seconds": 6.14,
+      "face_box_blender": {
+        "x": 0.1983,
+        "y": 0.2444,
+        "w": 0.2131,
+        "h": 0.4233
+      }
+    },
+    {
+      "id": "test-05-dark",
+      "seconds": 5.93,
+      "face_box_blender": {
+        "x": 0.1983,
+        "y": 0.2444,
+        "w": 0.2131,
+        "h": 0.4233
+      }
+    },
+    {
+      "id": "test-06-light",
+      "seconds": 6.47,
+      "face_box_blender": {
+        "x": 0.3773,
+        "y": 0.1812,
+        "w": 0.2524,
+        "h": 0.5053
+      }
+    },
+    {
+      "id": "test-06-dark",
+      "seconds": 5.7,
+      "face_box_blender": {
+        "x": 0.3773,
+        "y": 0.1812,
+        "w": 0.2524,
+        "h": 0.5053
+      }
+    },
+    {
+      "id": "test-07-light",
+      "seconds": 6.47,
+      "face_box_blender": {
+        "x": 0.1786,
+        "y": 0.1532,
+        "w": 0.2814,
+        "h": 0.5469
+      }
+    },
+    {
+      "id": "test-07-dark",
+      "seconds": 6.12,
+      "face_box_blender": {
+        "x": 0.1786,
+        "y": 0.1532,
+        "w": 0.2814,
+        "h": 0.5469
+      }
+    },
+    {
+      "id": "test-08-light",
+      "seconds": 5.48,
+      "face_box_blender": {
+        "x": 0.2319,
+        "y": 0.3024,
+        "w": 0.1889,
+        "h": 0.3676
+      }
+    },
+    {
+      "id": "test-08-dark",
+      "seconds": 5.27,
+      "face_box_blender": {
+        "x": 0.2319,
+        "y": 0.3024,
+        "w": 0.1889,
+        "h": 0.3676
+      }
+    },
+    {
+      "id": "test-09-light",
+      "seconds": 6.23,
+      "face_box_blender": {
+        "x": 0.2454,
+        "y": 0.2434,
+        "w": 0.2315,
+        "h": 0.4482
+      }
+    },
+    {
+      "id": "test-09-dark",
+      "seconds": 5.9,
+      "face_box_blender": {
+        "x": 0.2454,
+        "y": 0.2434,
+        "w": 0.2315,
+        "h": 0.4482
+      }
+    },
+    {
+      "id": "test-10-light",
+      "seconds": 4.18,
+      "face_box_blender": {
+        "x": 0.3664,
+        "y": 0.1759,
+        "w": 0.2507,
+        "h": 0.4914
+      }
+    },
+    {
+      "id": "test-10-dark",
+      "seconds": 3.75,
+      "face_box_blender": {
+        "x": 0.3664,
+        "y": 0.1759,
+        "w": 0.2507,
+        "h": 0.4914
+      }
+    },
+    {
+      "id": "test-11-light",
+      "seconds": 6.12,
+      "face_box_blender": {
+        "x": 0.2495,
+        "y": 0.2619,
+        "w": 0.1997,
+        "h": 0.3892
+      }
+    },
+    {
+      "id": "test-11-dark",
+      "seconds": 5.81,
+      "face_box_blender": {
+        "x": 0.2495,
+        "y": 0.2619,
+        "w": 0.1997,
+        "h": 0.3892
+      }
+    },
+    {
+      "id": "test-12-light",
+      "seconds": 6.17,
+      "face_box_blender": {
+        "x": 0.2011,
+        "y": 0.1558,
+        "w": 0.2845,
+        "h": 0.5531
+      }
+    },
+    {
+      "id": "test-12-dark",
+      "seconds": 5.7,
+      "face_box_blender": {
+        "x": 0.2011,
+        "y": 0.1558,
+        "w": 0.2845,
+        "h": 0.5531
+      }
+    }
+  ]
+}

@@ -5,8 +5,10 @@ import { join } from 'node:path';
 import { buildRegistry } from '../../src/actions/index.ts';
 
 const LOGIC = join(import.meta.dirname, '..', '..', 'src', 'ui', 'logic');
+// A screen's logic is its `.logic.tsx` plus the helper modules beside it (`Breakdown.rows.ts`, …).
+const isLogic = (f: string) => f.endsWith('.logic.tsx') || (f.endsWith('.ts') && f !== 'screens.ts');
 const source = readdirSync(LOGIC)
-  .filter((f) => f.endsWith('.logic.tsx'))
+  .filter(isLogic)
   .map((f) => readFileSync(join(LOGIC, f), 'utf8'))
   .join('\n');
 
@@ -30,7 +32,7 @@ test('no screen calls a command that does not exist', () => {
 
 test('screens never draw the design\'s MEASURED or AI badge on sample data (D-LL-015)', () => {
   // A badge constant may exist, but it must go through sampleBadge() while the screen is on sample data.
-  for (const f of readdirSync(LOGIC).filter((x) => x.endsWith('.logic.tsx'))) {
+  for (const f of readdirSync(LOGIC).filter(isLogic)) {
     const s = readFileSync(join(LOGIC, f), 'utf8');
     if (/label:\s*'MEASURED'|label:\s*`AI \$\{/.test(s)) expect(s, f).toContain('sampleBadge(');
   }
@@ -48,7 +50,7 @@ test('views with typed source badges have logic that relabels them (D-LL-015)', 
 });
 
 test('the Breakdown shows each value\'s own source, not the design\'s badge (P2)', () => {
-  const s = readFileSync(join(LOGIC, 'Breakdown.logic.tsx'), 'utf8');
+  const s = readdirSync(LOGIC).filter((f) => f.startsWith('Breakdown.') && isLogic(f)).map((f) => readFileSync(join(LOGIC, f), 'utf8')).join('\n');
   expect(s).not.toMatch(/const PAL = \[/);
   expect(s).not.toMatch(/'ai',\s*\d{2}\]/);
   expect(s).toContain("run('breakdown.analyse'");

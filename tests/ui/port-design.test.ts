@@ -89,6 +89,13 @@ describe('port-design: template → TSX', () => {
     expect(r.tsx).toContain('{"other"}');
   });
 
+  test('an attribute listed in bindings as "[title=…] name" becomes a data slot on that element only (P3)', () => {
+    const html = '<button title="breakdown.fit_light" disabled="{{ aiBlocked }}">Fit</button><button title="x" disabled="{{ aiBlocked }}">X</button>';
+    const r = convertTemplate(wrap(html), 'T', { '[title=breakdown.fit_light] disabled': 'fitLightDisabled' });
+    expect(r.tsx).toContain('disabled={v.fitLightDisabled ?? v.aiBlocked}');
+    expect(r.tsx.match(/disabled=\{v\.aiBlocked\}/g)).toHaveLength(1);
+  });
+
   test('numeric attributes become numbers', () => {
     const r = convertTemplate(wrap('<textarea rows="3" placeholder="4"></textarea>'), 'T');
     expect(r.tsx).toContain('rows={3}');

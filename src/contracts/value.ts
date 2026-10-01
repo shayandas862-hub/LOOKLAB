@@ -1,7 +1,12 @@
 import { z } from 'zod';
 
-/** Where a value came from. `sample` is placeholder data and is never shown as anything else (D-LL-015). */
-export const Source = z.enum(['measured', 'ai', 'manual', 'sample']);
+/**
+ * Where a value came from, strongest first (AD-LL-010). `measured`: a T0 instrument on the actual pixels.
+ * `manual`: a person set it. `metadata`: read from the original file's tags (EXIF), not from pixels.
+ * `estimate`: a T0 fit of a model to the pixels, true only as far as the model's assumptions (D-LL-033).
+ * `ai`: a model's answer, with a confidence. `sample`: placeholder data, never shown as anything else (D-LL-015).
+ */
+export const Source = z.enum(['measured', 'manual', 'metadata', 'estimate', 'ai', 'sample']);
 export type Source = z.infer<typeof Source>;
 
 /** A record id: letters, digits, `_` and `-`, starting with a letter or digit. Safe as a file name. */

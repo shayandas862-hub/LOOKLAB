@@ -84,9 +84,12 @@ defineAction({
 ## 5 · Honesty in the data (carried from v0.2)
 
 Every measured or estimated leaf is a `Value`:
-`{ value, unit?, source: 'measured'|'ai'|'manual'|'sample', confidence?, updated_by, updated_at }`.
+`{ value, unit?, source: 'measured'|'manual'|'metadata'|'estimate'|'ai'|'sample', confidence?, updated_by, updated_at }`
+(strongest first; `metadata` and `estimate` since P3, AD-LL-010).
 Stand-ins return `source: 'sample'`, and the UI says so. A value is `measured` only
-when a T0 instrument computed it from the actual pixels.
+when a T0 instrument computed it from the actual pixels. A T0 fit of a model to the
+pixels (the light fit) is an `estimate`, never `measured`; a value read from the file's
+own tags (EXIF focal length) is `metadata`.
 
 ## 6 · AI access (AD-LL-003)
 

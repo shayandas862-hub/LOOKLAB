@@ -49,11 +49,11 @@ beforeEach(async () => {
 });
 
 describe('what is real in P2 (standing rule 2)', () => {
-  test('the actions made real carry no stand-in flag; light, lens, framing size, mood and ask still do', () => {
+  test('the actions made real carry no stand-in flag; lens, framing size, mood and ask still do (light is real since P3)', () => {
     const flag = (n: string) => registry.get(n)!.standIn;
     for (const n of ['breakdown.import_reference', 'breakdown.add_frame', 'breakdown.get_frame', 'breakdown.get_reference',
-      'breakdown.detect_shots', 'breakdown.sample_palette', 'breakdown.analyse', 'breakdown.set_subject']) expect(flag(n), n).toBe(false);
-    for (const n of ['breakdown.fit_light', 'breakdown.fit_lens', 'breakdown.fit_framing', 'breakdown.fit_mood', 'breakdown.ask']) expect(flag(n), n).toBe(true);
+      'breakdown.detect_shots', 'breakdown.sample_palette', 'breakdown.analyse', 'breakdown.set_subject', 'breakdown.fit_light']) expect(flag(n), n).toBe(false);
+    for (const n of ['breakdown.fit_lens', 'breakdown.fit_framing', 'breakdown.fit_mood', 'breakdown.ask']) expect(flag(n), n).toBe(true);
   });
 
   test('the new helpers are not commands, so the design catalogue parity holds', () => {

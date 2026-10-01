@@ -2,6 +2,7 @@
 // sampled at 2 per second and scaled to at most 512 px on the long side, and each becomes a PNG for
 // breakdown.add_frame. The file is hashed in 8 MB pieces, so a long video is never held in memory whole.
 import { Sha256 } from '../../core/sha256';
+import { EXIF_READ_BYTES, readExifLens, type ExifLens } from '../../core/exif';
 
 export const SAMPLE_FPS = 2;
 export const MAX_FRAMES = 600;
@@ -25,6 +26,17 @@ export async function hashFile(file: File, progress?: (done: number, total: numb
     progress?.(Math.min(at + HASH_CHUNK, file.size), file.size);
   }
   return h.hex();
+}
+
+/**
+ * The focal length a still's EXIF records (P3): the start of the original file is read here, and only the two
+ * lens numbers leave the browser. null when the file has none. Videos are not read (their lens tags, when a
+ * camera writes any, are vendor-specific): the focal length is entered by hand.
+ */
+export async function readLens(file: File): Promise<ExifLens | null> {
+  const bytes = new Uint8Array(await file.slice(0, Math.min(file.size, EXIF_READ_BYTES)).arrayBuffer());
+  const l = readExifLens(bytes);
+  return l.focal_mm !== null || l.focal_35mm !== null ? l : null;
 }
 
 export function analysisSize(w: number, h: number): { w: number; h: number } {

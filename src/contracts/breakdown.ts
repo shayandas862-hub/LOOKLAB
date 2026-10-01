@@ -7,6 +7,18 @@ export const FramePoint = z.object({ x: z.number().min(0).max(1), y: z.number().
 /** `at`: where on the analysis frame the swatch was sampled (P2; absent on the design's sample palette). */
 export const Swatch = z.object({ hex: Hex, share: NumValue, at: FramePoint.optional() });
 
+/**
+ * A face box drawn by hand on one sampled frame (P3, D-LL-033): hairline to chin, cheek to cheek, as fractions of
+ * the frame, and the frame it was drawn on. breakdown.fit_light fits the light on it.
+ */
+export const FaceBoxRecord = z.object({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+  w: z.number().gt(0).max(1),
+  h: z.number().gt(0).max(1),
+  frame_index: z.number().int().nonnegative(),
+});
+
 export const Breakdown = Meta.extend({
   project_id: Id,
   shot_id: Id,
@@ -15,6 +27,8 @@ export const Breakdown = Meta.extend({
   frame_index: z.number().int().nonnegative().nullable().default(null),
   /** Where a person clicked the subject (D-LL-028). */
   subject: FramePoint.nullable().default(null),
+  /** The face box a person drew (D-LL-033). */
+  face: FaceBoxRecord.nullable().default(null),
   palette: z.array(Swatch).max(12),
   tints: z.object({ shadow: TextValue, mid: TextValue, highlight: TextValue }),
   /** Mean colour of each tint zone, when measured. */

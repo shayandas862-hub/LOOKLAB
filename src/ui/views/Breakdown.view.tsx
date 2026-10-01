@@ -404,8 +404,8 @@ export function BreakdownView(v: any): React.ReactElement {
                       </React.Fragment>
                     ))}
                     <div style={sx("display:flex;gap:6px;margin-top:4px")}>
-                      <button onClick={v.fitLight} disabled={v.aiBlocked} title="breakdown.fit_light" style={sx(`flex:1;height:30px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:${v.aiBtnColor};cursor:pointer`)}>
-                        {"Fit light (AI)"}
+                      <button onClick={v.fitLight} disabled={v.fitLightDisabled ?? v.aiBlocked} title="breakdown.fit_light" style={sx(`flex:1;height:30px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:${v.aiBtnColor};cursor:pointer`)}>
+                        {v.fitLightLabel ?? "Fit light (AI)"}
                       </button>
                       <button onClick={v.editKey} title="breakdown.edit_value" style={sx("flex:1;height:30px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--tx);cursor:pointer")}>
                         {"Set by hand"}

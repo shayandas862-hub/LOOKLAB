@@ -13,6 +13,8 @@
     "Analysis stopped at “Light”": "errTitle",
     "The model returned an invalid response for shot 3. Shots, colour and framing were kept. Nothing was lost.": "errBody",
     "breakdown.fit_light · error 502 · 19:42:07": "errMeta",
-    "Enter light by hand": "errManual"
+    "Enter light by hand": "errManual",
+    "Fit light (AI)": "fitLightLabel",
+    "[title=breakdown.fit_light] disabled": "fitLightDisabled"
   }
 }

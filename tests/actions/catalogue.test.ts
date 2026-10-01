@@ -73,6 +73,8 @@ const REQUIRED: Record<string, Record<string, unknown>> = {
   'settings.toggle_cloud': { on: true },
   'settings.toggle_no_ai': { on: false },
   'breakdown.set_subject': { x: 0.3, y: 0.4 },
+  // A face-shaped box on the 64 × 36 frame importOneFrame() measures (29 × 32 px); fit_light then runs on it.
+  'breakdown.set_face': { x: 0.2, y: 0.05, w: 0.45, h: 0.9 },
   // Imports into another shot, so shot 12C keeps the reference imported by importOneFrame().
   'breakdown.import_reference': {
     shot_id: '12D', file_name: 'other.png', media: 'image', mime: 'image/png', size_bytes: 10, sha256: 'b'.repeat(64),

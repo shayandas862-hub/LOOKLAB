@@ -1,0 +1,113 @@
+{
+  "id": "dev-01-light",
+  "set": "dev",
+  "seed": 1,
+  "rig": 1,
+  "plan_version": 1,
+  "skin": {
+    "tone": "light",
+    "srgb": [
+      194,
+      150,
+      130
+    ],
+    "linear": [
+      0.5395,
+      0.305,
+      0.2232
+    ]
+  },
+  "key": {
+    "az": -80.2,
+    "el": 13.5,
+    "softness": 0.7473,
+    "kelvin": 4350,
+    "distance_m": 1.4876,
+    "size_m": 1.2274,
+    "angular_size_deg": 44.8
+  },
+  "fill": {
+    "stops": 2.09,
+    "az": 80.2,
+    "el": 8,
+    "kelvin": 6500,
+    "distance_m": 2,
+    "size_m": 2
+  },
+  "exposure_stops": -0.39,
+  "camera": {
+    "focal_mm": 35,
+    "sensor_mm": 36,
+    "position": [
+      0,
+      -0.6916,
+      1.612
+    ],
+    "shift_x": 0.166,
+    "shift_y": -0.0935
+  },
+  "head": {
+    "yaw": 0,
+    "tilt": 0
+  },
+  "background": "black",
+  "clothes": "olive",
+  "wall_distance_m": 1.4124,
+  "face_box": {
+    "x": 0.227,
+    "y": 0.2139,
+    "w": 0.214,
+    "h": 0.4493
+  },
+  "blender": {
+    "key": {
+      "position": [
+        -1.4254,
+        -0.2462,
+        1.9473
+      ],
+      "aim": [
+        0,
+        0,
+        1.6
+      ],
+      "size_m": 1.2274,
+      "color": [
+        1,
+        0.8208,
+        0.5961
+      ],
+      "power_w": 40.9217
+    },
+    "fill": {
+      "position": [
+        1.9516,
+        -0.3371,
+        1.8783
+      ],
+      "aim": [
+        0,
+        0,
+        1.6
+      ],
+      "size_m": 2,
+      "color": [
+        0.7851,
+        0.8611,
+        1
+      ],
+      "power_w": 18.5129
+    },
+    "wall": null,
+    "clothes": [
+      0.08,
+      0.08,
+      0.03
+    ],
+    "skin": [
+      0.5395,
+      0.305,
+      0.2232
+    ]
+  }
+}

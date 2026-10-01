@@ -82,7 +82,7 @@ function textJsx(text, scope, bindings = {}) {
     .join('');
 }
 
-/** `bindings` maps a literal text in the template to a vals key (src/ui/bindings.json). */
+/** `bindings` maps a literal text, or "[title=…] attribute", in the template to a vals key (src/ui/bindings.json). */
 export function convertTemplate(html, viewName, bindings = {}) {
   const doc = parseDocument(html, { lowerCaseAttributeNames: false, lowerCaseTags: false, recognizeSelfClosing: true });
   const css = [];
@@ -129,6 +129,14 @@ export function convertTemplate(html, viewName, bindings = {}) {
         continue;
       }
       const jsxName = attrName(name);
+      // An attribute bound in bindings.json as "[title=<the element's title>] <name>" becomes a data slot, with the
+      // design's own value as the fallback (P3: Fit light is T0, so it must not follow the AI buttons' disabled).
+      const bound = el.attribs.title && bindings[`[title=${el.attribs.title}] ${name}`];
+      if (bound) {
+        const orig = attrJsx(value, scope);
+        out.push(`${jsxName}={v.${bound} ?? ${orig.startsWith('{') && orig.endsWith('}') ? orig.slice(1, -1) : orig}}`);
+        continue;
+      }
       if (value === '' && BOOLEAN.has(jsxName)) {
         out.push(`${jsxName}={true}`);
         continue;

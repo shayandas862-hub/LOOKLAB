@@ -38,9 +38,23 @@ test, a review or a live run found it.
 
 ## Open
 
-_None._
+### B-LL-004 · After a 60 s import the engine idles over its 150 MB memory budget in most runs
+- **Phase:** P3, 2026-10-01, measuring the light fit's memory on the M1 (`scripts/measure-fit.ts`, `scripts/measure-import.ts`).
+- **Found by:** measurement. Engine RSS idle after importing the same 60 s 1080p clip, five runs this session: 147, 172, 185, 176 and 159 MB (budget ≤ 150 MB, standing rule 5); macOS footprint (private memory including compressed pages) 155 and 156 MB in the two runs that read it. P2 measured 146–147 MB three times (PR-LL-002), the low end of this spread. Idle before any import: 136–138 MB RSS, 96 MB footprint.
+- **Cause:** not yet known. The light fit is not it: ten fits add 0–2 MB at their peak and nothing that stays. Most likely the import's 121 frame decodes and their signatures leave the engine's heap larger than it needs and Node does not hand the memory back; RSS on macOS also moves with memory compression, so one reading proves little either way. Unproven until a heap snapshot is taken after an import.
+- **Fix:** none yet. Proposed: take a heap snapshot after a 60 s import to see what is held; if it is the decode's garbage, run the cut detection and measurement of a reference in a worker thread that exits when done, so its memory goes back to the system.
+- **Guard:** none. `scripts/measure-fit.ts` and `scripts/measure-import.ts` measure it by hand; no test checks the budget.
+- **Could it return?** HIGH: it is open now, and every import of a long clip shows it.
 
 ## Closed
+
+### B-LL-003 · The Blender head's eyebrows were rendered 27 cm off the face
+- **Phase:** P3, 2026-10-01, the first trial render of the Blender ground-truth set (`scripts/blender/render_set.py`), before any render was kept.
+- **Found by:** looking at the trial render: no brows on the face, and a thin dark streak floating in the background at head height.
+- **Cause:** each brow was built with its vertices at their final place and the object at the world origin, then given an 8° slant through `rotation_euler`. An object rotates about its own origin, so the brows swung round the world origin, 1.6 m below them, and landed about 0.27 m to the side.
+- **Fix:** the slant is applied to the brow's own vertices about the brow's centre (`ellipsoid(..., roll=...)`); nothing in the head is rotated as an object any more. Both sets were rendered after the fix.
+- **Guard:** `check_parts()` in `scripts/blender/render_set.py` runs before any render and stops the script if any part of the head lies more than 0.13 m from the head's centre (neck and torso 0.45 m). Checked against the original code: it refuses with "brow-1 is 0.271 m from the head centre". Its first version missed this, because `matrix_world` is stale until the scene updates; it now updates first.
+- **Could it return?** LOW for the head, while the guard runs. Any new part placed through an object transform instead of its vertices would repeat it, and the guard only catches parts that land far from the head.
 
 ### B-LL-002 · The recorded test clip reported a cut half a second in that was not there
 - **Phase:** P2, 2026-09-30, the first run of the Chrome video test (`tests/ui/breakdown.e2e.test.ts`).

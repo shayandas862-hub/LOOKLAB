@@ -15,6 +15,7 @@
     "dev": "node bin/looklab.mjs dev",
     "build": "vite build",
     "port-design": "node scripts/port-design.mjs",
+    "blender-set": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/blender/make-set.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vite build --logLevel warn && vitest run",
     "test:watch": "vitest",

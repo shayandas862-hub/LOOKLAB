@@ -59,6 +59,15 @@ export const MediaFile = z.object({
   sha256: z.string().regex(/^[0-9a-f]{64}$/, 'sha256 is 64 lowercase hex characters'),
 });
 
+/**
+ * The lens tags of the original file's EXIF, read in the browser at import (P3). Nothing else from EXIF is
+ * kept: not the camera, the date or the location. null: the file had none, or it is a video.
+ */
+export const LensExif = z.object({
+  focal_mm: z.number().gt(0).max(2000).nullable(),
+  focal_35mm: z.number().gt(0).max(5000).nullable(),
+});
+
 export const Reference = Meta.extend({
   project_id: Id,
   file_name: z.string().min(1).max(255),
@@ -76,6 +85,7 @@ export const Reference = Meta.extend({
   /** Frames sampled per second (0 for an image) and how many the import planned; frame i is at i / sample_fps. */
   sample_fps: z.number().nonnegative().max(30).default(0),
   frame_count: z.number().int().nonnegative().max(MAX_FRAMES).default(0),
+  exif: LensExif.nullable().default(null),
   sample: z.boolean().default(false),
 });
 export type Reference = z.infer<typeof Reference>;

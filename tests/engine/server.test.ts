@@ -169,7 +169,7 @@ describe('MCP (AD-LL-003, D-LL-016, D-LL-017)', () => {
     const expected = buildRegistry().list().map((a) => mcpName(a.name)).sort();
     expect(tools.map((t) => t.name).sort()).toEqual(expected);
     for (const t of tools) expect(t.name).toMatch(/^[a-zA-Z0-9_-]{1,64}$/);
-    for (const p2 of ['breakdown_add_frame', 'breakdown_get_frame', 'breakdown_get_reference', 'breakdown_set_subject']) {
+    for (const p2 of ['breakdown_add_frame', 'breakdown_get_frame', 'breakdown_get_reference', 'breakdown_set_subject', 'breakdown_set_face', 'breakdown_fit_light']) {
       expect(tools.map((t) => t.name), p2).toContain(p2);
     }
     expect(tools.find((t) => t.name === 'breakdown_analyse')?.description).not.toContain('STAND-IN');

@@ -25,7 +25,7 @@ export function sampleSeed(now: string, user: string, workspace: string) {
 
   const reference: Reference = {
     ...meta('ref-kitchen'), project_id: P, file_name: 'ref_kitchen_night.mov', media: 'video', local_only: true,
-    duration_s: 22.4, aspect: '2.39:1', sample: true, shots_source: 'sample', file: null, width: 0, height: 0, sample_fps: 0, frame_count: 0,
+    duration_s: 22.4, aspect: '2.39:1', sample: true, shots_source: 'sample', file: null, width: 0, height: 0, sample_fps: 0, frame_count: 0, exif: null,
     shots: ['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((c, i) => ({ code: `12${c}`, in_s: i * 3.2, out_s: (i + 1) * 3.2 })),
   };
 
@@ -33,7 +33,7 @@ export function sampleSeed(now: string, user: string, workspace: string) {
     .map(([hex, share]) => ({ hex, share: s(share, '%') }));
 
   const breakdown: Breakdown = {
-    ...meta(SAMPLE_SHOT), project_id: P, shot_id: SAMPLE_SHOT, reference_id: 'ref-kitchen', frame_index: null, subject: null, tint_hex: null, palette,
+    ...meta(SAMPLE_SHOT), project_id: P, shot_id: SAMPLE_SHOT, reference_id: 'ref-kitchen', frame_index: null, subject: null, face: null, tint_hex: null, palette,
     tints: { shadow: s('blue −6'), mid: s('neutral'), highlight: s('warm +9') },
     saturation: s(38, '%'), contrast_stops: s(9.2, 'stops'),
     light: {

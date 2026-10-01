@@ -5,79 +5,10 @@
 import React from 'react';
 import { DCLogic } from '../runtime/dc';
 import { BreakdownView, defaults } from '../views/Breakdown.view';
-import { sampleBadge, sampleBadgeText } from '../runtime/badges';
+import { sampleBadgeText } from '../runtime/badges';
 import { setScreenMarker } from '../components/StatusLayer';
-import { hashFile, mediaOf, openImage, openVideo, toBase64 } from '../runtime/media';
-
-// Where the design drew its sample palette's dots (the sample swatches carry no position).
-const SAMPLE_DOTS = [['22%','24%'],['82%','30%'],['27%','52%'],['44%','80%'],['36%','38%'],['92%','86%']];
-const SAMPLE_TINT_HEX = { shadow:'#1B2230', mid:'#3E4A52', highlight:'#E9C9A0' };
-/** The design's frame box is 2.39:1; a frame of another shape sits inside it, letterboxed. */
-const BOX_ASPECT = 2.39;
-
-const STEPS = [['Shots detected','T0'],['Colour','T0'],['Light','T0'],['Lens','T2'],['Framing','T1'],['Mood','T2']];
-const STEP_ACTIONS = ['breakdown.detect_shots','breakdown.sample_palette','breakdown.fit_light','breakdown.fit_lens','breakdown.fit_framing','breakdown.fit_mood'];
-const STEP_NOTE = ['', '', 'sample until P3', 'sample until P3/P4', 'aspect measured, subject by hand', 'sample until P4'];
-
-// Row id → the breakdown field it edits (breakdown.edit_value). Numeric fields take the first number typed.
-const FIELD = { key:'light.key_type', fill:'light.fill_kind', ratio:'light.ratio', hard:'light.key_hardness', prac:'light.practicals',
-  focal:'lens.focal_mm', dof:'lens.dof', height:'lens.height_m', angle:'lens.angle', move:'lens.movement',
-  size:'framing.size', pos:'framing.subject_pos', room:'framing.lead_room', aspect:'framing.aspect' };
-const NUMERIC = new Set(['light.ratio', 'lens.focal_mm', 'lens.height_m']);
-function typed(field, text) {
-  if (!NUMERIC.has(field)) return text;
-  const m = /-?\d+(\.\d+)?/.exec(text);
-  return m ? parseFloat(m[0]) : text;
-}
-
-const RANK = { measured:0, manual:1, ai:2, sample:3 };
-const weakest = vals => vals.reduce((w, v) => (RANK[v.source] > RANK[w] ? v.source : w), 'measured');
-const minus = n => (n < 0 ? `−${Math.abs(n)}` : `${n}`);
-
-/** The value's own badge. Sample values always read SAMPLE (D-LL-015); nothing here is AI until P4. */
-function badge(src, conf, lowMode) {
-  return src === 'sample' ? sampleBadge(designBadge(src, conf, lowMode)) : designBadge(src, conf, lowMode);
-}
-
-function designBadge(src, conf, lowMode) {
-  if (src === 'manual') return { label:'MANUAL', border:'1px solid transparent', bg:'var(--bg3)', color:'var(--tx)' };
-  if (src === 'measured') return { label:'MEASURED', border:'1px solid var(--line2)', bg:'transparent', color:'var(--tx2)' };
-  if (src === 'sample') return { label:'SAMPLE', border:'1px dotted var(--tx3)', bg:'transparent', color:'var(--tx3)' };
-  const low = lowMode && conf < 60;
-  return { label:`AI ${conf}%`, border: low ? '1px dashed var(--warn)' : '1px dashed var(--tx3)', bg: low ? 'var(--warn-soft)' : 'transparent', color: low ? 'var(--warn)' : 'var(--tx2)' };
-}
-
-const satBand = v => (v < 25 ? 'low' : v <= 50 ? 'medium' : 'high');
-const clock = s => { const m = Math.floor(s / 60); return `${String(m).padStart(2,'0')}:${(s - m * 60).toFixed(1).padStart(4,'0')}`; };
-const mb = n => (n / 1e6).toFixed(n < 1e7 ? 1 : 0);
-
-/** Rows of the light, lens and framing sections, from the breakdown record: [id, label, text, leaves]. */
-function rowSpecs(b) {
-  const L = b.light, N = b.lens, F = b.framing;
-  const ratio = Number(L.ratio.value);
-  return {
-    light: [
-      ['key', 'Key', `${L.key_hardness.value} · ${L.key_kelvin.value} K ${L.key_type.value}`, [L.key_hardness, L.key_kelvin, L.key_type]],
-      ['fill', 'Fill', `${L.fill_kelvin.value} K ${L.fill_kind.value}`, [L.fill_kelvin, L.fill_kind]],
-      ['ratio', 'Key:fill', ratio > 0 ? `${ratio}:1 (${Math.round(Math.log2(ratio) * 10) / 10} stops)` : String(L.ratio.value), [L.ratio]],
-      ['hard', 'Hardness', String(L.key_hardness.value), [L.key_hardness]],
-      ['prac', 'Practicals', String(L.practicals.value), [L.practicals]],
-    ],
-    lens: [
-      ['focal', 'Focal length', `≈${N.focal_mm.value} mm`, [N.focal_mm]],
-      ['dof', 'Depth of field', String(N.dof.value), [N.dof]],
-      ['height', 'Camera height', `${N.height_m.value} m`, [N.height_m]],
-      ['angle', 'Angle', String(N.angle.value), [N.angle]],
-      ['move', 'Movement', String(N.movement.value), [N.movement]],
-    ],
-    framing: [
-      ['size', 'Shot size', String(F.size.value), [F.size]],
-      ['pos', 'Subject', String(F.subject_pos.value), [F.subject_pos]],
-      ['room', 'Lead room', String(F.lead_room.value), [F.lead_room]],
-      ['aspect', 'Aspect', String(F.aspect.value), [F.aspect]],
-    ],
-  };
-}
+import { FIELD, SAMPLE_DOTS, SAMPLE_TINT_HEX, badge, boxPos as boxPosIn, clock, markerText, minus, rowSpecs, satBand, typed, weakest } from './Breakdown.rows';
+import { BY_HAND, STEPS, STEP_ACTIONS, STEP_NOTE, importReference, pickReference } from './Breakdown.import';
 
 export class Breakdown extends DCLogic {
   state = { sel:null, ov:{ thirds:true, light:true, palette:true }, open:{ colour:true, light:true, lens:true, framing:true, mood:true },
@@ -120,77 +51,13 @@ export class Breakdown extends DCLogic {
     }
     if (this._gone) return;
     this.setState({ b, ref, frame, moods:null });
-    setScreenMarker('breakdown', this.measured(b) ? 'SAMPLE: light, lens and mood (until P3/P4) · colour, tone and aspect measured' : null);
+    setScreenMarker('breakdown', this.measured(b) ? markerText(b) : null);
   }
 
   measured(b) { return !!b && b.palette.length > 0 && b.palette.every(p => p.share.source === 'measured'); }
+  pick() { pickReference(this); }
 
-  pick() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*,video/*';
-    input.onchange = () => input.files && input.files[0] && this.importFile(input.files[0]);
-    input.click();
-  }
-
-  /** Hash → open → import_reference → add_frame × n → detect shots → analyse → the other steps. */
-  async importFile(file) {
-    if (this._busy) return;
-    this._busy = true;
-    this._last = file;
-    let stage = 'Reading';
-    const fail = (title, body) => { this.setState({ err:{ title, body, meta:`${file.name} · ${new Date().toLocaleTimeString()}` } }); this.setB('error'); };
-    try {
-      const media = mediaOf(file);
-      if (!media) return fail('Not an image or a video', `${file.name} is not something Chrome can open as an image or a video. Nothing was imported.`);
-      this.setState({ importName:file.name, up:0, upText:'Hashing the file', err:null });
-      this.setB('uploading');
-      const sha = await hashFile(file, (d, t) => this.setState({ up: Math.round(30 * d / t), upText:`Hashing ${mb(d)} of ${mb(t)} MB` }));
-      stage = 'Decoding';
-      const src = media === 'image' ? await openImage(file) : await openVideo(file);
-      try {
-        stage = 'Import';
-        const imp = await this.run('breakdown.import_reference', 'Reference imported', {
-          file_name: file.name, media, mime: file.type || (media === 'image' ? 'image/png' : 'video/mp4'), size_bytes: file.size, sha256: sha,
-          last_modified: file.lastModified ? new Date(file.lastModified).toISOString() : null,
-          width: src.width, height: src.height, duration_s: src.duration_s, sample_fps: src.fps, frame_count: src.count,
-        }, { quiet:true });
-        if (!imp) throw new Error('The engine refused the import (see the message above).');
-        stage = 'Frames';
-        for (let i = 0; i < src.count; i++) {
-          const ok = await this.run('breakdown.add_frame', '', { reference_id: imp.result.reference_id, index: i, png_base64: await toBase64(await src.frame(i)) }, { quiet:true });
-          if (!ok) throw new Error(`Frame ${i + 1} of ${src.count} was refused.`);
-          this.setState({ up: 30 + Math.round(70 * (i + 1) / src.count), upText:`Frame ${i + 1} of ${src.count}${src.fps ? ` · ${clock(i / src.fps)}` : ''}` });
-        }
-      } finally {
-        src.close();
-      }
-      stage = 'Shots';
-      this.setState({ step:0 });
-      this.setB('analysing');
-      await this.runSteps(file.name);
-      await this.load();
-      this.setB('ready');
-    } catch (e) {
-      fail(`Import stopped at “${stage}”`, `${e.message} Frames already sent stay with the reference; importing the file again replaces them.`);
-    } finally {
-      this._busy = false;
-    }
-  }
-
-  /** The design's steps in order, then breakdown.analyse measures tone and aspect and saves the breakdown. */
-  async runSteps(name) {
-    const aiOk = this.props.aiOk ?? true;
-    for (let k = 0; k < STEPS.length; k++) {
-      const skip = !aiOk && STEPS[k][1] !== 'T0';
-      if (!skip) {
-        const r = await this.run(STEP_ACTIONS[k], STEPS[k][0], {}, { quiet:true });
-        if (!r && k < 2) throw new Error(`${STEP_ACTIONS[k]} failed.`);
-      }
-      this.setState({ step:k + 1 });
-    }
-    if (!(await this.run('breakdown.analyse', `Measured ${name}`))) throw new Error('breakdown.analyse failed.');
-  }
+  importFile(file) { return importReference(this, file); }
 
   /** Re-measures on another reference shot's key frame. */
   async analyseAt(index) {
@@ -203,14 +70,19 @@ export class Breakdown extends DCLogic {
     if (r) await this.load();
   }
 
-  /** A point on the frame (0–1) → a position in the design's 2.39:1 box, as CSS percentages. */
-  boxPos(at) {
-    const f = this.state.frame;
-    if (!f) return { x:`${at.x * 100}%`, y:`${at.y * 100}%` };
-    const a = f.width / f.height;
-    const fw = a < BOX_ASPECT ? a / BOX_ASPECT : 1, fh = a < BOX_ASPECT ? 1 : BOX_ASPECT / a;
-    return { x:`${((1 - fw) / 2 + at.x * fw) * 100}%`, y:`${((1 - fh) / 2 + at.y * fh) * 100}%` };
+  /** A drag on the frame marks the face (D-LL-033); the engine checks the box and says why when it refuses it. */
+  async setFace(box) {
+    const r4 = v => Math.round(v * 10000) / 10000;
+    const r = await this.run('breakdown.set_face', 'Face marked by hand', { x: r4(box.x), y: r4(box.y), w: r4(box.w), h: r4(box.h) }, { quiet:true });
+    if (r) await this.load();
   }
+
+  async fitLight() {
+    const r = await this.run('breakdown.fit_light', 'Light fitted to the marked face (estimate)');
+    if (r) await this.load();
+  }
+  /** A point on the frame (0–1) → a position in the design's 2.39:1 box, as CSS percentages. */
+  boxPos(at) { return boxPosIn(this.state.frame, at); }
 
   rows(group, low) {
     const { editing, b } = this.state;
@@ -254,7 +126,8 @@ export class Breakdown extends DCLogic {
     const L = b ? b.light : null;
     const az = L ? Number(L.key_az.value) * Math.PI / 180 : 0;
     const dial = { lx: 70 + 50 * Math.sin(az), ly: 70 + 50 * Math.cos(az), ax: 70 + 12 * Math.sin(az), ay: 70 + 12 * Math.cos(az) };
-    const lightTag = L && weakest([L.key_az, L.key_el, L.key_kelvin]) === 'sample' ? ' · SAMPLE' : '';
+    const lightSrc = L ? weakest([L.key_az, L.key_el, L.key_kelvin]) : null;
+    const lightTag = lightSrc === 'sample' ? ' · SAMPLE' : lightSrc === 'estimate' ? ' · ESTIMATE' : '';
     const secKeys = ['colour','light','lens','framing','mood'];
     const sec = {}; secKeys.forEach(k => sec[k] = { open: open[k], rot: open[k] ? 'none' : 'rotate(-90deg)', toggle: () => this.setState(s => ({ open: { ...s.open, [k]: !s.open[k] } })) });
     const askFn = text => { if (!aiOk || !text) return; this.setState({ q:text }); Promise.resolve(run('breakdown.ask', 'Answered from the breakdown', { question:text })).then(r => r && this.setState({ answer: r.result.answer })); };
@@ -283,8 +156,11 @@ export class Breakdown extends DCLogic {
       isReady, st, showFrame: !st.empty && !st.uploading,
       isReadyOverlay: { thirds: isReady && ov.thirds && !frame, light: isReady && ov.light, palette: isReady && ov.palette },
       slotProps: id => (id === 'ref-12c' && frame ? {
-        src: frame.src, grid: isReady && ov.thirds, marker: b && b.subject, title: 'Click the subject to set its position (breakdown.set_subject)',
+        src: frame.src, grid: isReady && ov.thirds, marker: b && b.subject,
+        title: 'Click the subject to set its position. Drag a box around the face, hairline to chin and cheek to cheek, to fit the light.',
         onPoint: (x, y) => this.setSubject(x, y),
+        box: b && b.face && b.face.frame_index === b.frame_index ? b.face : null,
+        onBox: box => this.setFace(box),
       } : {}),
       overlays: [['thirds','Thirds','breakdown.toggle_thirds'],['light','Light','breakdown.toggle_light'],['palette','Palette','breakdown.toggle_samples']].map(([k,label,cmd]) => ({ label, cmd, bg: ov[k] ? 'var(--bg3)' : 'transparent', color: ov[k] ? 'var(--tx)' : 'var(--tx3)', toggle: () => { run(cmd, label, { on: !ov[k] }, { quiet:true }); this.setState(s => ({ ov: { ...s.ov, [k]: !s.ov[k] } })); } })),
       replace: () => { this.setB('empty'); },
@@ -294,8 +170,9 @@ export class Breakdown extends DCLogic {
       importNote: 'Reading frames in this browser: 2 per second, 512 px. The file is not copied; nothing leaves this computer.',
       upPct: up + '%', upText: this.state.upText,
       steps: STEPS.map(([label, tier], i) => {
-        const skip = !aiOk && tier !== 'T0';
-        const note = skip ? 'skipped, enter by hand' : STEP_NOTE[i];
+        const manual = BY_HAND.has(STEP_ACTIONS[i]);
+        const skip = manual || (!aiOk && tier !== 'T0');
+        const note = skip && !manual ? 'skipped, enter by hand' : STEP_NOTE[i];
         return { label: note ? `${label} (${note})` : label, tier, mark: i < step ? (skip ? '–' : '✓') : i === step ? '…' : '·', color: i <= step ? 'var(--tx)' : 'var(--tx3)' };
       }),
       errTitle: err ? err.title : undefined, errBody: err ? err.body : undefined, errMeta: err ? err.meta : undefined,
@@ -314,7 +191,10 @@ export class Breakdown extends DCLogic {
       chips: ["What's the exact colour scheme?", 'How many lights?'].map(label => ({ label, use: () => askFn(label) })),
       saveLook: () => run('breakdown.save_look', real ? 'Look saved to Library (palette measured; light and mood sample)' : 'Look saved to Library (sample)'),
       adapt: () => { run('adapt.open', 'Adapt to our location', {}, { quiet:true }); nav('location'); },
-      lowConf: low, aiBlocked: !aiOk, aiMsg: this.props.aiMsg || '', aiBtnColor: aiOk ? 'var(--tx)' : 'var(--tx3)',
+      lowConf: low, aiBlocked: !aiOk, aiMsg: this.props.aiMsg || '',
+      // Fit light is a T0 instrument (P3): it works with no AI, so it follows the frame, not the AI state. The design's
+      // aiBtnColor colours only this button.
+      fitLightLabel: 'Fit light', fitLightDisabled: !isReady, aiBtnColor: isReady ? 'var(--tx)' : 'var(--tx3)',
       panelEmpty: !hasData, panelShow: hasData,
       sec,
       paletteCount: `${palette.length} ${palette.length === 1 ? 'colour' : 'colours'}`,
@@ -327,7 +207,7 @@ export class Breakdown extends DCLogic {
       dial, azLabel: L ? `${minus(L.key_az.value)}° az` : '', elLabel: L ? `${L.key_el.value}° el` : '',
       keyOverlay: L ? `Key ${minus(L.key_az.value)}° az · ${L.key_el.value}° el · ${L.key_kelvin.value} K${lightTag}` : undefined,
       lightRows: b ? this.rows('light', low) : [], lensRows: b ? this.rows('lens', low) : [], framingRows: b ? this.rows('framing', low) : [],
-      fitLight: () => { run('breakdown.fit_light', 'Light re-fitted to reference'); },
+      fitLight: () => this.fitLight(),
       editKey: () => this.setState({ editing:'key', open:{ ...open, light:true } }),
       moods: this.state.moods || (b ? b.mood.value : []),
       addMood: () => { const m = window.prompt('Add a mood tag'); if (m) this.setState(s => ({ moods:[...(s.moods || (b ? b.mood.value : [])), m] })); },

@@ -7,6 +7,35 @@
 
 ---
 
+## 2026-09-30 — P3: light and lens
+
+- **AD-LL-010 — `Value.source` gains `estimate` (a fitted value) and `metadata` (read from the file's own tags).**
+  **Status: accepted by the founder, 2026-09-30.**
+  **Chose:** the `Source` enum becomes `measured | manual | metadata | estimate | ai | sample`.
+  `estimate`: a T0 instrument fitted a model to the actual pixels (the light fit), so the number comes
+  from the frame, but through the model's assumptions (D-LL-008), and its accuracy is known only on
+  synthetic sets. It reads **ESTIMATE**, never MEASURED. A fitted value stays `estimate` even when the
+  Blender set passes: passing a synthetic set changes what the validation table says, not the label
+  (standing rule 3); only a ground-truth set of real frames could argue for more, and that is its own
+  decision. It carries a `confidence` only if confidence tracks error on the set (Spearman ≥ 0.5).
+  `metadata`: read from the original file's tags (EXIF focal length), not from pixels and not typed by
+  a person. It reads **METADATA**. For "the weakest source in a group" (a look's `light_source`, a
+  screen row made of several leaves) the order is measured, manual, metadata, estimate, ai, sample.
+  **Rejected:** keeping `measured` with a side flag such as `validated: false` (a reader that checks only
+  `source` would show a fitted light as MEASURED, which is what the P3 card forbids); `ai` with a
+  confidence (no model is called, and `ai` promises a confidence the fit may not have); one new value for
+  both (a fitted light and a camera's own record of its focal length fail in different ways: the first
+  through the model's assumptions, the second when the picture was cropped or re-saved after capture);
+  `manual` for EXIF (nobody typed it). **Why:** architecture §5 calls a value `measured` when a T0
+  instrument computed it from the actual pixels. The fit does that, but through a model of the scene
+  that can be wrong about it, and the P3 card says light reads as an estimate, never MEASURED; the word
+  has to live where every reader already looks. **Migration:** additive. Every stored record still
+  parses, so `schema_version` stays 1; the readers that branch on a source (badges, the weakest-source
+  rank, the Library) gain the two cases, with tests. **Trade-off:** two more badge states on every
+  screen that shows a value.
+
+---
+
 ## 2026-09-30 — v1 architecture (full picture in [`architecture.md`](architecture.md))
 
 - **AD-LL-009 — Core maths is DOM-free and runtime-agnostic, shared by the browser and the engine.**

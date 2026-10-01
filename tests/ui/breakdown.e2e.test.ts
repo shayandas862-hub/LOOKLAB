@@ -103,11 +103,12 @@ describe.skipIf(!canRun)('Breakdown in Chrome (P2)', () => {
     expect(await page.locator('img[src^="data:image/png"]').count()).toBe(1);
   }, 90_000);
 
-  test('light, lens and mood stay SAMPLE, and the marker says exactly that', async () => {
-    for (const l of ['Key', 'Fill', 'Focal length', 'Camera height', 'Shot size']) expect((await row(l)).badge, l).toBe('SAMPLE');
+  test('until the light is fitted, light, lens and mood stay SAMPLE, and the marker says exactly that', async () => {
+    // P3 split the light rows (one per value) and builds the marker from the record (D-LL-038).
+    for (const l of ['Key azimuth', 'Key colour', 'Key type', 'Fill', 'Focal length', 'Camera height', 'Shot size']) expect((await row(l)).badge, l).toBe('SAMPLE');
     const marker = await page.locator('[data-testid=sample-marker]').innerText();
-    expect(marker).toMatch(/light, lens and mood/i);
-    expect(marker).toMatch(/sample/i);
+    expect(marker).toMatch(/SAMPLE: key direction, key colour, key type, hardness, fill, key:fill, practicals, focal length/);
+    expect(marker).toMatch(/lead room, mood · colour, tone and aspect measured/);
     expect(await page.locator('main').innerText()).not.toMatch(/\bAI \d{1,3}%/);
   });
 

@@ -1,0 +1,166 @@
+{
+  "blender": "5.1.1",
+  "device": "CPU",
+  "scenes": [
+    {
+      "id": "dev-01-light",
+      "seconds": 3.68,
+      "face_box_blender": {
+        "x": 0.2276,
+        "y": 0.2184,
+        "w": 0.2127,
+        "h": 0.4299
+      }
+    },
+    {
+      "id": "dev-01-dark",
+      "seconds": 3.33,
+      "face_box_blender": {
+        "x": 0.2276,
+        "y": 0.2184,
+        "w": 0.2127,
+        "h": 0.4299
+      }
+    },
+    {
+      "id": "dev-02-light",
+      "seconds": 3.37,
+      "face_box_blender": {
+        "x": 0.2326,
+        "y": 0.2698,
+        "w": 0.2035,
+        "h": 0.4102
+      }
+    },
+    {
+      "id": "dev-02-dark",
+      "seconds": 3.19,
+      "face_box_blender": {
+        "x": 0.2326,
+        "y": 0.2698,
+        "w": 0.2035,
+        "h": 0.4102
+      }
+    },
+    {
+      "id": "dev-03-light",
+      "seconds": 5.13,
+      "face_box_blender": {
+        "x": 0.5867,
+        "y": 0.2515,
+        "w": 0.2029,
+        "h": 0.392
+      }
+    },
+    {
+      "id": "dev-03-dark",
+      "seconds": 4.98,
+      "face_box_blender": {
+        "x": 0.5867,
+        "y": 0.2515,
+        "w": 0.2029,
+        "h": 0.392
+      }
+    },
+    {
+      "id": "dev-04-light",
+      "seconds": 5.44,
+      "face_box_blender": {
+        "x": 0.4137,
+        "y": 0.2226,
+        "w": 0.2169,
+        "h": 0.4311
+      }
+    },
+    {
+      "id": "dev-04-dark",
+      "seconds": 5.07,
+      "face_box_blender": {
+        "x": 0.4137,
+        "y": 0.2226,
+        "w": 0.2169,
+        "h": 0.4311
+      }
+    },
+    {
+      "id": "dev-05-light",
+      "seconds": 5.7,
+      "face_box_blender": {
+        "x": 0.2185,
+        "y": 0.1797,
+        "w": 0.2591,
+        "h": 0.5084
+      }
+    },
+    {
+      "id": "dev-05-dark",
+      "seconds": 5.38,
+      "face_box_blender": {
+        "x": 0.2185,
+        "y": 0.1797,
+        "w": 0.2591,
+        "h": 0.5084
+      }
+    },
+    {
+      "id": "dev-06-light",
+      "seconds": 4.16,
+      "face_box_blender": {
+        "x": 0.5291,
+        "y": 0.199,
+        "w": 0.2427,
+        "h": 0.4942
+      }
+    },
+    {
+      "id": "dev-06-dark",
+      "seconds": 4.39,
+      "face_box_blender": {
+        "x": 0.5291,
+        "y": 0.199,
+        "w": 0.2427,
+        "h": 0.4942
+      }
+    },
+    {
+      "id": "dev-07-light",
+      "seconds": 5.41,
+      "face_box_blender": {
+        "x": 0.3822,
+        "y": 0.2326,
+        "w": 0.2137,
+        "h": 0.4318
+      }
+    },
+    {
+      "id": "dev-07-dark",
+      "seconds": 5.06,
+      "face_box_blender": {
+        "x": 0.3822,
+        "y": 0.2326,
+        "w": 0.2137,
+        "h": 0.4318
+      }
+    },
+    {
+      "id": "dev-08-light",
+      "seconds": 5.86,
+      "face_box_blender": {
+        "x": 0.1809,
+        "y": 0.2012,
+        "w": 0.2594,
+        "h": 0.5198
+      }
+    },
+    {
+      "id": "dev-08-dark",
+      "seconds": 5.69,
+      "face_box_blender": {
+        "x": 0.1809,
+        "y": 0.2012,
+        "w": 0.2594,
+        "h": 0.5198
+      }
+    }
+  ]
+}

@@ -23,6 +23,102 @@ Cited by number. Fixed at the start of v1.
 
 ---
 
+## 2026-09-30 — P3: light and lens, and their ground truth
+
+- **D-LL-038 — On the Breakdown, a drag marks the face, each light value has its own row, the marker is built from the record, and Fit light is a T0 button.**
+  **Chose:** on the frame, a press that moves more than 4 px draws a box and calls `breakdown.set_face`
+  (`command: false`); a click still sets the subject (D-LL-028). The stored box is drawn on the picture when it
+  belongs to the frame on screen. The light section shows one row per value the fit may write (Key azimuth, Key
+  elevation, Key colour), so each carries its own badge (ESTIMATE, with the fit's score as "ESTIMATE · 34", never
+  a percentage); key type, fill, key:fill, hardness and practicals keep their rows. The marker is
+  `markerText(record)`: it lists, by the names a DP uses, what is SAMPLE, what is ESTIMATE ("fitted to the face
+  marked by hand; not verified on real footage"), what is METADATA (EXIF), and that colour, tone and aspect are
+  measured; it now also names shot size and lead room, which P2's fixed text left out. The design's "Fit light
+  (AI)" button reads "Fit light" and is enabled whenever a frame is measured, with or without AI: two entries
+  in `src/ui/bindings.json`, one of them an attribute binding (`"[title=breakdown.fit_light] disabled"`) that the
+  converter learned for it, tested. The import no longer calls `fit_light` (there is no face box yet); its step
+  says to mark the face. **Rejected:** a separate "mark face" mode button (a drag is enough, and the click keeps
+  its meaning); one Key row combining hardness, kelvin and type (one sample leaf made the whole row SAMPLE and hid
+  the estimate); editing `design/` to change the button (the export stays as Claude Design wrote it); keeping
+  "(AI)" on a T0 button (it said a model is called when none is). **Why:** D-LL-032 at the level of each value;
+  with no API key, P3's normal state, the design's binding left the fit unusable.
+
+- **D-LL-037 — The Breakdown writes a fitted light value only if it met its tolerance on the held-out Blender set; direction always, as an estimate.**
+  **Chose:** `breakdown.fit_light` writes key azimuth and elevation (always, as `estimate`) and kelvin (its
+  held-out median error was 445 K, inside v0.2's 500 K). It does **not** write fill ratio (1.10 stops against
+  0.6) or hardness (softness 0.31 against 0.25): those keep whatever they held, sample or a person's entry, and
+  the Breakdown's marker says they were not fitted. The rules live in `src/core/light-validation.ts` and
+  `tests/core/light-accuracy.test.ts` re-measures the set on every run and fails if they disagree with it.
+  Chosen by the founder 2026-10-01. **Rejected:** writing every fitted value as an estimate whatever its error
+  (a 1-stop fill error presented beside a correct direction reads as equally trustworthy); writing nothing unless
+  the whole set passes. **Why:** an estimate still has to be worth reading; the tolerance is the line.
+  **Limit:** the set is synthetic and small (24 scenes); a pass here says nothing about real footage.
+
+- **D-LL-036 — The fit's confidence is the gap to the next-best direction, shown because it ranked with the error on the held-out set (Spearman 0.57).**
+  **Chose:** a score 0–100 from how much worse the best direction 45° or more away explains the skin than the
+  chosen one: `100 · g / (g + 1)`, where `g` is (that error − the fit's error) / the fit's error. It is a rank,
+  not a probability: higher means the fit found one clear answer, not "72% likely right". Picked on the dev set
+  from three candidates declared beforehand (Spearman with −direction error: gap 0.50, residual 0.35, sharpness
+  of the azimuth profile 0.01); on the held-out set it scored 0.57, over the 0.5 bar, so the Breakdown shows it
+  beside the estimate. **Rejected:** the residual (ranks worse), a calibrated percentage (24 scenes cannot
+  calibrate one). **Why:** the P3 rule: a confidence appears only if it tracks error. **Limit:** 0.50 and 0.57 on
+  16 and 24 scenes is a weak signal, just over the bar; it is re-checked on every test run.
+
+- **D-LL-035 — The light fit is scored on the face's skin, as a brightness pattern, not on the whole crop; v0.2's renderer and search stay.**
+  **Chose:** a candidate light is scored only on the renderer's own bare-skin mask, each pixel's brightness
+  (display value to the 2.2) divided by the mask's mean, so the wall, hair, neck and clothes do not count and
+  neither skin tone nor exposure moves the direction. A sweep over direction and fill, then v0.2's descent on
+  direction, fill and softness; intensity is then matched to the skin's mean brightness and kelvin to the lit
+  skin's colour. The drawn box is placed on the renderer by the eye line: its eyes at 0.36 of the box from the
+  top (the anthropometric average), its chin at the bottom (`src/core/light-skin.ts`). The ported v0.2 fit is
+  kept unchanged beside it (`light-fit.ts`, parity-tested). **Measured:** the ported fit on the dev set had a
+  median az error of 57° and el 27° (docs/validation.md §3.1); four variants declared before any was run,
+  {pattern in linear light, log pattern} × {box on hairline and chin, box on the eye line}, were compared on the
+  dev set only by median direction error: 19.4°, **16.2°**, 17.8°, 19.8°; the chosen one ran once on the
+  held-out set: median az 13.9°, el 8.7° (light skin 7.4° / 10.9°, dark skin 21.9° / 6.9°). A test fails without
+  the change (`tests/core/light-accuracy.test.ts`: the whole-crop objective's median direction error on the dev
+  set is over 30°). Chosen by the founder 2026-10-01. **Rejected:** keeping v0.2's objective (its median az error is 42° over the line);
+  undoing the renderer's tone curve to compare true linear light (worse on the dev set, 13° az and 17° el in a
+  first trial); a new renderer or a face model (a redesign, not this phase). **Why:** v0.2 scored every pixel of
+  its own renders, where the wall and the head come from the same model; on a real head the wall and clothes
+  outweigh the face, and one fixed skin colour turns a darker face into dimmer or warmer light. **Limits:** dark
+  skin is worse (median az 21.9°, over 15° on its own): near-frontal keys on dark skin were read as side light;
+  a box drawn less carefully (each edge off by up to 8%) raises the median az to 26°; the renderer still draws no
+  cast shadows.
+
+- **D-LL-034 — The focal length comes from the original still's EXIF, as metadata; otherwise a person enters it.**
+  **Chose:** at import the browser reads the start of an image file (up to 16 MB) and passes only two tags of
+  its Exif IFD, FocalLength (0x920A) and FocalLengthIn35mmFilm (0xA405), found in a JPEG's APP1, a PNG's
+  eXIf or a WebP's EXIF chunk, with `breakdown.import_reference`. The engine keeps them on the reference
+  (`exif`) and `breakdown.analyse` writes `lens.focal_mm` with source `metadata` (AD-LL-010): the 35 mm
+  equivalent when the file has it ("75 mm (EXIF, 35 mm equiv.)"), else the actual focal length, marked
+  "actual; sensor size unknown". A value set by hand is kept; a new file without EXIF goes back to the
+  sample value. Videos are not read. The reader is `src/core/exif.ts`, written here, no dependency, never
+  throws. **Rejected:** an EXIF library (a dependency and a licence for two tags); working out a 35 mm
+  equivalent from the focal-plane resolution tags (it needs a sensor size few files record, so the number
+  would be invented); lens tags in video containers (vendor-specific); sending the whole EXIF block (it can
+  hold a camera serial number and GPS; nothing but the two lens numbers leaves the browser). **Why:** EXIF
+  is the camera's own record of the capture, so it is neither measured from the pixels nor typed by a
+  person. The lens does not feed the light fit (D-LL-033). **Limit:** a crop or a re-save after capture
+  changes the framing but not the tag; a still grabbed from a film carries no EXIF.
+
+- **D-LL-033 — The light fit takes the face from a box a person draws; the rest of the camera and set are stated assumptions (revises D-LL-008).**
+  **Chose:** the fit works on a crop defined by a face box drawn by hand (hairline to chin, cheek to
+  cheek). The box maps onto the fit's own face region, so it sets the head's size and position, and the
+  lens is **not** an input to the light fit (its renderer has no perspective). Assumed unless set by
+  hand: the face points at the camera and the camera is at eye level (yaw 0, tilt 0); the wall behind is
+  of middling brightness (the fit's `wall` 0.7); no practical lamp is in frame. Light direction is
+  reported relative to the camera: az 0 is from the camera, positive az is from the right of the frame,
+  el is above the eye line. Accepted by the founder 2026-09-30. **Rejected:** keeping D-LL-008 as it
+  stood (the camera and set must be given, which no imported reference provides); lens from face size
+  (the fit's head size is the box's, so it would be circular); estimating head yaw and tilt now (a pose
+  model, T1 work with its own licence). **Why:** the fit needs the face's place and size and nothing
+  else about the camera; a box is one drag, as the subject is one click (D-LL-028). **Limit:** a face
+  turned away from the camera, or lit by a practical in frame, breaks the assumptions; the error that
+  causes is not measured on the Blender set, whose faces all point at the camera.
+
+---
+
 ## 2026-09-30 — P2 built: the deterministic breakdown (no AI)
 
 - **D-LL-032 — A partly real screen names exactly what is still sample, and every value shows its own source.**
@@ -226,7 +322,7 @@ Original text: `reference/v0.2/docs/10-DECISIONS-AND-OPEN-QUESTIONS.md`. Status 
 - **D-LL-011 — (v0.2 `D-011`) The 8 GB M1 limits the local loop to about 6 GB and one model at a time.** Kept and tightened: Look Lab's own processes ≤ 1.5 GB, because the machine also runs a browser, Slack and Claude (standing rule 5).
 - **D-LL-010 — (v0.2 `D-010`) Image → 3D runs in the cloud.** Kept.
 - **D-LL-009 — (v0.2 `D-009`) The scene-graph JSON is the source of truth.** Kept; it becomes the `SetPlan` contract, edited only through `plan.*` actions.
-- **D-LL-008 — (v0.2 `D-008`) The fit assumes the camera and set are known.** Kept for now; revisit in the light-fit phase (lens from face size or EXIF, camera-relative light).
+- **D-LL-008 — (v0.2 `D-008`) The fit assumes the camera and set are known.** Kept for now; revisit in the light-fit phase (lens from face size or EXIF, camera-relative light). **Revised** by D-LL-033 (P3).
 - **D-LL-007 — (v0.2 `D-007`) The look-match metric uses cheek windows only.** Kept. Do not revert to whole-face statistics.
 - **D-LL-006 — (v0.2 `D-006`) Cards for people, meshes for props; flag a card viewed more than 35° off-axis (R11).** Kept for the Set Plan phase.
 - **D-LL-005 — (v0.2 `D-005`) Single-file HTML with three.js r128 from cdnjs.** **Superseded** by D-LL-013 / AD-LL-001.

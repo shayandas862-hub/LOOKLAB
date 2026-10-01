@@ -66,13 +66,40 @@ footage (standing rule 3: no accuracy claim until P3's ground truth); Chrome is 
 
 **Next: P3.** Five-line plan and its tests are written at the start of that session.
 
-## P3 · Light and lens, and their ground truth
+## P3 · Light and lens, and their ground truth — **done 2026-10-01** against its acceptance as written; **dark skin alone does not pass** (PR-LL-003)
 Port the v0.2 light fit (`createFit`) and match metric into `src/core/`, with its 5
 synthetic cases · lens estimate · Blender ground-truth set (≥ 20 scenes, known
 rigs; needs Blender installed) · light values stay labelled "estimate" until the set
 passes. **Acceptance.** v0.2 cases pass at their v0.2 thresholds · on the Blender
 set: median az error ≤ 15°, el ≤ 10°, worst case stated · confidence correlates
 with error (Spearman ≥ 0.5) or no confidence is shown.
+
+**Result.** Full numbers in [`validation.md`](validation.md); **every Blender number is a claim about the
+Blender set only, none about real footage.**
+- **v0.2 cases pass at v0.2 thresholds**, and the port is identical to v0.2 (tolerance 0: pixels, every search
+  step, the cheek statistic): rembrandt 3° / 0° / 150 K / 0.05 st … extra-b 10° / 1° / 188 K / 0.06 st.
+- **Blender set:** 40 scenes (dev 16, held-out 24; each rig in light and dark skin), regenerated with
+  `npm run blender-set` in 217 s on the M1's CPU, 5.3 MB committed. The ported fit failed it (dev median az 57°,
+  el 27°); scored on the face's skin instead (D-LL-035), **held-out median az 13.9°, el 8.7°: passes.** Light
+  skin 7.4° / 10.9°; **dark skin 21.9° / 6.9° (az over 15° on its own).** **Worst case** `test-04-dark`: a key at
+  az 17°, el 1° fitted at 78°, 11° (61° off). Kelvin 445 K (written); fill 1.10 stops and softness 0.31 (not
+  written, D-LL-037). A face box off by up to ±8% per edge raises the median az to 26°.
+- **Confidence:** Spearman(score, −direction error) 0.57 on the held-out set (0.50 dev): shown, as a score.
+- **Lens:** focal length from the original still's EXIF as `metadata` (D-LL-034), otherwise by hand.
+- **In Chrome** (`tests/ui/light.e2e.test.ts`): a committed Blender render imported, the face dragged, Fit light
+  pressed: Key azimuth, elevation and colour read ESTIMATE (never MEASURED); fill, key:fill, hardness, key type
+  and practicals stay SAMPLE; the marker names both; nothing claims accuracy on real footage; a still with EXIF
+  reads its focal length as METADATA. Fit light works with no AI connected.
+- **Measured on the M1 (8 GB):** one fit 196 ms median in the fit itself, 204–206 ms over HTTP (first call
+  310–315 ms). Engine RSS: 137 MB idle fresh, 144 MB after one frame is imported and measured, 144 MB peak during
+  ten fits and after; after a 60 s 1080p import, 147–185 MB idle over five runs (footprint 155–156 MB), and ten
+  fits add 0–2 MB at their peak and nothing that stays. **The fit does not push the engine over 150 MB; the
+  60 s import does, in most runs (B-LL-004, open).** Import itself re-measured: 19.4 s.
+**Not done:** the face is marked by hand (no detector); dark skin fails the direction bar on its own; the fit
+is sensitive to a careless box; fill and hardness are not estimated; no real footage was checked (none exists
+with known light); B-LL-004 (engine memory after a long import) is open.
+
+**Next: P4.** Build prompt `prompts/06-phase-4.md`; its CLAUDE.md is drafted in `prompts/06-phase-4-CLAUDE.md`.
 
 ## P4 · AI in the app
 Provider adapter (Anthropic via API key in the Keychain) · spend cap and cost

@@ -20,11 +20,21 @@
 
 **Breakdown** — the measured and estimated description of one shot's look: palette, tints, saturation, contrast, light, lens, framing, mood. Every leaf is a Value.
 
-**Value** — `{ value, unit?, source, confidence?, updated_by, updated_at }`. `source` is one of:
+**Value** — `{ value, unit?, source, confidence?, updated_by, updated_at }`. `source` is one of, strongest first (AD-LL-010):
 - **measured** — computed by a T0 instrument from the actual pixels;
-- **ai** — a model's estimate, always with a confidence 0–100 (below 60 goes to review);
 - **manual** — typed or set by a person;
+- **metadata** — read from the original file's own tags (the EXIF focal length), not from pixels and not typed by a person;
+- **estimate** — a T0 fit of a model to the actual pixels (the light fit): true only as far as the model's assumptions. Reads ESTIMATE, never MEASURED, even after a synthetic set passes;
+- **ai** — a model's estimate, always with a confidence 0–100 (below 60 goes to review);
 - **sample** — placeholder data from the design or a stand-in. Never shown as anything else (D-LL-015).
+
+**Face box** — a box a person drags around a face on a sampled frame, hairline to chin and cheek to cheek, stored with the frame it was drawn on. The light fit runs on it; a new file drops it (D-LL-033).
+
+**Light fit** — `breakdown.fit_light`: v0.2's renderer and search, scored on the face's skin as a brightness pattern (D-LL-035). Writes key direction and key colour as estimates; fill ratio and hardness only if they meet their tolerance on the held-out set (D-LL-037).
+
+**Confidence score (of a fit)** — 0–100, how much better the fitted direction explains the skin than the best direction 45° or more away. A rank, not a probability; shown only because it ranked with error on the held-out set (D-LL-036).
+
+**Blender set** (also **ground-truth set**) — renders of one head built in a Blender script, under lights whose truth is written beside each render (`tests/fixtures/blender/`). The **dev set** may be looked at while the fit changes; the **held-out set** is run once, for the number that is reported. A result on it is a claim about the Blender set only (docs/validation.md).
 
 **Look** — a saved breakdown fingerprint in the Library (palette, key direction, ratio, colour temperature, tags, mood) that can be applied to another shot's targets.
 

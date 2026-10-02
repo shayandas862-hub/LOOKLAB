@@ -85,7 +85,8 @@ defineAction({
 
 Every measured or estimated leaf is a `Value`:
 `{ value, unit?, source: 'measured'|'manual'|'metadata'|'estimate'|'ai'|'sample', confidence?, updated_by, updated_at }`
-(strongest first; `metadata` and `estimate` since P3, AD-LL-010).
+(strongest first; `metadata` and `estimate` since P3, AD-LL-010). Since P4 a value may name the decision row that
+wrote it (`decision_id`, AD-LL-013); every AI value does.
 Stand-ins return `source: 'sample'`, and the UI says so. A value is `measured` only
 when a T0 instrument computed it from the actual pixels. A T0 fit of a model to the
 pixels (the light fit) is an `estimate`, never `measured`; a value read from the file's
@@ -97,6 +98,15 @@ own tags (EXIF focal length) is `metadata`.
 |---|---|---|
 | Own Claude subscription | The person runs **Claude Code**, which connects to Look Lab's `/mcp` endpoint and drives it. | Their subscription, used by Claude Code itself. |
 | API key | In-app AI buttons call a provider adapter (Anthropic first). Key in the macOS Keychain. Monthly cap with a hard stop and a cost log. | The key's account. |
+
+**As built in P4:** `src/engine/anthropic.ts` sends one Messages API request per call with plain `node:https`
+(D-LL-041) to `claude-opus-5` (D-LL-040), structured output checked again with zod. The key is added only from the
+Look Lab window (`settings.add_provider`, refused over MCP and the CLI), written to the login Keychain through
+`security` on stdin and read back for each call (`src/engine/keychain.ts`, D-LL-048). Every call goes through
+`callModel` (`src/actions/ai-call.ts`): No AI and the key are checked, the call is priced at its worst case and refused
+if it would cross the month's cap, the real cost goes to the decision row and to `used_inr` (AD-LL-011, AD-LL-012),
+and calls run one at a time. Only the breakdown's numbers and words leave the machine (D-LL-039). The test suite runs
+with no network at all (D-LL-045).
 | No AI | Every screen works by hand. AI buttons disable and say why. | Nobody. |
 
 Look Lab never offers a claude.ai login and never reuses subscription OAuth tokens:
@@ -107,7 +117,7 @@ Anthropic does not allow third-party products to do so
 
 | Piece | Where | Budget | How measured |
 |---|---|---|---|
-| Engine | Node, 127.0.0.1 | ≤ 150 MB RSS (measured 121 MB idle, 113–118 MB after 600 writes) | `ps -o rss` on the node pid |
+| Engine | Node, 127.0.0.1, `--max-semi-space-size=1` (D-LL-044) | ≤ 150 MB RSS (P4: 138–141 MB idle fresh, 119–135 MB idle after a 60 s import, B-LL-004) | `ps -o rss` and `footprint` on the node pid |
 | UI | a tab in the browser the person already has open | ≤ 400 MB for the tab | Chrome Task Manager / `performance.memory` |
 | 3D (Set Plan) | three.js, loaded only when Set Plan opens | inside the tab budget | same |
 | Video/image decode | the browser's own decoder (hardware on M1) | inside the tab budget | same |
@@ -121,7 +131,8 @@ Total target for Look Lab's own processes: **≤ 1.5 GB** in normal use.
 ```
 ~/LookLab/                     (override with LOOKLAB_HOME; every file mode 0600, folders 0700)
   token                        MCP/CLI bearer token
-  system/settings.json         No AI mode, API provider and cap, cloud-allowed projects
+  system/settings.json         No AI mode, API provider, the cap and the month's spend (AD-LL-011), cloud-allowed projects
+                               (the API key is not here: it is in the macOS Keychain, D-LL-048)
   projects/<project_id>.json   the project: scenes, shots, cloud flag
   projects/<project_id>/
     references/<ref_id>.json   file facts (name, size, SHA-256), sampling, detected shots
@@ -130,8 +141,8 @@ Total target for Look Lab's own processes: **≤ 1.5 GB** in normal use.
     plans/<shot_id>.json       the current plan, its version number and its undo history
     setsheets/<shot_id>.json   boards/board.json
   looks/<look_id>.json         the Library, shared across projects
-  decisions.jsonl              every logged decision, append-only
-  verdicts.jsonl               people's verdicts on decisions, append-only
+  decisions.jsonl              every logged decision, append-only; an AI call's row holds what was sent and what it cost (AD-LL-012)
+  verdicts.jsonl               people's verdicts on decisions, append-only (a review's "agreed", D-LL-049)
 ```
 (Layout as built and listed on 2026-09-30.)
 

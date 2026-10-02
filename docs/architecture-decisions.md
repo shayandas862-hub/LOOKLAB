@@ -7,6 +7,41 @@
 
 ---
 
+## 2026-10-01 — P4: AI in the app
+
+- **AD-LL-013 — A value names the decision row that wrote it (`Value.decision_id`).**
+  **Status: accepted by the founder, 2026-10-01** (reply to the P4 questions: "what are you waiting for?", taken as yes
+  to every recommendation). **Chose:** every `Value` may carry `decision_id`, the id of the decision row whose action
+  wrote it; the registry creates that id before the handler runs, so the handler can stamp it on the value it writes.
+  AI values always carry it. **Rejected:** finding the decision at review time from the shot code and the action name
+  (decision rows know the shot but not the project, and two projects can both have a shot "12C"); a separate
+  `ai_decisions` map on the breakdown (a second place to keep in step with the values). **Why:** R5's review must
+  record its verdict on the exact call that produced the value (D-LL-023, P4 task 4). **Migration:** additive and
+  optional; every stored record parses unchanged and `schema_version` stays 1. **Trade-off:** one more field on
+  every value an action writes.
+
+- **AD-LL-012 — A decision row records what a model call sent and cost (`Decision.ai`).**
+  **Status: accepted by the founder, 2026-10-01.** **Chose:** a decision row gains `ai` (null for every action that
+  called no model): provider, model, prompt id and version, `sent` (the system prompt and the user message: exactly
+  what left the machine), tokens in and out as billed, time, stop reason, the worst case the call was priced at before
+  it was sent, and the dated prices and rupee rate used. `cost_inr` (from P1) holds the real cost and is written for
+  failed calls too. **Rejected:** the prompt version only, with the text in code (a row could not then be read on its
+  own, and a changed prompt file would rewrite history); a separate upload log (D-LL-039 sends no footage, and the row
+  already holds every byte that was sent). **Why:** the P4 card: "the prompt and its version are in the decision
+  row", a cost on every row, and `used_inr` equal to the rows' sum. **Migration:** additive with a default of null;
+  rows written before P4 parse unchanged. **Trade-off:** an AI row is a few KB (the prompt is repeated in each); calls
+  are capped by money, so the log grows slowly.
+
+- **AD-LL-011 — The spend belongs to a month (`Settings.api.month`).**
+  **Status: accepted by the founder, 2026-10-01.** **Chose:** `Settings.api` gains `month` ("2026-10"), the UTC month
+  `used_inr` counts, as Anthropic bills. The first call or read in a new UTC month sets `used_inr` to 0 and the new
+  month; a record from before P4 (`month: null`) adopts the current month and keeps its total. **Rejected:** a
+  rolling 30 days (not what the bill says); local time (India is 5 h 30 ahead, so the cap would reset before the bill
+  does); summing the decision log on every check (slow as it grows, and a row's cost is already added once).
+  **Migration:** additive with a default of null. **Trade-off:** none found.
+
+---
+
 ## 2026-09-30 — P3: light and lens
 
 - **AD-LL-010 — `Value.source` gains `estimate` (a fitted value) and `metadata` (read from the file's own tags).**

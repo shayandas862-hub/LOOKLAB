@@ -15,6 +15,8 @@
     "breakdown.fit_light · error 502 · 19:42:07": "errMeta",
     "Enter light by hand": "errManual",
     "Fit light (AI)": "fitLightLabel",
-    "[title=breakdown.fit_light] disabled": "fitLightDisabled"
+    "[title=breakdown.fit_light] disabled": "fitLightDisabled",
+    "3 values need review": "reviewTitle",
+    "Practicals, fill temperature and camera height are below 60% confidence. Confirm or edit them.": "reviewBody"
   }
 }

@@ -4,6 +4,7 @@ import { join, dirname } from 'node:path';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { startEngine } from './engine.ts';
+import { MacKeychain } from './keychain.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const home = process.env.LOOKLAB_HOME ?? join(homedir(), 'LookLab');
@@ -11,7 +12,7 @@ const port = Number(process.env.LOOKLAB_PORT ?? 4317);
 const uiDir = join(root, 'dist', 'ui');
 
 try {
-  const engine = await startEngine({ home, port, uiDir: existsSync(uiDir) ? uiDir : undefined });
+  const engine = await startEngine({ home, port, uiDir: existsSync(uiDir) ? uiDir : undefined, keychain: new MacKeychain() });
   console.log(`Look Lab engine running at ${engine.url}`);
   console.log(`Data folder: ${home}`);
   const stop = async () => {

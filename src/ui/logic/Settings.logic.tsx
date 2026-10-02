@@ -4,6 +4,7 @@ import React from 'react';
 import { DCLogic } from '../runtime/dc';
 import { SettingsView, defaults } from '../views/Settings.view';
 import { invoke } from '../runtime/engine';
+import { KeyBox } from '../components/KeyBox';
 
 const REFRESH_MS = 5000;
 const MCP_FRESH_MS = 10 * 60 * 1000;
@@ -14,7 +15,7 @@ function ago(iso) {
 }
 
 export class Settings extends DCLogic {
-  state = { tab:'ai', copied:false, cap:null, settings:null, status:null, command:'' };
+  state = { tab:'ai', copied:false, cap:null, settings:null, status:null, ai:null, command:'' };
 
   componentDidMount() {
     this.load();
@@ -25,6 +26,7 @@ export class Settings extends DCLogic {
   load() {
     invoke('settings.get').then(r => this.setState({ settings:r.result }), () => {});
     invoke('app.status').then(r => this.setState({ status:r.result }), () => {});
+    invoke('settings.ai_status').then(r => this.setState({ ai:r.result }), () => {});
   }
 
   renderVals() {
@@ -37,7 +39,8 @@ export class Settings extends DCLogic {
     const capN = parseInt(String(cap).replace(/\D/g, '')) || 0;
     const pct = capN ? Math.min(100, api.used_inr / capN * 100) : 0;
     const atCap = capN > 0 && pct >= 100;
-    const hasKey = api.provider !== 'none';
+    const ai = this.state.ai;
+    const hasKey = !!(ai && ai.key_in_keychain);
     const cloud = settings ? settings.cloud_allowed_projects.includes('neel') : false;
     const sw = on => ({ bg: on ? 'var(--acc)' : 'var(--line2)', knob: on ? '17px' : '3px' });
     const mcpSeen = status && status.mcp_last_seen;
@@ -51,7 +54,7 @@ export class Settings extends DCLogic {
       mcpBlurb: `Claude Code runs Look Lab through its MCP connection, on your own Claude subscription. ${status ? status.mcp_tools : '…'} Look Lab tools available. Run this once in a terminal:`,
       // The full command is long; show its start and copy the whole thing (the box is sized for one line).
       mcpCommandText: command ? (command.length > 58 ? command.slice(0, 57) + '…' : command) : 'Loading the setup command…',
-      apiKeyText: hasKey ? 'Key stored in the macOS Keychain' : 'No key yet. In-app AI buttons arrive in phase P4.',
+      apiKeyText: React.createElement(KeyBox, { hasKey, run, reload: () => this.load() }),
       copyLabel: copied ? 'Copied' : 'Copy setup command',
       copyCmd: () => { Promise.resolve(run('settings.copy_mcp_command', 'Setup command copied')).then(r => { if (!r) return; try { navigator.clipboard.writeText(r.result.command); } catch (e) {} this.setState({ copied:true }); setTimeout(() => this.setState({ copied:false }), 1800); }); },
       // The design has no save button for the cap: save when typing pauses.
@@ -61,10 +64,11 @@ export class Settings extends DCLogic {
         clearTimeout(this._capT);
         this._capT = setTimeout(() => run('settings.set_cap', 'Monthly cap saved', { amount_inr: parseInt(String(value).replace(/\D/g, '')) || 0 }), 800);
       },
-      used: api.used_inr.toLocaleString('en-IN'), usedPct: pct + '%',
+      used: api.used_inr.toLocaleString('en-IN', { maximumFractionDigits:2 }), usedPct: pct + '%',
       barColor: atCap ? 'var(--warn)' : 'var(--acc)', capBorder: atCap ? 'var(--warn)' : 'var(--line)',
-      capState: !hasKey ? 'No key' : atCap ? 'Cap reached · AI buttons paused' : 'Active', capColor: atCap ? 'var(--warn)' : 'var(--tx2)',
-      providers: [{ label:'Image model', add: () => run('settings.add_provider', 'Provider setup opened') }, { label:'3D reconstruction', add: () => run('settings.add_provider', 'Provider setup opened') }],
+      capState: noAi ? 'No AI mode' : !hasKey ? 'No key' : atCap ? 'Cap reached · AI buttons paused' : `Active · ${(ai && ai.model) || ''}`, capColor: atCap ? 'var(--warn)' : 'var(--tx2)',
+      // Image and 3D providers arrive with cloud jobs (P10): the engine refuses them and says so.
+      providers: [['Image model', 'fal'], ['3D reconstruction', 'replicate']].map(([label, provider]) => ({ label, add: () => run('settings.add_provider', '', { provider }) })),
       locals: [['Segmentation','not installed · phase P4'],['Depth','not installed · phase P4']].map(([label, meta]) => ({ label, meta, tbg: sw(false).bg, knob: sw(false).knob, toggle: () => {} })),
       memPct: Math.min(100, memMb / 8192 * 100) + '%', memLabel: status ? `${(memMb / 1024).toFixed(2)} GB` : '…',
       privBg: sw(!cloud).bg, privKnob: sw(!cloud).knob,

@@ -49,11 +49,12 @@ beforeEach(async () => {
 });
 
 describe('what is real in P2 (standing rule 2)', () => {
-  test('the actions made real carry no stand-in flag; lens, framing size, mood and ask still do (light is real since P3)', () => {
+  test('the actions made real carry no stand-in flag; the lens labels still do (light real since P3; framing, mood and ask since P4: tests/actions/standins.test.ts)', () => {
     const flag = (n: string) => registry.get(n)!.standIn;
     for (const n of ['breakdown.import_reference', 'breakdown.add_frame', 'breakdown.get_frame', 'breakdown.get_reference',
       'breakdown.detect_shots', 'breakdown.sample_palette', 'breakdown.analyse', 'breakdown.set_subject', 'breakdown.fit_light']) expect(flag(n), n).toBe(false);
-    for (const n of ['breakdown.fit_lens', 'breakdown.fit_framing', 'breakdown.fit_mood', 'breakdown.ask']) expect(flag(n), n).toBe(true);
+    for (const n of ['breakdown.fit_framing', 'breakdown.fit_mood', 'breakdown.ask']) expect(flag(n), n).toBe(false);
+    expect(flag('breakdown.fit_lens')).toBe(true);
   });
 
   test('the new helpers are not commands, so the design catalogue parity holds', () => {
@@ -194,11 +195,14 @@ describe('subject position by hand (D-LL-028) and saving the look', () => {
     expect(saved.source).toBe('sample');
   });
 
-  test('after a real import, stand-ins still return no measured value', async () => {
+  test('after a real import, framing and lens return no measured value (shot size is an estimate by R2 since P4)', async () => {
     await importFrames([stripes(64, 36, PATCHES).px]);
     await run('breakdown.analyse');
-    const r = await registry.invoke('breakdown.fit_framing', {}, ctx.for('ui'));
-    expect(JSON.stringify(r.result)).not.toContain('"measured"');
+    await run('breakdown.set_face', { x: 0.2, y: 0.05, w: 0.45, h: 0.9 });
+    for (const name of ['breakdown.fit_framing', 'breakdown.fit_lens']) {
+      const r = await registry.invoke(name, {}, ctx.for('ui'));
+      expect(JSON.stringify(r.result), name).not.toContain('"measured"');
+    }
   });
 });
 

@@ -4,11 +4,15 @@
 import { hashFile, mediaOf, openImage, openVideo, readLens, toBase64 } from '../runtime/media';
 import { clock, mb } from './Breakdown.rows';
 
-export const STEPS = [['Shots detected','T0'],['Colour','T0'],['Light','T0'],['Lens','T2'],['Framing','T1'],['Mood','T2']];
+export const STEPS = [['Shots detected','T0'],['Colour','T0'],['Light','T0'],['Lens','T0'],['Framing','T0'],['Mood','T2']];
 export const STEP_ACTIONS = ['breakdown.detect_shots','breakdown.sample_palette','breakdown.fit_light','breakdown.fit_lens','breakdown.fit_framing','breakdown.fit_mood'];
-export const STEP_NOTE = ['', '', 'mark the face on the frame, then Fit light', 'focal length from EXIF when the file has it; the rest sample until P4', 'aspect measured, subject by hand', 'sample until P4'];
-/** Steps a person finishes by hand after the import: the light needs the face box first (D-LL-033). */
-export const BY_HAND = new Set(['breakdown.fit_light']);
+export const STEP_NOTE = ['', '', 'mark the face on the frame, then Fit light', 'focal length from EXIF when the file has it; the rest by hand (D-LL-039)', 'aspect measured; shot size follows the face box (R2); subject and lead room by hand', ''];
+/**
+ * Steps a person finishes by hand after the import: the light and the shot size need the face box first (D-LL-033,
+ * D-LL-046), and the lens labels stay by hand because no frame leaves the machine (D-LL-039). Mood asks the model
+ * when AI is ready.
+ */
+export const BY_HAND = new Set(['breakdown.fit_light', 'breakdown.fit_lens', 'breakdown.fit_framing']);
 
 export function pickReference(c) {
   const input = document.createElement('input');

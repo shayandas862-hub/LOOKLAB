@@ -12,6 +12,7 @@ import { decodePng } from '../src/engine/png.ts';
 import { measurePalette } from '../src/core/palette.ts';
 import { measureContrast, measureSaturation, measureTints } from '../src/core/stats.ts';
 import { frameSignature } from '../src/core/cuts.ts';
+import NODE_FLAGS from '../src/engine/node-flags.json' with { type: 'json' };
 
 const ROOT = join(import.meta.dirname, '..');
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -106,7 +107,7 @@ async function recordClip(): Promise<string> {
 
 const clip = process.argv[2] ?? (await recordClip());
 
-const engine = spawn(process.execPath, ['--experimental-strip-types', '--no-warnings=ExperimentalWarning', 'src/engine/main.ts'], {
+const engine = spawn(process.execPath, [...NODE_FLAGS, 'src/engine/main.ts'], {
   cwd: ROOT,
   env: { ...process.env, LOOKLAB_HOME: home, LOOKLAB_PORT: String(port) },
 });

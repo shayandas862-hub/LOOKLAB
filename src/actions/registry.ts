@@ -1,7 +1,7 @@
 // The action registry: the only way state changes (AD-LL-002).
 import { z } from 'zod';
 import type { Decision, Tier, Via } from '../contracts/index.ts';
-import type { ActionContext } from './context.ts';
+import type { ActionContext, CallMeter } from './context.ts';
 
 export type Effect = 'read' | 'write' | 'spend' | 'upload' | 'delete';
 
@@ -13,6 +13,8 @@ export interface ActionDef<I extends z.ZodObject = z.ZodObject, O extends z.ZodT
   effect: Effect;
   /** A person approves before it writes. Refused over MCP until the approval queue exists (D-LL-017). */
   confirm?: boolean;
+  /** Runs only from the Look Lab window: refused over MCP and the CLI, with this reason (the API key, P4). */
+  windowOnly?: string;
   /** Needs a T1/T2 model; refused in No AI mode. */
   ai?: boolean;
   /** Returns sample output where a real instrument or model will go (standing rule 2). */
@@ -41,6 +43,7 @@ export type ErrorCode =
   | 'invalid_output'
   | 'needs_approval'
   | 'ai_unavailable'
+  | 'model_output'
   | 'not_found'
   | 'failed';
 
@@ -78,6 +81,8 @@ function issuesText(error: z.ZodError): string {
 
 const SECRET_FIELD = /key|token|secret|password/i;
 
+const newDecisionId = (time: string) => `d-${Date.parse(time).toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
 /** A short, log-safe summary: secret-looking fields are redacted before anything is written (standing rule 6). */
 function brief(value: unknown, max = 240): string {
   const s = JSON.stringify(value, (k, v) => (k && SECRET_FIELD.test(k) && typeof v === 'string' ? '[redacted]' : v)) ?? '';
@@ -112,11 +117,14 @@ export class Registry {
     const action = this.byName.get(name);
     if (!action) throw new ActionError('unknown_action', name, `no action named "${name}"`);
     const started = ctx.now();
+    const call: CallMeter = { decision_id: newDecisionId(started), cost_inr: 0, confidence: null, rule_id: null, ai: null };
+    ctx = { ...ctx, call };
     let inputSummary = brief(raw ?? {});
     try {
       const parsed = action.input.safeParse(raw ?? {});
       if (!parsed.success) throw new ActionError('invalid_input', name, `${name}: ${issuesText(parsed.error)}`);
       inputSummary = brief(parsed.data);
+      if (action.windowOnly && (ctx.via === 'mcp' || ctx.via === 'cli')) throw new ActionError('needs_approval', name, action.windowOnly);
       if (action.confirm && ctx.via === 'mcp') {
         throw new ActionError(
           'needs_approval',
@@ -150,24 +158,26 @@ export class Registry {
 
   private async log(ctx: ActionContext, a: AnyAction, time: string, inputs: string, result: string, ok: boolean) {
     const shot = /"shot_id":"([^"]+)"/.exec(inputs)?.[1] ?? null;
+    const call = ctx.call;
     const row: Decision = {
       schema_version: 1,
-      id: `d-${Date.parse(time).toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+      id: call?.decision_id ?? newDecisionId(time),
       time,
       workspace_id: ctx.workspace,
       by: ctx.user,
       via: ctx.via,
       command: a.name,
       tier: a.tier,
-      rule_id: a.rules?.[0] ?? null,
+      rule_id: call?.rule_id ?? a.rules?.[0] ?? null,
       shot_id: shot,
       inputs,
       result,
       ok,
       stand_in: !!a.standIn,
-      confidence: null,
-      cost_inr: 0,
+      confidence: call?.confidence ?? null,
+      cost_inr: call?.cost_inr ?? 0,
       verdict: null,
+      ai: call?.ai ?? null,
     };
     await ctx.logDecision(row);
   }

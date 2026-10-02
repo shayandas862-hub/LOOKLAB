@@ -13,6 +13,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { chromium } from 'playwright-core';
+import NODE_FLAGS from '../src/engine/node-flags.json' with { type: 'json' };
 
 const ROOT = join(import.meta.dirname, '..');
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -34,7 +35,7 @@ async function idleRss(pid: number): Promise<number> {
   return median(xs);
 }
 
-const engine = spawn(process.execPath, ['--experimental-strip-types', '--no-warnings=ExperimentalWarning', 'src/engine/main.ts'], {
+const engine = spawn(process.execPath, [...NODE_FLAGS, 'src/engine/main.ts'], {
   cwd: ROOT, env: { ...process.env, LOOKLAB_HOME: home, LOOKLAB_PORT: String(port) },
 });
 await new Promise<void>((resolve, reject) => {

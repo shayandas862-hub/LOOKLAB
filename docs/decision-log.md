@@ -23,6 +23,139 @@ Cited by number. Fixed at the start of v1.
 
 ---
 
+## 2026-10-01 — P4: AI in the app
+
+- **D-LL-050 — P4 closes without an API key: the founder's AI is Claude Code over MCP; the in-app key path stays built and dormant.**
+  **Chose:** no Anthropic API key is added (founder, 2026-10-02: "start the next part of the build then", after the
+  in-app path was explained as optional). The in-app path (D-LL-039…D-LL-048) is built, tested on the stub client and
+  off: with no key every AI control says "No API key in the Keychain" and everything works by hand. The two live calls
+  P4 asked for (one mood, one Ask, measured on the M1) are **not done**; `scripts/measure-ai.ts` runs them when a key
+  is added (worst case ₹3.73 + ₹6.34, priced 2026-10-02). **Rejected:** removing the in-app path (it costs nothing
+  idle, and a key can be added later); adding a key to finish the measurement (the founder's money and choice).
+  **Why:** a Claude subscription can drive every action through Claude Code; an API key bills separately.
+  **Known gap, not fixed here:** a value Claude Code writes over MCP through `breakdown.edit_value` is recorded as
+  `manual`, as if a person typed it; it should read as a model's. Its own decision, next.
+
+- **D-LL-049 — Mood can be set by hand; a person's review is a verdict on the decision that wrote the value, and a new AI value clears it.**
+  **Chose:** `breakdown.edit_value` accepts `mood` as words separated by commas (source manual), so mood works with No
+  AI; the Breakdown's "+ Add" now saves through it (before P4 it changed only the screen and was lost on reload).
+  `breakdown.review` refuses anything but an AI value, appends `agreed` to `verdicts.jsonl` for the value's
+  `decision_id` (AD-LL-013) and adds the field to the breakdown's `reviewed`; a new AI value for the field removes it
+  from `reviewed`, so the new value is queued afresh if it is under 60. `breakdown.review_queue` (a helper, `command:
+  false`) lists what waits. **Rejected:** reviewing any value (a person's own value has nothing to confirm); keeping a
+  review across a new answer (the person agreed to other words). **Why:** R5 and D-LL-023: the click is the approval,
+  and the router's future training data needs the verdict on the exact call.
+
+- **D-LL-048 — The API key is added only in the Look Lab window; it goes to the Keychain on stdin and is read back for each call.**
+  **Chose:** `settings.add_provider` (T3) carries a new `windowOnly` flag: the registry refuses it over MCP and over the
+  CLI with the reason, before the handler runs (an agent must not handle the key; a key typed in a terminal stays in
+  its history). The key is checked against `sk-ant-[A-Za-z0-9_-]{16,256}` before anything runs (so it can carry no
+  quote, space or newline), then written with `security -i`, the command and key on stdin, never in argv (which `ps`
+  shows to every process), as the generic password "look-lab" / "anthropic-api-key" in the login keychain
+  (`src/engine/keychain.ts`, probed on the M1 with a dummy value: write, read and delete work; a missing item exits 44).
+  The provider reads it with `security find-generic-password -w` for each call and keeps no copy. The decision row's
+  input summary already redacts a field named like a key (P1); the errors never repeat it; `tests/engine/secret-scan.test.ts`
+  searches every file the engine wrote, every event, every answer and every console line for it. Image and 3D
+  providers are refused until P10. `settings.remove_provider` (a helper) deletes it. **Rejected:** `security
+  add-generic-password -w <key>` (the key in argv); a key file with mode 0600 (standing rule 6); keeping the key in
+  the engine's memory (one read per call costs about 20 ms and nothing else). **Limit:** any program running as the
+  person can call `security` too; the Keychain protects the key at rest, not from the person's own processes (D-LL-023).
+
+- **D-LL-047 — Ask may quote only numbers that are in the record; any other number refuses the answer.**
+  **Chose:** after a valid answer, every number and `#RRGGBB` code in it must appear in the breakdown that was sent or in
+  the question (a number written with fewer decimals passes if it is a rounding of one in the record: "38%" for a
+  38.2% share); standard names that carry digits (Rec.709, BT.1886, S-Log3, sRGB …) and Look Lab's ids (P4.5, R5,
+  D-LL-…) are words. An answer with any other number is refused with the numbers named, and its cost is still logged.
+  The prompt says capture numbers (white balance, gel, ISO, exposure, CDL, LUT) come from P4.5's maths.
+  **Rejected:** letting the model compute ("about 3200 K") and labelling it AI (D-LL-003: models choose words, not
+  numbers); asking for counts in digits (a count is not in the record; the prompt asks for words). **Why:** the first
+  bad answer would put a confident wrong number in front of a gaffer. **Limit:** a number written out in words
+  ("thirty-two hundred") passes the check; the prompt forbids it, the check does not.
+
+- **D-LL-046 — Shot size comes from the face box by R2 (T0): the face's height over the active picture's height.**
+  **Chose:** `breakdown.fit_framing` becomes T0 and real: share = face box height × frame height ÷ the active picture's
+  height (letterbox bars excluded, D-LL-029); ECU ≥ 0.70, CU ≥ 0.38, MCU ≥ 0.23, MS ≥ 0.16, MWS ≥ 0.115, WS ≥ 0.07,
+  else EWS (`src/core/shot-size.ts`). The boundaries are the geometric means between the share each name's typical
+  framing gives a face about a fifth of a metre hairline to chin (ECU the face or less, CU 0.35 m of frame, MCU 0.7 m,
+  MS 1 m, MWS 1.35 m, WS 2 m, EWS 4 m). Written as `estimate` with its decision id; a size set by hand is kept; lead
+  room and subject stay by hand. The Breakdown calls it after a face is marked. **Rejected:** a model labelling the
+  size (D-LL-039 sends no frame, and the face box already answers it); no label until a detector exists. **Why:** the
+  P4 card: "where a T0 rule already gives a label (R2: shot size from the face box), propose T0 instead". **Limit:** a
+  definition, not a measurement: it assumes an adult face seen from the front; a child, a profile or a face partly out
+  of frame reads one size off. On the Blender set (faces 32–58% of the frame) it reads MCU or CU by construction.
+
+- **D-LL-045 — The test suite has no network: a guard refuses every connection off the machine, and Chrome runs offline.**
+  **Chose:** `tests/setup/no-network.ts`, loaded before every test file, wraps `net.Socket.prototype.connect` (every
+  TCP and TLS client in Node goes through it: `net`, `tls`, `http`, `https`, `fetch`) and destroys any socket bound
+  for a host that is not loopback, with "no-network guard" in the error. The browser tests start Chrome through
+  `tests/ui/chrome.ts`: every host name resolves to nothing except 127.0.0.1, and each page aborts any request not for
+  127.0.0.1, `data:` or `blob:`. `tests/engine/no-network.test.ts` and a Chrome test prove both. Before the guard, the
+  same test reached api.anthropic.com (an unauthenticated request, answered 401; no key was sent, nothing billed).
+  **Rejected:** trusting each test to use the stub (one mistake costs money); an environment variable that turns the
+  client off (production code would then carry a test switch). **Why:** "zero live calls in the suite" has to be
+  enforced, not promised. **Found while doing it:** the UI loads Google Fonts from the internet on every page load
+  (`src/ui/index.html`); offline, the request fails quietly and the page falls back to system fonts. Noted, not
+  changed (the page is the design's).
+
+- **D-LL-044 — B-LL-004's fix: the engine runs with a 1 MB young generation, from one list of Node flags.**
+  **Chose:** `--max-semi-space-size=1`, in `src/engine/node-flags.json`, which `bin/looklab.mjs` (start, dev and a new
+  `engine` command that `npm run engine` now calls), both measure scripts and the boot test read. Five runs after a
+  60 s import: 119–130 MB RSS idle (it was 147–185); a light fit about 4% slower. **Rejected:** a full GC after each
+  import (a second mechanism, not needed once the young generation is small); decoding in a worker thread that exits
+  (more code for the same result); `--max-old-space-size` (it caps the heap and can crash a large import instead of
+  slowing it). **Why:** the cause was measured: not a leak, but the import's garbage held by a heap V8 does not shrink
+  while idle (B-LL-004).
+
+- **D-LL-043 — Colour grading is its own phase, P4.5, between P4 and P5; no phase is renumbered.**
+  **Chose:** "P4.5 · Colour: what to capture and how to grade" (founder's request of 2026-10-01; V-LL-002). P5–P12
+  keep their numbers. **Rejected:** folding colour into P5 (Location & Kit is already a full phase, and colour needs
+  its own ground truth); renumbering P5 onwards (phase numbers are cited in code, tests and records). **Why:**
+  records convention §1: an id cited elsewhere never moves. Accepted by the founder, 2026-10-01.
+
+- **D-LL-042 — A model's own confidence reads "AI · n", with "the model's own rating, not checked"; under 60 still goes to review.**
+  **Chose:** an AI value's badge reads `AI · 72`, never `AI 72%`; the Breakdown's marker says the number is the model's
+  own rating and has not been checked against anything. R5 still queues a value under 60 for a person. **Rejected:**
+  a percentage (it promises a calibrated probability, D-LL-036); hiding the number (R5 needs it, and a person should
+  see why a value was queued); checking it now (nothing in the record is a right answer for mood words or a
+  free-text answer). **Why:** D-LL-036: a confidence is shown as what it is. Accepted by the founder, 2026-10-01.
+
+- **D-LL-041 — The client is plain `node:https`; no SDK.**
+  **Chose:** `src/engine/anthropic.ts` sends the Messages API request itself (the request shape from the claude-api
+  skill's documented raw-HTTP examples: `POST /v1/messages`, `x-api-key`, `anthropic-version: 2023-06-01`,
+  `output_config.format` for structured output). **Rejected:** `@anthropic-ai/sdk` 0.131.0 (MIT; its dependencies MIT
+  and Unlicense, so licence was not the obstacle): measured last session in a scratch process, +20.2 MB after one call
+  and +37.2 MB after 21, against +3.2 / +4.2 MB for `node:https`; with idle at 119–140 MB the SDK alone could push the
+  engine over its 150 MB budget. `fetch` measured +5.0 / +24.9 MB. **Why:** memory first (standing rule 5), and no
+  dependency to track. **Trade-off:** no SDK retries, types or streaming helpers; one request type is used, and a
+  failed request is reported, never retried (a retry can cost money). Accepted by the founder, 2026-10-01.
+
+- **D-LL-040 — In-app AI uses `claude-opus-5`; its price and the rupee rate are dated data; a call is priced at its worst case before it is sent.**
+  **Chose:** `claude-opus-5` at $5 / $25 per million tokens in / out (the pricing page, read 2026-10-01), ₹96.33 per
+  US dollar (ECB reference rate of 2026-10-01; it was 95.83 the day before), both in `src/engine/pricing.ts` with their
+  dates and sources. Before a call: input bounded at one token per UTF-8 byte of what is sent (no token is shorter
+  than a byte) plus a 500-token allowance for the request's framing and the schema's instructions, and output at
+  `max_tokens` (thinking included). The call is refused if that worst case would take the month past the cap; after
+  it, the real cost from `usage` is logged. Adaptive thinking at effort `low` (mood and Ask are short); no server-side
+  `fallbacks` (the claude-api skill recommends `fallbacks: "default"` for Opus 5: left off because a fallback bills a
+  second model inside one call, which the cap arithmetic would have to price too, and Opus 5's classifiers decline
+  cyber requests, far from mood words; a refusal is reported with its category). **Rejected:** a cheaper model chosen
+  for cost (the founder's choice, not this code's); `claude-opus-5-5` ($4 / $20; still launching, named only by the
+  founder); counting tokens with the API's count endpoint before each call (a second request); a live price lookup
+  (the network at every call, and a price that moves under the cap). **Why:** the cap must hold before money is spent.
+  **Limit:** the byte bound is about four times the real input, so the cap refuses a call a little early near the
+  limit. Accepted by the founder, 2026-10-01.
+
+- **D-LL-039 — What leaves the machine: measured numbers and words from the breakdown only, never a frame (option A).**
+  **Chose:** a model call sends the breakdown's values that are not sample (palette hex and share, tints, saturation,
+  contrast, aspect, and estimates, metadata and hand-set values, each with its source), never pixels, file names or
+  paths. Shot size comes from the face box by R2 (T0, an estimate); depth of field, camera angle, movement and lead
+  room stay by hand, and `breakdown.fit_lens` stays a stand-in that says why. **Rejected:** option B, the frame too (an
+  upload under standing rule 7: cloud-allowed projects only, an upload record per frame, and a confidence that would
+  first have to rank with error on the Blender set before it is shown). **Why:** client footage stays local, the
+  sample project is not cloud-allowed, and what a model could add from the frame is a few words a person sets in one
+  click. **Revisit:** when a project allows cloud and the founder wants frame labels; that is its own decision.
+  Accepted by the founder, 2026-10-01.
+
 ## 2026-09-30 — P3: light and lens, and their ground truth
 
 - **D-LL-038 — On the Breakdown, a drag marks the face, each light value has its own row, the marker is built from the record, and Fit light is a T0 button.**

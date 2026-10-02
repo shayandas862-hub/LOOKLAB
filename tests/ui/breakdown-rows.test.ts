@@ -1,7 +1,7 @@
 // The Breakdown's badges and row text for the sources AD-LL-010 adds: a fitted light reads ESTIMATE and an
 // EXIF focal length reads METADATA; neither ever reads MEASURED.
 import { describe, expect, test } from 'vitest';
-import { badge, markerText, rowSpecs, weakest } from '../../src/ui/logic/Breakdown.rows.ts';
+import { aiLabel, badge, markerText, reviewQueue, reviewState, rowSpecs, weakest } from '../../src/ui/logic/Breakdown.rows.ts';
 import { sampleSeed } from '../../src/actions/sample.ts';
 
 const b = () => structuredClone(sampleSeed('2026-09-30T12:00:00Z', 'tester', 'local').breakdown);
@@ -10,7 +10,7 @@ const lensText = (bd: ReturnType<typeof b>) => rowSpecs(bd).lens.find((r: unknow
 describe('badges', () => {
   test.each([['measured', 'MEASURED'], ['manual', 'MANUAL'], ['metadata', 'METADATA'], ['estimate', 'ESTIMATE'], ['sample', 'SAMPLE']])(
     '%s reads %s', (src, label) => {
-      expect(badge(src, undefined, false).label).toBe(label);
+      expect(badge(src, undefined, '').label).toBe(label);
     });
 
   test('the weakest source of a row: measured, manual, metadata, estimate, ai, sample', () => {
@@ -60,8 +60,8 @@ describe('light rows after the fit (P3)', () => {
   });
 
   test('an estimate with a confidence shows the score, not a percentage', () => {
-    expect(badge('estimate', 34, false).label).toBe('ESTIMATE · 34');
-    expect(badge('estimate', undefined, false).label).toBe('ESTIMATE');
+    expect(badge('estimate', 34, '').label).toBe('ESTIMATE · 34');
+    expect(badge('estimate', undefined, '').label).toBe('ESTIMATE');
   });
 });
 
@@ -78,10 +78,35 @@ describe('the Breakdown marker names exactly what is still sample (D-LL-032, D-L
     bd.light.key_az = e(-48) as never; bd.light.key_el = e(27) as never; bd.light.key_kelvin = e(4350) as never;
     bd.lens.focal_mm = { value: 75, unit: 'mm (35 mm equiv.)', source: 'metadata', updated_by: 'x', updated_at: 'now' } as never;
     const m = markerText(bd);
-    expect(m).toContain('ESTIMATE: key direction, key colour (fitted to the face marked by hand; not verified on real footage)');
+    expect(m).toContain('ESTIMATE: key direction, key colour (from the face marked by hand; not verified on real footage)');
     expect(m).toContain('METADATA: focal length (EXIF)');
     expect(m).toMatch(/^SAMPLE: key type, hardness, fill, key:fill, practicals, depth of field/);
     expect(m).not.toMatch(/SAMPLE:[^·]*key direction/);
     expect(m).not.toMatch(/accura|validated|\d+%/i);
+  });
+});
+
+describe('AI values on the Breakdown (P4, D-LL-042)', () => {
+  test('an AI value reads "AI · n", never a percentage; under 60 it reads LOW until a person confirms it', () => {
+    expect(badge('ai', 72, '').label).toBe('AI · 72');
+    expect(badge('ai', 41, 'low').label).toBe('AI · 41 · LOW');
+    expect(badge('ai', 41, 'confirmed').label).toBe('AI · 41 · CONFIRMED');
+    expect(aiLabel(59, 'low')).not.toMatch(/%/);
+  });
+
+  test('R5: 59 waits for review, 60 does not, and a confirmed value leaves the queue', () => {
+    expect(reviewState({ source: 'ai', confidence: 59 }, 'mood', [])).toBe('low');
+    expect(reviewState({ source: 'ai', confidence: 60 }, 'mood', [])).toBe('');
+    expect(reviewState({ source: 'ai', confidence: 59 }, 'mood', ['mood'])).toBe('confirmed');
+    expect(reviewState({ source: 'manual' }, 'mood', [])).toBe('');
+  });
+
+  test('the marker names AI values as the model\'s own rating, not checked', () => {
+    const bd = b();
+    bd.mood = { value: ['lonely'], source: 'ai', confidence: 72, updated_by: 'claude-opus-5', updated_at: 'now' };
+    expect(markerText(bd)).toContain("AI: mood (the model's own rating, not checked)");
+    expect(reviewQueue(bd)).toEqual([]);
+    bd.mood.confidence = 41;
+    expect(reviewQueue(bd)).toEqual([{ field: 'mood', label: 'Mood', confidence: 41 }]);
   });
 });

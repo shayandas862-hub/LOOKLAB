@@ -1,0 +1,1 @@
+["--experimental-strip-types", "--no-warnings=ExperimentalWarning", "--max-semi-space-size=1"]

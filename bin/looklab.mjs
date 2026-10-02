@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Look Lab CLI: start, dev, mcp-setup, run <action> [json].
+// Look Lab CLI: start, dev, engine, mcp-setup, run <action> [json].
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -9,7 +9,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const HOME = process.env.LOOKLAB_HOME ?? join(homedir(), 'LookLab');
 const PORT = Number(process.env.LOOKLAB_PORT ?? 4317);
-const NODE_FLAGS = ['--experimental-strip-types', '--no-warnings=ExperimentalWarning'];
+// The engine's Node flags, shared with the measure scripts and the boot test (B-LL-004: a 1 MB young generation).
+const NODE_FLAGS = JSON.parse(readFileSync(join(ROOT, 'src', 'engine', 'node-flags.json'), 'utf8'));
 
 function checkNode() {
   const [major, minor] = process.versions.node.split('.').map(Number);
@@ -39,11 +40,14 @@ function buildUiIfStale() {
 }
 
 function engine(extraEnv = {}) {
-  return spawn(process.execPath, [...NODE_FLAGS, join(ROOT, 'src', 'engine', 'main.ts')], {
+  const child = spawn(process.execPath, [...NODE_FLAGS, join(ROOT, 'src', 'engine', 'main.ts')], {
     cwd: ROOT,
     stdio: 'inherit',
     env: { ...process.env, LOOKLAB_HOME: HOME, LOOKLAB_PORT: String(PORT), ...extraEnv },
   });
+  // A signal sent to the launcher alone (a process manager, `kill`) reaches the engine too, so none is orphaned (B-LL-005).
+  for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => child.kill(sig));
+  return child;
 }
 
 async function waitFor(url, tries = 50) {
@@ -67,6 +71,10 @@ if (cmd === 'start' || !cmd) {
   const child = engine();
   const url = `http://127.0.0.1:${PORT}`;
   if (await waitFor(url) && !process.env.LOOKLAB_NO_OPEN) spawn('open', [url], { stdio: 'ignore' });
+  child.on('exit', (code) => process.exit(code ?? 0));
+} else if (cmd === 'engine') {
+  // The engine alone, in the foreground (npm run engine): no UI build, no browser.
+  const child = engine();
   child.on('exit', (code) => process.exit(code ?? 0));
 } else if (cmd === 'dev') {
   const child = engine();
@@ -124,6 +132,6 @@ if (cmd === 'start' || !cmd) {
   console.log(JSON.stringify(await r.json(), null, 2));
   process.exit(r.ok ? 0 : 1);
 } else {
-  console.error(`unknown command "${cmd}". Commands: start, dev, mcp-setup, run`);
+  console.error(`unknown command "${cmd}". Commands: start, dev, engine, mcp-setup, run`);
   process.exit(2);
 }

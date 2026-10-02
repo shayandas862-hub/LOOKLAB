@@ -8,6 +8,7 @@ import { seedSampleIfEmpty } from '../../src/actions/seed.ts';
 import { SCREENS } from '../../src/actions/domains/system.ts';
 import { encodePng } from '../../src/engine/png.ts';
 import { memoryContext } from './memory-context.ts';
+import { cannedReply, memoryKeychain, stubAi, TEST_KEY } from './stub-ai.ts';
 import { stripes } from '../core/synth.ts';
 
 const ROOT = join(import.meta.dirname, '..', '..');
@@ -65,13 +66,14 @@ describe('the registry matches the design (AD-LL-002)', () => {
 // Inputs for the actions that have no sensible default.
 const REQUIRED: Record<string, Record<string, unknown>> = {
   'breakdown.edit_value': { field: 'light.key_kelvin', value: 2100 },
-  'breakdown.review': { field: 'lens.focal_mm' },
+  'breakdown.review': { field: 'mood' }, // fit_mood runs before it in registry order and writes an AI mood
   'breakdown.ask': { question: 'What is the exact colour scheme?' },
   'plan.move_object': { id: 'key', x: 4, y: 1.4 },
   'plan.set_property': { id: 'key', field: 'power', value: 60 },
   'settings.set_cap': { amount_inr: 1500 },
   'settings.toggle_cloud': { on: true },
   'settings.toggle_no_ai': { on: false },
+  'settings.add_provider': { provider: 'anthropic', api_key: TEST_KEY },
   'breakdown.set_subject': { x: 0.3, y: 0.4 },
   // A face-shaped box on the 64 × 36 frame importOneFrame() measures (29 × 32 px); fit_light then runs on it.
   'breakdown.set_face': { x: 0.2, y: 0.05, w: 0.45, h: 0.9 },
@@ -109,7 +111,8 @@ describe('every action runs on the sample project', () => {
   let ctx: ReturnType<typeof memoryContext>;
   let registry: Registry;
   beforeEach(async () => {
-    ctx = memoryContext();
+    const kc = memoryKeychain();
+    ctx = memoryContext({ keychain: kc, ai: stubAi(cannedReply, kc).provider });
     registry = buildRegistry();
     await seedSampleIfEmpty(ctx.store, '2026-09-30T12:00:00Z', 'tester', 'local');
   });

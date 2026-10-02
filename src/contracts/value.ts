@@ -22,6 +22,8 @@ export function valueOf<T extends z.ZodType>(inner: T) {
       unit: z.string().optional(),
       source: Source,
       confidence: z.number().min(0).max(100).optional(),
+      /** The decision row that wrote this value (AD-LL-013): how a review finds the call it confirms. */
+      decision_id: z.string().optional(),
       updated_by: z.string(),
       updated_at: z.string(),
     })

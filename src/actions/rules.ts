@@ -26,3 +26,6 @@ export const RULES: Rule[] = [
 ];
 
 export const RULE_IDS = new Set(RULES.map((r) => r.id));
+
+/** R5's review threshold: an AI value with a confidence under this is queued for a person (P4, D-LL-042). */
+export const REVIEW_BELOW = 60;

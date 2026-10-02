@@ -101,12 +101,72 @@ with known light); B-LL-004 (engine memory after a long import) is open.
 
 **Next: P4.** Build prompt `prompts/06-phase-4.md`; its CLAUDE.md is drafted in `prompts/06-phase-4-CLAUDE.md`.
 
-## P4 · AI in the app
+## P4 · AI in the app — **done 2026-10-02** against its acceptance; **the two live calls not run: no API key** (PR-LL-004)
 Provider adapter (Anthropic via API key in the Keychain) · spend cap and cost
 log · `breakdown.fit_mood`, `breakdown.ask`, framing/lens labels as T2 with
 confidence · R5 routing to review below 60 · No AI mode verified on every screen.
 **Acceptance.** Zero live calls in the suite (stub client) · cap stops calls at the
 limit (test) · AI values never render as measured (test).
+
+**Result.** All three acceptance tests pass; 389/389 tests, 42 files.
+- **Zero live calls:** every test runs behind a guard that refuses any connection off the machine, and Chrome runs
+  offline (D-LL-045); the suite drives the real provider through a stub transport.
+- **The key** (D-LL-048): added only in Settings in the Look Lab window, written to the Keychain on stdin, read for each
+  call; refused over MCP and the CLI; a test finds it in no file, row, event, answer, error or log line.
+- **The cap** (D-LL-040, AD-LL-011, AD-LL-012): a call is priced at its worst case and refused before it is sent if it
+  would cross the cap; `used_inr` equals the rows' `cost_inr`; the month rolls over in UTC; calls run one at a time.
+- **AI values:** mood and Ask are `ai` with the model's own confidence, shown "AI · n" (D-LL-042), never MEASURED or
+  ESTIMATE; measured, estimated, EXIF and hand-set values survive a call; only numbers and words leave the machine
+  (D-LL-039); bad output is refused with its cost logged; Ask may quote only the record's numbers (D-LL-047). Shot size
+  comes from the face box by R2 (T0, D-LL-046); the lens labels stay by hand (`fit_lens` is still a stand-in). Stand-ins
+  18 → 14. R5: 59 is queued, 60 is not; one click confirms, recorded on the decision that wrote it (D-LL-049).
+- **No AI:** with No AI on, no key, or the cap reached, every AI control on all 11 screens is off and names which;
+  every screen works by hand; Fit light (T0) and shot size work; mood can be typed (Chrome tests).
+- **Memory (M1, 8 GB):** B-LL-004 fixed by `--max-semi-space-size=1` (D-LL-044): idle after a 60 s import 119–130 MB
+  RSS over five runs (it was 147–185), 130–135 MB over three runs with the AI client loaded; idle fresh 138–141 MB;
+  footprint 130–147 MB. One light fit 210–218 ms median over HTTP (P3: 204–206).
+**Not done:** the live mood and Ask calls on the M1 (time, tokens, rupees, the cap counting them): the founder chose not
+to add an API key and to use Claude Code as the AI (D-LL-050); `scripts/measure-ai.ts` runs them when a key is added.
+Engine memory during and after a real call is therefore not measured. A value Claude Code writes over MCP reads MANUAL
+(D-LL-050, its own decision next). The UI loads Google Fonts from the internet on every page load (D-LL-045, noted).
+
+**Next: P4.5.** Spec `plans/P-LL-001-colour-grading.md`; design prompt `prompts/08-claude-design-colour.md`; build
+prompt `prompts/09-phase-4-5.md`; its CLAUDE.md is drafted in `prompts/09-phase-4-5-CLAUDE.md`.
+
+## P4.5 · Colour: what to capture and how to grade
+**Goal.** For a reference shot, tell the crew what to put in front of the lens (each light's colour and the kit
+setting or gel that gets it, key:fill, the colours that must physically exist in the set and wardrobe), how to set the
+camera (white balance, profile and gamut, base ISO, exposure targets, recording, frame rate and shutter, charts), and
+what is left for the grade (a starting ASC CDL, a .cdl and a 33-point .cube); then measure a test-shoot or graded still
+against the reference, in numbers. Every number is T0 maths from the breakdown, the kit and cited documents; a model
+may choose only the strategy (D-LL-003). Spec: [`P-LL-001`](../plans/P-LL-001-colour-grading.md) (V-LL-002, D-LL-043).
+**Deliverables.** Five ADs, each with the founder's yes first: the kit's colour fields (camera recording modes, light
+colour ranges, the gel book, monitoring, charts), the project and location colour settings, the colour plan record
+and the Breakdown's green–magenta fields, the Set Sheet's capture card, the still and grade-check records · colour maths
+in `src/core/` (mireds and the gel search, S-Log3, S-Gamut3.Cine, CCT and Duv, the ASC CDL and its fit, the base
+transform, .cdl and .cube) · actions `colour.plan_capture`, `colour.fit_cdl`, `colour.set_split`,
+`colour.choose_strategy` (T2), `colour.export_cdl`, `colour.export_lut`, `colour.import_still`, `colour.check_grade`,
+`adapt.set_kit_colour` · the Breakdown's CAPTURE & GRADE section and grade-check mode, the capture card (A4 and phone)
+and the kit colour editor, from the export of `prompts/08-claude-design-colour.md` · the Blender colour set (dev 16,
+held-out 24) and the noise and banding test.
+**Acceptance.**
+- The maths tests pass at P-LL-001 §9.1's tolerances; the 33-point LUT matches the exact pipeline (ΔE00 99th
+  percentile ≤ 1.0, worst ≤ 3.0); .cdl and .cube round-trip exactly.
+- Every manufacturer number in code is cited from a document read in the phase, its licence checked; none from memory.
+- Held-out Blender colour set, tolerances written in `validation.md` before it ran: light colour from the grey patch
+  median ≤ 5 mired; the fitted CDL's output within ΔE00 1.0 median of the true grade's; the grade check reports a known
+  grade within ΔE00 1.0 median per swatch; set colours classified right on ≥ 90% of scenes; key:fill ≤ 0.5 stop median
+  or not written; light and dark skin reported apart. A pass is a claim about the Blender set only.
+- No colour number comes from a model (test); every colour value carries the weakest source of its inputs: a plan from
+  sample inputs reads SAMPLE, a gel chosen from the fitted key reads ESTIMATE, no computed light colour reads MEASURED
+  (test).
+- The sample plan reports ½ CTS missing from the gel book; a key on the fit's 2800 K bound asks for the value by hand
+  (test).
+- In Chrome: Plan capture, Export .cdl and .cube (files parse), a grade check on a committed still, the capture card on
+  one A4 page and on the phone; with No AI on, every colour button works except Choose strategy, which says why.
+- Engine ≤ 150 MB idle after building a LUT and after a grade check (RSS and footprint measured).
+Design prompt `prompts/08-claude-design-colour.md` runs first; build prompt `prompts/09-phase-4-5.md`; its CLAUDE.md is
+drafted in `prompts/09-phase-4-5-CLAUDE.md`.
 
 ## P5 · Location & Kit, and the recipe
 Location and kit editors · power budget check (deterministic) · gear-gap check ·
@@ -125,6 +185,12 @@ its 3 samples) · plan JSON round-trips exactly · RSS inside budget with the sc
 Generate from a plan version · A4 print and phone view · PDF via the browser's
 print · share to phone (confirm). **Acceptance.** Sheet lists every light and every
 gear item in the plan (test) · print layout fits one A4 page for the sample plan.
+The set sheet also carries the per-shot **capture card** from P4.5 (P-LL-001 §10): camera (profile and gamut, base
+ISO, white balance set by number, exposure targets, recording, frame rate and shutter), each light with its fixture
+setting, gels and residual, the set and wardrobe colours that must exist, charts at the head of every setup, the
+monitoring LUT and the grade start. It is copied from the shot's colour plan when the sheet is generated, names that
+plan's version, shows every number with its source and every gap in amber, and prints as its own A4 page (so "fits
+one A4 page" applies to each page). Acceptance gains: the capture card matches the colour-plan version it names (test).
 
 ## P8 · Library and mood board
 Save/apply/compare looks (apply = confirm) · board of references with measured

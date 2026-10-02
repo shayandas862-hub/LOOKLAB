@@ -38,7 +38,7 @@ function savedTheme() {
 
 export class Shell extends DCLogic {
   state = { screen:'breakdown', palette:false, pq:'', psel:0, toast:null, theme:savedTheme(), bstate:null,
-    actions:[], settings:null, engineUp:true, preview:preview() };
+    actions:[], settings:null, ai:null, engineUp:true, preview:preview() };
   pRef = React.createRef();
 
   componentDidMount() {
@@ -61,7 +61,11 @@ export class Shell extends DCLogic {
   }
   componentWillUnmount() { window.removeEventListener('keydown', this._k); clearTimeout(this._tt); this._unsub && this._unsub(); }
 
-  loadSettings() { invoke('settings.get').then(r => this.setState({ settings:r.result, engineUp:true })).catch(() => this.setState({ engineUp:false })); }
+  loadSettings() {
+    invoke('settings.get').then(r => this.setState({ settings:r.result, engineUp:true })).catch(() => this.setState({ engineUp:false }));
+    // Whether AI can run now and, if not, the one reason every AI control shows (P4: No AI, no key, or the cap).
+    invoke('settings.ai_status').then(r => this.setState({ ai:r.result })).catch(() => {});
+  }
   toast(text, cmd, tone) {
     clearTimeout(this._tt);
     this.setState({ toast:{ text, cmd } });
@@ -94,6 +98,8 @@ export class Shell extends DCLogic {
     return this.commands().filter(c => !q || c.title.toLowerCase().includes(q) || c.name.includes(q));
   }
   exec(c) {
+    // An AI command that cannot run says why and calls nothing (P4 task 5).
+    if (c.ai && !this.aiReady()) return this.toast(`${c.title} is off: ${this.aiReason()}`, c.name, 'error');
     const open = /^app\.open_(.+)$/.exec(c.name);
     const screen = open ? open[1] : SCREEN_OF[c.name.split('.')[0]];
     this.setState({ palette:false, ...(screen ? { screen } : {}) });
@@ -106,12 +112,19 @@ export class Shell extends DCLogic {
   }
 
   aiState() {
-    const { preview, settings, engineUp } = this.state;
+    const { preview, ai, engineUp } = this.state;
     if (preview.ai) return preview.ai;
     if (!engineUp) return 'offline';
-    if (!settings || settings.api.provider === 'none') return 'not-connected';
-    if (settings.api.used_inr >= settings.api.cap_inr) return 'cap';
-    return 'connected';
+    if (!ai) return 'not-connected';
+    if (ai.ready) return 'connected';
+    return ai.no_ai ? 'no-ai' : /cap/.test(ai.reason) ? 'cap' : 'not-connected';
+  }
+  aiReady() { return this.aiState() === 'connected'; }
+  /** The reason AI is off, as the engine gives it ("No API key in the Keychain", "Monthly spend cap reached", …). */
+  aiReason() {
+    const { ai } = this.state;
+    const st = this.aiState();
+    return st === 'offline' ? 'Offline' : ai && ai.reason ? ai.reason : st === 'cap' ? 'Monthly spend cap reached' : 'AI not connected';
   }
 
   render() {
@@ -128,13 +141,15 @@ export class Shell extends DCLogic {
     const noAi = !!(settings && settings.no_ai);
     const bstate = this.state.bstate || this.state.preview.b || 'ready';
     const aiOk = !noAi && aiState === 'connected';
-    const aiMsg = noAi ? 'No AI mode is on' : aiState === 'not-connected' ? 'AI not connected' : aiState === 'cap' ? 'Monthly spend cap reached' : aiState === 'offline' ? 'Offline' : '';
-    const cap = settings ? settings.api : { cap_inr:0, used_inr:0 };
-    const pill = noAi ? { label:'No AI mode', dot:'var(--tx3)', tip:'Everything works by hand' }
-      : aiState === 'connected' ? { label:'AI ready · API key', dot:'var(--acc)', tip:`₹${cap.used_inr} of ₹${cap.cap_inr} used` }
-      : aiState === 'not-connected' ? { label:'AI not connected', dot:'var(--tx3)', tip:'Manual tools work. Connect Claude Code in Settings, or add an API key (phase P4).' }
-      : aiState === 'cap' ? { label:'Spend cap reached', dot:'var(--warn)', tip:`₹${cap.used_inr} of ₹${cap.cap_inr} used this month` }
-      : { label:'Engine offline', dot:'var(--warn)', tip:'Start Look Lab with npm start' };
+    const aiMsg = noAi ? 'No AI mode is on' : aiOk ? '' : this.aiReason();
+    const cap = this.state.ai || (settings ? settings.api : { cap_inr:0, used_inr:0 });
+    const rupees = n => `₹${Number(n).toLocaleString('en-IN', { maximumFractionDigits:2 })}`;
+    // The pill names the reason itself, so every screen says why the AI controls are off (P4 task 5).
+    const pill = noAi ? { label:'No AI mode is on', dot:'var(--tx3)', tip:'Everything works by hand' }
+      : aiState === 'connected' ? { label:`AI ready · ${(this.state.ai && this.state.ai.model) || 'API key'}`, dot:'var(--acc)', tip:`${rupees(cap.used_inr)} of ${rupees(cap.cap_inr)} used this month` }
+      : aiState === 'cap' ? { label:'Monthly spend cap reached', dot:'var(--warn)', tip:`${rupees(cap.used_inr)} of ${rupees(cap.cap_inr)} used this month` }
+      : aiState === 'offline' ? { label:'Engine offline', dot:'var(--warn)', tip:'Start Look Lab with npm start' }
+      : { label: aiMsg || 'AI not connected', dot:'var(--tx3)', tip:'Manual tools work. Add an API key in Settings, or connect Claude Code.' };
     const mk = n => ({ ...n, go: () => this.nav(n.id), bg: screen === n.id ? 'var(--bg3)' : 'transparent', color: screen === n.id ? 'var(--tx)' : 'var(--tx3)', bar: screen === n.id ? 'var(--acc)' : 'transparent' });
     const res = this.results();
     const is = {}; Object.keys(TITLES).forEach(k => is[k] = screen === k);
@@ -150,7 +165,7 @@ export class Shell extends DCLogic {
       openPalette: () => this.openP(), closePalette: () => this.closeP(), stop: e => e.stopPropagation(),
       palette, pq, pRef: this.pRef,
       onPq: e => this.setState({ pq:e.target.value, psel:0 }),
-      results: res.map((c, i) => ({ label:c.title, name:c.name, key:c.key, bg: i === psel ? 'var(--bg3)' : 'transparent', go: () => this.exec(c), hover: () => this.setState({ psel:i }) })),
+      results: res.map((c, i) => ({ label: c.ai && !aiOk ? `${c.title} · off: ${aiMsg}` : c.title, name:c.name, key:c.key, bg: i === psel ? 'var(--bg3)' : 'transparent', go: () => this.exec(c), hover: () => this.setState({ psel:i }) })),
       noResults: res.length === 0,
       hasToast: !!toast, toast: toast || { text:'', cmd:'' },
     };

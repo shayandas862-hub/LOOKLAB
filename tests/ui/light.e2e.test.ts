@@ -7,12 +7,12 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { crc32 } from 'node:zlib';
-import { chromium, type Browser, type Page } from 'playwright-core';
+import type { Browser, Page } from 'playwright-core';
+import { blockedByOffline, CHROME, launchChrome, offlinePage } from './chrome.ts';
 import { startEngine, type Engine } from '../../src/engine/engine.ts';
 
 const ROOT = join(import.meta.dirname, '..', '..');
 const UI = join(ROOT, 'dist', 'ui');
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const SCENE = join(ROOT, 'tests', 'fixtures', 'blender', 'test', 'test-03-light');
 const TRUTH = JSON.parse(readFileSync(`${SCENE}.json`, 'utf8'));
 const canRun = existsSync(CHROME) && existsSync(join(UI, 'index.html'));
@@ -82,9 +82,9 @@ describe.skipIf(!canRun)('Light and lens in Chrome (P3)', () => {
   beforeAll(async () => {
     home = mkdtempSync(join(tmpdir(), 'looklab-p3-'));
     engine = await startEngine({ home, port: 0, uiDir: UI, quiet: true, rateLimit: { perSecond: 200, burst: 400 } });
-    browser = await chromium.launch({ executablePath: CHROME, headless: true });
-    page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    page.on('console', (m) => m.type() === 'error' && !m.text().includes('fonts.g') && !m.text().includes('400 (Bad Request)') && errors.push(m.text()));
+    browser = await launchChrome();
+    page = await offlinePage(browser, { viewport: { width: 1440, height: 900 } });
+    page.on('console', (m) => m.type() === 'error' && !m.text().includes('fonts.g') && !blockedByOffline(m.text()) && !m.text().includes('400 (Bad Request)') && errors.push(m.text()));
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto(engine.url);
     await page.waitForSelector('[data-screen-label="Breakdown"]');
@@ -125,8 +125,8 @@ describe.skipIf(!canRun)('Light and lens in Chrome (P3)', () => {
 
   test('Fit light fills the light rows as an estimate, never MEASURED; the rest stays SAMPLE', async () => {
     await page.getByRole('button', { name: 'Fit light', exact: true }).click();
-    // The page has two asides (navigation, then the value panel): wait on any of them.
-    await page.waitForFunction(() => [...document.querySelectorAll('aside')].some((a) => /ESTIMATE/.test(a.textContent ?? '')), null, { timeout: 15_000 });
+    // Since P4 the face box already makes shot size an ESTIMATE (R2), so wait on the Key azimuth row itself.
+    for (let i = 0; i < 75 && !(await row('Key azimuth')).badge.startsWith('ESTIMATE'); i++) await page.waitForTimeout(200);
     for (const l of ['Key azimuth', 'Key elevation', 'Key colour']) {
       const r = await row(l);
       expect(r.badge, l).toMatch(/^ESTIMATE( · \d{1,3})?$/);
@@ -139,7 +139,7 @@ describe.skipIf(!canRun)('Light and lens in Chrome (P3)', () => {
 
   test('the marker names what is estimated and what is still sample, and nothing claims accuracy on real footage', async () => {
     const marker = await page.locator('[data-testid=sample-marker]').innerText();
-    expect(marker).toContain('ESTIMATE: key direction, key colour (fitted to the face marked by hand; not verified on real footage)');
+    expect(marker).toContain('ESTIMATE: key direction, key colour, shot size (from the face marked by hand; not verified on real footage)');
     expect(marker).toMatch(/SAMPLE: key type, hardness, fill, key:fill, practicals, focal length/);
     expect(marker).not.toMatch(/SAMPLE:[^·]*key direction/);
     const text = await page.locator('body').innerText();

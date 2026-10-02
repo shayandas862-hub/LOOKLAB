@@ -15,7 +15,7 @@ what it forces, so any decision can be traced up to the vision it served.
 
 ## 1 · The vision as it stands
 
-**Last verified: 2026-09-30.**
+**Last verified: 2026-10-01** (V-LL-002 added colour grading).
 
 ### Why Look Lab exists
 
@@ -38,6 +38,16 @@ location and kit and plans the set in 3D, so the crew arrives with a plan.
    location; a look-match score says how close the camera view is to the reference.
 4. **Execute**: a set sheet (lighting plot, gear list, camera settings, setup
    order) for print and phone.
+5. **Colour, from capture to grade** (V-LL-002): for the reference's colour, what
+   has to be captured on set to get it (each light's colour and the gel or fixture
+   setting from our kit, the key:fill ratio, the colours that must physically be in
+   the set and wardrobe), the camera settings that needs (white balance, picture
+   profile and gamut, base ISO and exposure targets, bit depth, chroma and codec,
+   a chart at the head of every setup), and what is left for the grade (a starting
+   grade as an ASC CDL and a monitoring LUT, with the targets to check against).
+   A **grade check** measures a still from our test shoot or our grade against the
+   reference, in numbers. Every number is T0 maths; a model may choose the
+   strategy, never a number.
 
 Around it: projects, a shot-by-shot previs board, mood boards, and a library of
 saved looks that becomes the team's taste data.
@@ -66,6 +76,24 @@ producers). Later: the public. People who want numbers they can trust and edit.
 ---
 
 ## 2 · How the vision changed
+
+### V-LL-002 · 2026-10-01 — Look Lab serves colour grading: what to capture on set, which camera settings, what is left for the grade
+- **Was:** V-LL-001: the breakdown measures a reference's colour (palette, tints, saturation, contrast) and its
+  light; nothing turned that colour into instructions for the camera department or the colourist.
+- **Now:** §1, item 5. For any reference, Look Lab tells the crew, per shot, what has to be captured in front of the
+  lens to get that colour, the camera specifications that needs, and what is left for the grade; and it checks a
+  graded or test-shoot still against the reference in numbers. Every number is T0 maths from published documents
+  (mireds, gel books, camera curves and gamuts, the ASC CDL); a model may only choose the strategy (put the colour in
+  the light, capture neutral and grade, or both), never a number (D-LL-003). One graded frame cannot say how much of
+  its colour was lit and how much was graded: the spec states its assumption and lets a person set the split.
+- **Caused by:** the founder's request of 2026-10-01, at the start of the P4 session ("Look Lab must serve colour
+  grading").
+- **Forces:** an AD for the Kit contract (camera recording modes, each light's colour range, the gel book, monitoring
+  and LUT support, written when P4.5 starts); a colour section on the Breakdown and the Set Sheet, and a grade check,
+  designed through Claude Design (`prompts/08-claude-design-colour.md`); a Blender colour ground-truth set (the P3 head
+  with a ColorChecker, known key kelvin and camera white balance, a known CDL) with tolerances written before it runs;
+  the P4.5 card in [`phases.md`](phases.md) (D-LL-043); the plan [`plans/P-LL-001-colour-grading.md`](../plans/P-LL-001-colour-grading.md);
+  the build prompt `prompts/09-phase-4-5.md`.
 
 ### V-LL-001 · 2026-09-30 — From a solo look-matching prototype to a production team's pre-production brain
 - **Was:** v0.2 (`reference/v0.2/docs/01-VISION.md`): a single-file tool for one

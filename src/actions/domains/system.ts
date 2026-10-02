@@ -78,15 +78,6 @@ export const systemActions: AnyAction[] = [
     },
   }),
   defineAction({
-    name: 'settings.add_provider',
-    title: 'Add AI provider',
-    description: 'Connects an AI provider with an API key kept in the Keychain. Needs approval. Stand-in until P4: no key is taken or stored.',
-    tier: 'T3', effect: 'write', confirm: true, standIn: true,
-    input: z.object({ provider: z.enum(['anthropic', 'openai', 'google', 'fal', 'replicate']).default('anthropic') }),
-    output: z.object({ provider: z.string(), connected: z.literal(false) }),
-    handler: async (_c, i) => ({ provider: i.provider, connected: false as const }),
-  }),
-  defineAction({
     name: 'settings.toggle_cloud',
     title: 'Allow cloud for a project',
     description: 'Allows or stops uploading this project\'s footage to cloud services. Needs approval.',

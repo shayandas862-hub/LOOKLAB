@@ -25,20 +25,45 @@ export const weakest = vals => vals.reduce((w, v) => (RANK[v.source] > RANK[w] ?
 export const minus = n => (n < 0 ? `−${Math.abs(n)}` : `${n}`);
 
 /** The value's own badge. Sample values always read SAMPLE (D-LL-015); a fitted value reads ESTIMATE and an EXIF
- * value METADATA, never MEASURED (AD-LL-010); nothing here is AI until P4. */
-export function badge(src, conf, lowMode) {
-  return src === 'sample' ? sampleBadge(designBadge(src, conf, lowMode)) : designBadge(src, conf, lowMode);
+ * value METADATA, never MEASURED (AD-LL-010); a model's value reads "AI · n", its own rating (D-LL-042). `review`:
+ * 'low' when an AI value under 60 waits for a person (R5), 'confirmed' once a person agreed. */
+export function badge(src, conf, review) {
+  return src === 'sample' ? sampleBadge(designBadge(src, conf, review)) : designBadge(src, conf, review);
 }
 
-function designBadge(src, conf, lowMode) {
+/** The text of an AI value's badge: "AI · 72", "AI · 41 · LOW", "AI · 41 · CONFIRMED". Never a percentage. */
+export function aiLabel(conf, review) {
+  return `AI · ${conf}${review === 'low' ? ' · LOW' : review === 'confirmed' ? ' · CONFIRMED' : ''}`;
+}
+
+/** Where a value stands in R5's review: 'low' (under 60, not confirmed), 'confirmed', or '' (nothing to review). */
+export function reviewState(leaf, field, reviewed) {
+  if (!leaf || leaf.source !== 'ai') return '';
+  if ((reviewed || []).includes(field)) return 'confirmed';
+  return leaf.confidence < 60 ? 'low' : '';
+}
+
+/** AI values under 60 that no person has confirmed: the Breakdown's review banner (R5). */
+export function reviewQueue(b) {
+  if (!b) return [];
+  const specs = rowSpecs(b);
+  const labelOf = Object.fromEntries(['light', 'lens', 'framing'].flatMap((g) => specs[g].map(([id, label]) => [id, label])));
+  const leaves = [['mood', 'Mood', b.mood], ...Object.entries(FIELD).map(([id, f]) => {
+    const [g, l] = f.split('.');
+    return [f, labelOf[id] || id, b[g] && b[g][l]];
+  })];
+  return leaves.filter(([f, , leaf]) => reviewState(leaf, f, b.reviewed) === 'low').map(([field, label, leaf]) => ({ field, label, confidence: leaf.confidence }));
+}
+
+function designBadge(src, conf, review) {
   if (src === 'manual') return { label:'MANUAL', border:'1px solid transparent', bg:'var(--bg3)', color:'var(--tx)' };
   if (src === 'measured') return { label:'MEASURED', border:'1px solid var(--line2)', bg:'transparent', color:'var(--tx2)' };
   if (src === 'sample') return { label:'SAMPLE', border:'1px dotted var(--tx3)', bg:'transparent', color:'var(--tx3)' };
   // A fit's confidence is a rank, not a probability (D-LL-036): shown as a score, never as a percentage.
   if (src === 'estimate') return { label: conf === undefined ? 'ESTIMATE' : `ESTIMATE · ${conf}`, border:'1px solid var(--tx3)', bg:'transparent', color:'var(--tx2)' };
   if (src === 'metadata') return { label:'METADATA', border:'1px solid var(--line)', bg:'transparent', color:'var(--tx2)' };
-  const low = lowMode && conf < 60;
-  return { label:`AI ${conf}%`, border: low ? '1px dashed var(--warn)' : '1px dashed var(--tx3)', bg: low ? 'var(--warn-soft)' : 'transparent', color: low ? 'var(--warn)' : 'var(--tx2)' };
+  const low = review === 'low';
+  return { label: aiLabel(conf, review), border: low ? '1px dashed var(--warn)' : '1px dashed var(--tx3)', bg: low ? 'var(--warn-soft)' : 'transparent', color: low ? 'var(--warn)' : 'var(--tx2)' };
 }
 
 export const satBand = v => (v < 25 ? 'low' : v <= 50 ? 'medium' : 'high');
@@ -111,8 +136,9 @@ export function markerText(b) {
   const named = src => leaves.filter(([, v]) => weakest(v) === src).map(([n]) => n).join(', ');
   const parts = [];
   if (named('sample')) parts.push(`SAMPLE: ${named('sample')}`);
-  if (named('estimate')) parts.push(`ESTIMATE: ${named('estimate')} (fitted to the face marked by hand; not verified on real footage)`);
+  if (named('estimate')) parts.push(`ESTIMATE: ${named('estimate')} (from the face marked by hand; not verified on real footage)`);
   if (named('metadata')) parts.push(`METADATA: ${named('metadata')} (EXIF)`);
+  if (named('ai')) parts.push(`AI: ${named('ai')} (the model's own rating, not checked)`);
   if (b.palette.length && b.palette.every(p => p.share.source === 'measured')) parts.push('colour, tone and aspect measured');
   return parts.join(' · ');
 }

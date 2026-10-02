@@ -36,9 +36,8 @@ beforeEach(async () => {
 });
 
 describe('what is real in P3 (standing rule 2)', () => {
-  test('fit_light carries no stand-in flag, and the stand-in count dropped by one to 18', () => {
+  test('fit_light carries no stand-in flag (P3 took the count from 19 to 18; tests/actions/standins.test.ts owns the count now)', () => {
     expect(registry.get('breakdown.fit_light')!.standIn).toBe(false);
-    expect(registry.list().filter((a) => a.standIn)).toHaveLength(18);
   });
 
   test('set_face is a helper, not a command, so the design catalogue parity holds', () => {

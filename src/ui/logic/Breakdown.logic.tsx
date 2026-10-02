@@ -7,12 +7,13 @@ import { DCLogic } from '../runtime/dc';
 import { BreakdownView, defaults } from '../views/Breakdown.view';
 import { sampleBadgeText } from '../runtime/badges';
 import { setScreenMarker } from '../components/StatusLayer';
-import { FIELD, SAMPLE_DOTS, SAMPLE_TINT_HEX, badge, boxPos as boxPosIn, clock, markerText, minus, rowSpecs, satBand, typed, weakest } from './Breakdown.rows';
+import { FIELD, SAMPLE_DOTS, SAMPLE_TINT_HEX, aiLabel, badge, boxPos as boxPosIn, clock, markerText, minus, reviewQueue, reviewState, rowSpecs, satBand, typed, weakest } from './Breakdown.rows';
+import { moodBadgeText, reviewBodyFor } from './Breakdown.review';
 import { BY_HAND, STEPS, STEP_ACTIONS, STEP_NOTE, importReference, pickReference } from './Breakdown.import';
 
 export class Breakdown extends DCLogic {
   state = { sel:null, ov:{ thirds:true, light:true, palette:true }, open:{ colour:true, light:true, lens:true, framing:true, mood:true },
-    editing:null, q:'', answer:'', step:0, up:0, upText:'', importName:'', err:null, sampleShot:2, moods:null,
+    editing:null, q:'', answer:'', answerConf:null, step:0, up:0, upText:'', importName:'', err:null, sampleShot:2, moods:null,
     b:null, ref:null, frame:null };
 
   componentDidMount() {
@@ -74,6 +75,8 @@ export class Breakdown extends DCLogic {
   async setFace(box) {
     const r4 = v => Math.round(v * 10000) / 10000;
     const r = await this.run('breakdown.set_face', 'Face marked by hand', { x: r4(box.x), y: r4(box.y), w: r4(box.w), h: r4(box.h) }, { quiet:true });
+    // The face box names the shot size by R2 (T0, D-LL-046); a size set by hand is kept by the engine.
+    if (r) await this.run('breakdown.fit_framing', 'Shot size from the face box (estimate)', {}, { quiet:true });
     if (r) await this.load();
   }
 
@@ -81,24 +84,32 @@ export class Breakdown extends DCLogic {
     const r = await this.run('breakdown.fit_light', 'Light fitted to the marked face (estimate)');
     if (r) await this.load();
   }
+  /** The design typed "MEASURED" (palette), "AI 70%" (mood) and "AI 78%" (Ask's answer); each follows its own record. */
+  typedBadge(label, paletteLabel, b) {
+    if (label === 'MEASURED') return paletteLabel;
+    if (label === 'AI 70%') return moodBadgeText(b);
+    if (label === 'AI 78%' && this.state.answerConf !== null) return aiLabel(this.state.answerConf, '');
+    return null;
+  }
   /** A point on the frame (0–1) → a position in the design's 2.39:1 box, as CSS percentages. */
   boxPos(at) { return boxPosIn(this.state.frame, at); }
 
-  rows(group, low) {
+  rows(group) {
     const { editing, b } = this.state;
     return rowSpecs(b)[group].map(([id, label, val, leaves]) => {
       const src = weakest(leaves);
       const conf = leaves[0].confidence;
+      const review = reviewState(leaves[0], FIELD[id], b.reviewed);
       const commit = ev => {
         const text = ev.target.value.trim();
         const changed = text && text !== val;
         this.setState({ editing:null });
         if (changed && FIELD[id]) this.run('breakdown.edit_value', `${label} set by hand`, { field: FIELD[id], value: typed(FIELD[id], text) }).then(r => r && this.load());
         // Enter on an unchanged low-confidence AI value is a person confirming it (R5, T3).
-        else if (!changed && src === 'ai' && conf < 60 && FIELD[id]) this.run('breakdown.review', `${label} confirmed`, { field: FIELD[id] });
+        else if (!changed && review === 'low' && FIELD[id]) this.run('breakdown.review', `${label} confirmed`, { field: FIELD[id] }).then(r => r && this.load());
       };
       return {
-        label, val, b: badge(src, conf, low),
+        label, val, b: badge(src, conf, review),
         vc: src === 'ai' ? 'var(--tx2)' : 'var(--tx)',
         editing: editing === id, idle: editing !== id,
         edit: () => this.setState({ editing:id }),
@@ -130,7 +141,9 @@ export class Breakdown extends DCLogic {
     const lightTag = lightSrc === 'sample' ? ' · SAMPLE' : lightSrc === 'estimate' ? ' · ESTIMATE' : '';
     const secKeys = ['colour','light','lens','framing','mood'];
     const sec = {}; secKeys.forEach(k => sec[k] = { open: open[k], rot: open[k] ? 'none' : 'rotate(-90deg)', toggle: () => this.setState(s => ({ open: { ...s.open, [k]: !s.open[k] } })) });
-    const askFn = text => { if (!aiOk || !text) return; this.setState({ q:text }); Promise.resolve(run('breakdown.ask', 'Answered from the breakdown', { question:text })).then(r => r && this.setState({ answer: r.result.answer })); };
+    const askFn = text => { if (!aiOk || !real || !text) return; this.setState({ q:text }); Promise.resolve(run('breakdown.ask', 'Answered from the breakdown (AI)', { question:text })).then(r => r && this.setState({ answer: r.result.answer, answerConf: r.result.confidence })); };
+    const queue = reviewQueue(b);
+    const confirm = item => run('breakdown.review', `${item.label} confirmed`, { field: item.field }).then(r => r && this.load());
 
     // Reference shots: detected ones for an imported reference, the design's seven for the sample.
     const shots = ref ? ref.shots : [];
@@ -151,7 +164,8 @@ export class Breakdown extends DCLogic {
     const paletteLabel = real ? 'MEASURED' : 'SAMPLE';
 
     return {
-      badgeText: (label) => label === 'MEASURED' ? paletteLabel : sampleBadgeText(label),
+      // Typed design badges: the palette's, the mood's and Ask's answer follow their own record (D-LL-042); the rest read SAMPLE.
+      badgeText: (label) => this.typedBadge(label, paletteLabel, b) ?? sampleBadgeText(label),
       refName: st.empty || !ref ? 'No reference' : `${ref.file_name} · ${shots.length} ${shots.length === 1 ? 'shot' : 'shots'}${ref.aspect ? ` · ${ref.aspect}` : ''}`,
       isReady, st, showFrame: !st.empty && !st.uploading,
       isReadyOverlay: { thirds: isReady && ov.thirds && !frame, light: isReady && ov.light, palette: isReady && ov.palette },
@@ -186,12 +200,14 @@ export class Breakdown extends DCLogic {
       prev: () => goShot(Math.max(0, cur - 1)), next: () => goShot(Math.min(shots.length - 1, cur + 1)),
       hasAnswer: !!answer && isReady, answer, closeAnswer: () => this.setState({ answer:'' }),
       q, onQ: e => this.setState({ q:e.target.value }), ask: e => { e.preventDefault(); askFn(q); },
-      askDisabled: !aiOk || !isReady,
-      askPlaceholder: aiOk ? 'Ask about this reference' : `Ask needs AI · ${this.props.aiMsg || 'unavailable'}`,
+      askDisabled: !aiOk || !isReady || !real,
+      askPlaceholder: !aiOk ? `Ask needs AI · ${this.props.aiMsg || 'unavailable'}` : !real ? 'Ask needs a measured reference: import one first' : 'Ask about this reference',
       chips: ["What's the exact colour scheme?", 'How many lights?'].map(label => ({ label, use: () => askFn(label) })),
       saveLook: () => run('breakdown.save_look', real ? 'Look saved to Library (palette measured; light and mood sample)' : 'Look saved to Library (sample)'),
       adapt: () => { run('adapt.open', 'Adapt to our location', {}, { quiet:true }); nav('location'); },
-      lowConf: low, aiBlocked: !aiOk, aiMsg: this.props.aiMsg || '',
+      lowConf: low || (hasData && queue.length > 0), aiBlocked: !aiOk, aiMsg: this.props.aiMsg || '',
+      reviewTitle: queue.length ? `${queue.length} ${queue.length === 1 ? 'value needs' : 'values need'} review` : undefined,
+      reviewBody: queue.length ? reviewBodyFor(queue, confirm) : undefined,
       // Fit light is a T0 instrument (P3): it works with no AI, so it follows the frame, not the AI state. The design's
       // aiBtnColor colours only this button.
       fitLightLabel: 'Fit light', fitLightDisabled: !isReady, aiBtnColor: isReady ? 'var(--tx)' : 'var(--tx3)',
@@ -206,11 +222,17 @@ export class Breakdown extends DCLogic {
       ] : [],
       dial, azLabel: L ? `${minus(L.key_az.value)}° az` : '', elLabel: L ? `${L.key_el.value}° el` : '',
       keyOverlay: L ? `Key ${minus(L.key_az.value)}° az · ${L.key_el.value}° el · ${L.key_kelvin.value} K${lightTag}` : undefined,
-      lightRows: b ? this.rows('light', low) : [], lensRows: b ? this.rows('lens', low) : [], framingRows: b ? this.rows('framing', low) : [],
+      lightRows: b ? this.rows('light') : [], lensRows: b ? this.rows('lens') : [], framingRows: b ? this.rows('framing') : [],
       fitLight: () => this.fitLight(),
       editKey: () => this.setState({ editing:'key', open:{ ...open, light:true } }),
       moods: this.state.moods || (b ? b.mood.value : []),
-      addMood: () => { const m = window.prompt('Add a mood tag'); if (m) this.setState(s => ({ moods:[...(s.moods || (b ? b.mood.value : [])), m] })); },
+      // A mood tag typed by hand is saved (source manual, D-LL-049); sample words are replaced, never promoted to manual.
+      addMood: () => {
+        const m = window.prompt('Add a mood tag');
+        if (!m || !b) return;
+        const words = [...(b.mood.source === 'sample' ? [] : b.mood.value), m];
+        run('breakdown.edit_value', 'Mood set by hand', { field:'mood', value: words.join(', ') }).then(r => r && this.load());
+      },
     };
   }
 }

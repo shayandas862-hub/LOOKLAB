@@ -1,14 +1,18 @@
 // Breakdown: measure a reference. Since P2, import, frames, shot cuts, palette, tints, saturation, contrast
 // and aspect are T0 instruments on the actual pixels (source "measured"), and subject position is set by
 // hand (D-LL-028). Since P3 the key light is fitted to a face marked by hand, as an estimate, and the focal
-// length comes from EXIF when the file has it; the rest of the lens, framing size (T1) and mood (P4) are
-// still stand-ins. The reference and its frames live in breakdown-reference.ts, the light in
-// breakdown-light.ts, shared helpers in breakdown-shared.ts.
+// length comes from EXIF when the file has it. Since P4 shot size comes from the face box by R2 (T0, an
+// estimate), mood and Ask from a model (breakdown-ai.ts); the rest of the lens stays a stand-in under D-LL-039.
+// The reference and its frames live in breakdown-reference.ts, the light in breakdown-light.ts, shared helpers
+// in breakdown-shared.ts.
 import { z } from 'zod';
 import { Breakdown, EditableField, FramePoint, Id, Look, MAX_FRAMES, Swatch, TextValue } from '../../contracts/index.ts';
 import { defineAction, ActionError, type AnyAction } from '../registry.ts';
 import { col, meta, save, stamp, target } from '../records.ts';
-import { analyseShot, defaultFrame, getBreakdown, loadFrame, paletteOf, referenceFor, weakest, type BreakdownT } from './breakdown-shared.ts';
+import { analyseShot, defaultFrame, getBreakdown, loadFrame, paletteOf, readyReference, referenceFor, weakest, type BreakdownT } from './breakdown-shared.ts';
+import { aiActions } from './breakdown-ai.ts';
+import { findActiveArea } from '../../core/image.ts';
+import { shotSize } from '../../core/shot-size.ts';
 import { referenceActions } from './breakdown-reference.ts';
 import { lightActions } from './breakdown-light.ts';
 
@@ -97,10 +101,13 @@ export const breakdownActions: AnyAction[] = [
     },
   }),
   ...lightActions,
+  ...aiActions,
   defineAction({
     name: 'breakdown.fit_lens',
     title: 'Estimate lens and camera',
-    description: 'Estimates focal length, depth of field, camera height, angle and movement. Stand-in until P3/P4.',
+    description:
+      'Would label depth of field, camera height, angle and movement from the frame. A stand-in: under D-LL-039 no frame leaves the ' +
+      'machine, so these stay by hand; the focal length comes from EXIF (D-LL-034) or a person.',
     tier: 'T2', effect: 'write', ai: true, standIn: true, rules: ['R2'],
     input: z.object(target),
     output: z.object({ lens: Breakdown.shape.lens }),
@@ -110,24 +117,28 @@ export const breakdownActions: AnyAction[] = [
     name: 'breakdown.fit_framing',
     title: 'Estimate framing',
     description:
-      'Estimates shot size and lead room. Stand-in until a subject detector (T1) exists. Aspect is measured by breakdown.analyse; ' +
-      'subject position is set by hand (breakdown.set_subject).',
-    tier: 'T1', effect: 'write', ai: true, standIn: true, rules: ['R2'],
+      'Names the shot size from the face box by R2 (T0): the face\'s height over the active picture\'s height (ECU, CU, MCU, MS, MWS, WS, ' +
+      'EWS; D-LL-046). Written as an estimate; a size set by hand is kept. Subject position and lead room stay by hand (D-LL-028, D-LL-039).',
+    tier: 'T0', effect: 'write', rules: ['R2'],
     input: z.object(target),
-    output: z.object({ framing: z.object({ size: TextValue, lead_room: TextValue }) }),
+    output: z.object({ framing: z.object({ size: TextValue, lead_room: TextValue }), basis: z.string() }),
     handler: async (ctx, i) => {
-      const f = (await getBreakdown(ctx, i.project_id, i.shot_id)).framing;
-      return { framing: { size: f.size, lead_room: f.lead_room } };
+      const b = await getBreakdown(ctx, i.project_id, i.shot_id);
+      if (!b.face || b.reference_id === null || b.face.frame_index !== b.frame_index) {
+        throw new ActionError('invalid_input', '', 'no face box on the measured frame: drag a box around the face on the frame, hairline to chin, then try again');
+      }
+      const px = await loadFrame(ctx, i.project_id, await readyReference(ctx, i.project_id, b.reference_id), b.face.frame_index);
+      const active = findActiveArea(px);
+      const share = (b.face.h * px.height) / (active.y1 - active.y0);
+      const label = shotSize(Math.min(share, 1.5));
+      const basis = `face ${Math.round(share * 100)}% of the picture height → ${label} (R2)`;
+      if (['manual', 'measured', 'metadata'].includes(b.framing.size.source)) {
+        return { framing: { size: b.framing.size, lead_room: b.framing.lead_room }, basis: `${basis}; kept the size set by hand` };
+      }
+      const size = { value: label, source: 'estimate' as const, decision_id: ctx.call?.decision_id, updated_by: 'R2', updated_at: ctx.now() };
+      await save(ctx, Breakdown, col.breakdowns(i.project_id), i.shot_id, stamp(ctx, { ...b, framing: { ...b.framing, size } }));
+      return { framing: { size, lead_room: b.framing.lead_room }, basis };
     },
-  }),
-  defineAction({
-    name: 'breakdown.fit_mood',
-    title: 'Suggest mood words',
-    description: 'Suggests mood tags from the frame and palette. Words, not measurements. Stand-in until P4.',
-    tier: 'T2', effect: 'write', ai: true, standIn: true, rules: ['R3', 'R5'],
-    input: z.object(target),
-    output: z.object({ mood: Breakdown.shape.mood }),
-    handler: async (ctx, i) => ({ mood: (await getBreakdown(ctx, i.project_id, i.shot_id)).mood }),
   }),
   defineAction({
     name: 'breakdown.edit_value',
@@ -141,45 +152,26 @@ export const breakdownActions: AnyAction[] = [
         throw new ActionError('invalid_input', '', `${i.field} takes a ${NUMERIC.has(i.field) ? 'number' : 'text value'}`);
       }
       const b = await getBreakdown(ctx, i.project_id, i.shot_id);
+      if (i.field === 'mood') {
+        const words = String(i.value).split(',').map((w) => w.trim()).filter(Boolean).slice(0, 8);
+        if (!words.length) throw new ActionError('invalid_input', '', 'mood takes words separated by commas');
+        b.mood = { value: words, source: 'manual', updated_by: ctx.user, updated_at: ctx.now() };
+        await save(ctx, Breakdown, col.breakdowns(i.project_id), i.shot_id, stamp(ctx, b));
+        return { field: i.field, value: words.join(', '), source: 'manual' as const };
+      }
       const [group, leaf] = i.field.split('.');
       const holder = (leaf ? (b as Record<string, unknown>)[group] : b) as Record<string, { value: unknown; source: string; confidence?: number; updated_by: string; updated_at: string }>;
       const key = leaf ?? group;
       holder[key] = { ...holder[key], value: i.value, source: 'manual', updated_by: ctx.user, updated_at: ctx.now() };
       delete holder[key].confidence;
+      delete (holder[key] as { decision_id?: string }).decision_id;
       await save(ctx, Breakdown, col.breakdowns(i.project_id), i.shot_id, stamp(ctx, b));
       return { field: i.field, value: i.value, source: 'manual' as const };
-    },
-  }),
-  defineAction({
-    name: 'breakdown.review',
-    title: 'Confirm a value after review',
-    description: 'A person confirms a low-confidence value. Needs approval in the Look Lab window.',
-    tier: 'T3', effect: 'write', confirm: true, rules: ['R5'],
-    input: z.object({ ...target, field: EditableField }),
-    output: z.object({ reviewed: z.array(z.string()) }),
-    handler: async (ctx, i) => {
-      const b = await getBreakdown(ctx, i.project_id, i.shot_id);
-      const reviewed = [...new Set([...b.reviewed, i.field])];
-      await save(ctx, Breakdown, col.breakdowns(i.project_id), i.shot_id, stamp(ctx, { ...b, reviewed }));
-      return { reviewed };
     },
   }),
   overlay('breakdown.toggle_thirds', 'thirds'),
   overlay('breakdown.toggle_light', 'light direction'),
   overlay('breakdown.toggle_samples', 'palette sample points'),
-  defineAction({
-    name: 'breakdown.ask',
-    title: 'Ask about this reference',
-    description: 'Answers a question from the breakdown ("what is the exact colour scheme?"). Stand-in until P4.',
-    tier: 'T2', effect: 'read', ai: true, standIn: true, rules: ['R3'],
-    input: z.object({ ...target, question: z.string().trim().min(1).max(500) }),
-    output: z.object({ answer: z.string(), source: z.literal('sample') }),
-    handler: async (ctx, i) => {
-      const b = await getBreakdown(ctx, i.project_id, i.shot_id);
-      const pal = b.palette.map((p) => `${p.hex} ${p.share.value}%`).join(', ');
-      return { answer: `Sample answer (no model called). Palette: ${pal}. Key ${b.light.key_az.value}° az, ${b.light.key_el.value}° el, ${b.light.key_kelvin.value} K, ratio ${b.light.ratio.value}:1.`, source: 'sample' as const };
-    },
-  }),
   defineAction({
     name: 'breakdown.save_look',
     title: 'Save look to library',

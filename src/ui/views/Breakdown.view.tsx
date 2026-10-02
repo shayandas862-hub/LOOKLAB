@@ -243,10 +243,10 @@ export function BreakdownView(v: any): React.ReactElement {
           <>
             <div style={sx("margin:12px 12px 0;padding:10px 12px;border-radius:8px;background:var(--warn-soft);border:1px solid var(--warn);display:flex;flex-direction:column;gap:4px")}>
               <div style={sx("font-weight:600;color:var(--warn)")}>
-                {"3 values need review"}
+                {v.reviewTitle ?? "3 values need review"}
               </div>
               <div style={sx("color:var(--tx2)")}>
-                {"Practicals, fill temperature and camera height are below 60% confidence. Confirm or edit them."}
+                {v.reviewBody ?? "Practicals, fill temperature and camera height are below 60% confidence. Confirm or edit them."}
               </div>
             </div>
           </>

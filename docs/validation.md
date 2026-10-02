@@ -132,10 +132,21 @@ renderer by the eye line. Chosen on the dev set among four variants declared bef
 
 ---
 
+## 4 · AI values (P4)
+
+Mood words and Ask's answers come from `claude-opus-5` through the founder's key. **Nothing checks them against a known
+answer:** there is no ground truth for a mood, and an answer is free text. Their confidence is the model's own rating,
+shown as "AI · n" and never as a percentage (D-LL-042); below 60 a person reviews them (R5). What is checked, in the
+suite, on a stub client: that only numbers and words leave the machine (D-LL-039), that a model never overwrites a
+measured, estimated, EXIF or hand-set value, that bad output is refused, and that an Ask answer quoting a number not in
+the record is refused (D-LL-047). Shot size from the face box (R2, D-LL-046) is a definition, not a measurement.
+
 ## Not validated
 
 | Area | Why it matters |
 |---|---|
+| AI mood words and Ask answers | No ground truth exists for them; the model's confidence is not checked against anything (§4). |
+| Shot size from the face box on real faces | A definition tuned to an adult face seen from the front; a turned face, a child or a cropped head reads one size off. |
 | Real footage or real photos | Nothing real has been checked against a known light. Real faces turn, wear hair, glasses and make-up, and are graded and compressed. |
 | Faces not pointing at the camera, practical lamps in frame | The fit assumes neither (D-LL-033); the Blender set contains neither. |
 | Any other head than the one in the Blender script | Every Blender scene uses the same head. |

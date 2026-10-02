@@ -5,6 +5,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import NODE_FLAGS from '../../src/engine/node-flags.json' with { type: 'json' };
 
 const ROOT = join(import.meta.dirname, '..', '..');
 let child: ChildProcess | null = null;
@@ -18,7 +19,7 @@ afterEach(() => {
 test('the engine starts under node --experimental-strip-types and serves the API (B-LL-001)', async () => {
   home = mkdtempSync(join(tmpdir(), 'looklab-boot-'));
   const port = 40000 + Math.floor(Math.random() * 20000);
-  child = spawn(process.execPath, ['--experimental-strip-types', '--no-warnings=ExperimentalWarning', 'src/engine/main.ts'], {
+  child = spawn(process.execPath, [...NODE_FLAGS, 'src/engine/main.ts'], {
     cwd: ROOT,
     env: { ...process.env, LOOKLAB_HOME: home, LOOKLAB_PORT: String(port) },
   });

@@ -5,13 +5,13 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { chromium, type Browser, type Page } from 'playwright-core';
+import type { Browser, Page } from 'playwright-core';
+import { blockedByOffline, CHROME, launchChrome, offlinePage } from './chrome.ts';
 import { startEngine, type Engine } from '../../src/engine/engine.ts';
 import { deltaE2000, hexToLab } from '../../src/core/colour.ts';
 
 const ROOT = join(import.meta.dirname, '..', '..');
 const UI = join(ROOT, 'dist', 'ui');
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const FIXTURE = join(ROOT, 'tests', 'fixtures', 'patches-239.png');
 const SPEC = JSON.parse(readFileSync(join(ROOT, 'tests', 'fixtures', 'patches-239.json'), 'utf8')) as { patches: [string, number][] };
 const canRun = existsSync(CHROME) && existsSync(join(UI, 'index.html'));
@@ -63,9 +63,9 @@ describe.skipIf(!canRun)('Breakdown in Chrome (P2)', () => {
   beforeAll(async () => {
     home = mkdtempSync(join(tmpdir(), 'looklab-p2-'));
     engine = await startEngine({ home, port: 0, uiDir: UI, quiet: true, rateLimit: { perSecond: 200, burst: 400 } });
-    browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ['--autoplay-policy=no-user-gesture-required'] });
-    page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    page.on('console', (m) => m.type() === 'error' && !m.text().includes('fonts.g') && errors.push(m.text()));
+    browser = await launchChrome(['--autoplay-policy=no-user-gesture-required']);
+    page = await offlinePage(browser, { viewport: { width: 1440, height: 900 } });
+    page.on('console', (m) => m.type() === 'error' && !m.text().includes('fonts.g') && !blockedByOffline(m.text()) && errors.push(m.text()));
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto(engine.url);
     await page.waitForSelector('[data-screen-label="Breakdown"]');

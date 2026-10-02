@@ -53,8 +53,9 @@ export const Breakdown = Meta.extend({
 });
 export type Breakdown = z.infer<typeof Breakdown>;
 
-/** Dotted paths a person may edit by hand (`breakdown.edit_value`). */
+/** Dotted paths a person may edit by hand (`breakdown.edit_value`). `mood` takes words separated by commas (P4). */
 export const EDITABLE_FIELDS = [
+  'mood',
   'saturation', 'contrast_stops',
   'light.key_az', 'light.key_el', 'light.key_hardness', 'light.key_kelvin', 'light.key_type',
   'light.fill_kelvin', 'light.fill_kind', 'light.ratio', 'light.practicals',

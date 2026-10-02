@@ -38,15 +38,25 @@ test, a review or a live run found it.
 
 ## Open
 
-### B-LL-004 · After a 60 s import the engine idles over its 150 MB memory budget in most runs
-- **Phase:** P3, 2026-10-01, measuring the light fit's memory on the M1 (`scripts/measure-fit.ts`, `scripts/measure-import.ts`).
-- **Found by:** measurement. Engine RSS idle after importing the same 60 s 1080p clip, five runs this session: 147, 172, 185, 176 and 159 MB (budget ≤ 150 MB, standing rule 5); macOS footprint (private memory including compressed pages) 155 and 156 MB in the two runs that read it. P2 measured 146–147 MB three times (PR-LL-002), the low end of this spread. Idle before any import: 136–138 MB RSS, 96 MB footprint.
-- **Cause:** not yet known. The light fit is not it: ten fits add 0–2 MB at their peak and nothing that stays. Most likely the import's 121 frame decodes and their signatures leave the engine's heap larger than it needs and Node does not hand the memory back; RSS on macOS also moves with memory compression, so one reading proves little either way. Unproven until a heap snapshot is taken after an import.
-- **Fix:** none yet. Proposed: take a heap snapshot after a 60 s import to see what is held; if it is the decode's garbage, run the cut detection and measurement of a reference in a worker thread that exits when done, so its memory goes back to the system.
-- **Guard:** none. `scripts/measure-fit.ts` and `scripts/measure-import.ts` measure it by hand; no test checks the budget.
-- **Could it return?** HIGH: it is open now, and every import of a long clip shows it.
+_None._
 
 ## Closed
+
+### B-LL-005 · Stopping the launcher with SIGTERM left the engine running, holding its port
+- **Phase:** P4 Task 0, 2026-10-01, the first run of the new launch test (`tests/engine/launch.test.ts`).
+- **Found by:** the test's clean-up: after the launcher (`node bin/looklab.mjs engine`) was killed, `pgrep` still listed its engine, now a child of launchd (parent pid 1), serving its port.
+- **Cause:** `bin/looklab.mjs` spawns the engine as a child process and only exited when the engine did; a signal sent to the launcher alone (a process manager's SIGTERM, `kill <pid>`) stopped the launcher and orphaned the engine. Ctrl-C in a terminal was not affected, because the terminal signals the whole process group.
+- **Fix:** the launcher passes SIGINT and SIGTERM on to the engine it started (`engine()` in `bin/looklab.mjs`).
+- **Guard:** `tests/engine/launch.test.ts` ("stopping the launcher with SIGTERM stops its engine too"): it fails against the old launcher (checked) and passes now.
+- **Could it return?** LOW for `start`, `dev` and `engine`, which all go through `engine()`. A new command that spawns the engine some other way would not be covered.
+
+### B-LL-004 · After a 60 s import the engine idled over its 150 MB memory budget in most runs
+- **Phase:** P3, 2026-10-01, measuring the light fit's memory on the M1 (`scripts/measure-fit.ts`, `scripts/measure-import.ts`).
+- **Found by:** measurement. Engine RSS idle after importing the same 60 s 1080p clip, five runs this session: 147, 172, 185, 176 and 159 MB (budget ≤ 150 MB, standing rule 5); macOS footprint (private memory including compressed pages) 155 and 156 MB in the two runs that read it. P2 measured 146–147 MB three times (PR-LL-002), the low end of this spread. Idle before any import: 136–138 MB RSS, 96 MB footprint.
+- **Cause:** found 2026-10-01 (end of the P3 session, measured on the M1 with `--heapsnapshot-signal` and with `--inspect` + CDP `HeapProfiler.collectGarbage`, in a scratch harness not kept). **Not a leak:** heap snapshots before and after a 60 s import hold 19.4 and 20.3 MB of live JS. While the 121 frames are decoded and measured, V8's heap grows from 23 to 52 MB (17 MB live afterwards), and V8 does not shrink it while the engine is idle, so the import's garbage stays in RSS. A forced full GC took RSS from 148 to 115 MB; 70 s of idling alone took one run from 163 to 85 MB, which is why the five readings spread so widely. The light fit is not it: ten fits add 0–2 MB at their peak and nothing that stays.
+- **Fix:** P4 Task 0, 2026-10-01: the engine runs with `--max-semi-space-size=1` (a 1 MB young generation, so an import's short-lived decode buffers are collected before the heap grows). The flags live in one list, `src/engine/node-flags.json`, read by `bin/looklab.mjs` (`npm start`, `npm run dev`, and `npm run engine`, which now goes through it), both measure scripts and the boot test. In the scratch harness first: 120, 134 and 136 MB over three runs. **Measured after the fix, five runs of `scripts/measure-fit.ts` on the same 60 s 1080p clip:** idle after the import **129, 130, 128, 120 and 119 MB RSS** (footprint 140, 142, 140, 143 and 130 MB); idle fresh 138–140 MB RSS (footprint 96–98 MB); ten light fits add nothing that stays (115–126 MB after). Cost: one light fit 212–218 ms median over HTTP, against P3's 204–206 ms (about 4% slower). No full GC after an import was needed.
+- **Guard:** `tests/engine/launch.test.ts`: the shared list holds the flag, every launcher reads the list, and a launched engine's own command line carries it. No test checks the 150 MB budget itself; `scripts/measure-fit.ts` and `scripts/measure-import.ts` measure it by hand.
+- **Could it return?** MEDIUM: idle fresh is already 138–140 MB, 10–12 MB under the budget, so anything new held in memory (the AI client, a larger store cache) or a longer import could cross it again. Measure every addition (standing rule 5).
 
 ### B-LL-003 · The Blender head's eyebrows were rendered 27 cm off the face
 - **Phase:** P3, 2026-10-01, the first trial render of the Blender ground-truth set (`scripts/blender/render_set.py`), before any render was kept.

@@ -8,7 +8,9 @@ import { ActionError, buildRegistry, DEFAULT_MAX_BYTES, mcpName, type Registry }
 import type { ActionContext } from '../actions/context.ts';
 import { seedSampleIfEmpty } from '../actions/seed.ts';
 import { Decision, Settings, type Via } from '../contracts/index.ts';
-import { NoAiProvider, type AiProvider } from './ai.ts';
+import type { AiProvider } from './ai.ts';
+import { AnthropicProvider } from './anthropic.ts';
+import { EmptyKeychain, type SecretStore } from './keychain.ts';
 import { EventBus } from './events.ts';
 import { createMcpServer, inputJsonSchema, VERSION } from './mcp.ts';
 import { bearer, ensureToken, hostAllowed, RateLimiter, tokenMatches } from './security.ts';
@@ -20,6 +22,10 @@ export interface EngineOptions {
   uiDir?: string;
   rateLimit?: { perSecond: number; burst: number };
   quiet?: boolean;
+  /** Where the API key lives. main.ts passes the macOS Keychain; anything else (tests) gets one that is always empty. */
+  keychain?: SecretStore;
+  /** The model provider; by default Anthropic, reading its key from `keychain` (P4). */
+  ai?: AiProvider;
 }
 
 export interface Engine {
@@ -31,7 +37,7 @@ export interface Engine {
 }
 
 const STATUS: Record<string, number> = {
-  unknown_action: 404, not_found: 404, invalid_input: 400, needs_approval: 403, ai_unavailable: 409, invalid_output: 500, failed: 500,
+  unknown_action: 404, not_found: 404, invalid_input: 400, needs_approval: 403, ai_unavailable: 409, model_output: 502, invalid_output: 500, failed: 500,
 };
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -84,7 +90,8 @@ export async function startEngine(opts: EngineOptions): Promise<Engine> {
   const store: Store = new FileStore(opts.home);
   const events = new EventBus();
   const registry = buildRegistry();
-  const ai: AiProvider = new NoAiProvider();
+  const keychain: SecretStore = opts.keychain ?? new EmptyKeychain();
+  const ai: AiProvider = opts.ai ?? new AnthropicProvider(keychain);
   const limiter = new RateLimiter(opts.rateLimit?.perSecond ?? 50, opts.rateLimit?.burst ?? 200);
   const user = userInfo().username;
   const workspace = 'local';
@@ -95,7 +102,7 @@ export async function startEngine(opts: EngineOptions): Promise<Engine> {
   const shellQuote = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
 
   const context = (via: Via): ActionContext => ({
-    store, events, ai, via, user, workspace,
+    store, events, ai, keychain, via, user, workspace,
     now: () => new Date().toISOString(),
     settings: async () => Settings.parse((await store.get('system', 'settings')) ?? { schema_version: 1, api: {} }),
     saveSettings: async (s) => store.put('system', 'settings', Settings.parse(s)),

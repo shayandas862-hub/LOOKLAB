@@ -1,6 +1,6 @@
 # Prompt 9 · Claude Code: Phase 4.5 (colour: what to capture and how to grade)
 
-Before pasting: P4 committed and pushed to `origin`; `prompts/09-phase-4-5-CLAUDE.md` installed as `CLAUDE.md`, with
+Before pasting (done 2026-10-02 in the P4 session, which went straight on into P4.5: engine first, design later): P4 committed and pushed to `origin`; `prompts/09-phase-4-5-CLAUDE.md` installed as `CLAUDE.md`, with
 its P4 line filled in from P4's progress entry; the Claude Design export of `prompts/08-claude-design-colour.md` in
 `design/`. Open Claude Code in the project folder and paste the block below.
 

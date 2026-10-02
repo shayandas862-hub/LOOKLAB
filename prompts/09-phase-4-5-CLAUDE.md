@@ -18,10 +18,10 @@ For a reference shot, Look Lab tells the crew what to put in front of the lens (
 
 ## Your Tasks — Complete In This Order
 1. **Records, documents and contracts.**
-   Read and cite Sony's FX3 documents and S-Log3/S-Gamut3.Cine technical summary, the confirmed maker's gel book, the fixtures' sheets, ASC CDL v1.2, the Adobe Cube LUT spec 1.0, X-Rite's ColorChecker values and Kim et al. (2002), each with a licence verdict (unclear means no: P-LL-001 names the fallback). Write the five ADs of P-LL-001 §7 and get the founder's yes before any contract changes. Type the kit's colour numbers from the documents (`manual`, with `cite`). Write the §9.3 tolerances and the §9.4 declaration into `docs/validation.md` §5 now (§4 is P4's AI values).
+   Read and cite Sony's FX3 documents and S-Log3/S-Gamut3.Cine technical summary, the confirmed maker's gel book, the fixtures' sheets, ASC CDL v1.2, the Adobe Cube LUT spec 1.0, X-Rite's ColorChecker values and Kim et al. (2002), each with a licence verdict (unclear means no: P-LL-001 names the fallback). Write the five ADs of P-LL-001 §7 (the founder said yes to all five on 2026-10-02, and accepted the defaults of P-LL-001 §11; record both as D/AD records citing that). Type the kit's colour numbers from the documents (`manual`, with `cite`). Write the §9.3 tolerances and the §9.4 declaration into `docs/validation.md` §5 now (§4 is P4's AI values).
    → Tests first: every stored record still parses after each contract change; a kit colour number without a `cite` is refused.
 2. **Colour maths in `src/core/`.**
-   Mired and the gel search; S-Log3; the S-Gamut3.Cine matrices from the primaries; CCT and Duv; the ASC CDL forward, inverse and fit; the base transform B and B⁻¹; .cdl and .cube writers and parsers; LUT application; the set-colour verdicts; the camera rules. Exactly as P-LL-001 §4 writes them; a change to a formula or threshold is a D record first.
+   Start with the grade check's maths (palette matching, ΔE00 rows, the differences): matching a shot to its reference is the founder's priority (2026-10-02). Then mired and the gel search; S-Log3; the S-Gamut3.Cine matrices from the primaries; CCT and Duv; the ASC CDL forward, inverse and fit; the base transform B and B⁻¹; .cdl and .cube writers and parsers; LUT application; the set-colour verdicts; the camera rules. Exactly as P-LL-001 §4 writes them; a change to a formula or threshold is a D record first.
    → Tests first, at P-LL-001 §9.1's tolerances (Sony's table, the ASC examples where allowed, round trips, the LUT against the exact pipeline).
 3. **The Blender colour set and the noise and banding test.**
    P-LL-001 §9.2: the P3 head with a chart, a grey card, a neutral wall and a painted prop; dev (seed 3, 16 scenes) while building, held-out (seed 4, 24 scenes) run once; truth checked without Blender; committed ≤ 15 MB. §9.4 on synthetic frames.
@@ -44,7 +44,7 @@ For a reference shot, Look Lab tells the crew what to put in front of the lens (
 1. Every feature is an action in the registry (`src/actions/`); nothing writes to the store any other way. New getters and helpers get `command: false` so the design-catalogue parity test holds (AD-LL-002).
 2. Never present a stand-in as a real call. Stand-ins return `source: 'sample'`; sample data shows the Sample marker (D-LL-015, D-LL-032, D-LL-038). No colour action ships as a stand-in.
 3. No accuracy claims on real footage until a ground-truth test for it passes. An AI label is a word, not a measurement; a Blender-set number is a claim about the Blender set only.
-4. Look Lab's own processes ≤ 1.5 GB on the M1; engine ≤ 150 MB RSS idle (119–130 MB after a 60 s import since D-LL-044). Measure every addition (RSS and `footprint <pid>`).
+4. Look Lab's own processes ≤ 1.5 GB on the M1; engine ≤ 150 MB RSS idle (119–135 MB after a 60 s import since D-LL-044). Measure every addition (RSS and `footprint <pid>`).
 5. Claude subscriptions only through Claude Code over MCP; in-app AI uses an API key from the Keychain (AD-LL-003). Zero live calls in the test suite (D-LL-045).
 6. Secrets live in the macOS Keychain, never in files, the store, decision rows, events, logs, errors, tests or commits.
 7. Client footage stays local unless cloud is allowed for that project; every upload is logged. A model call sends numbers and words only, never a frame (D-LL-039).
@@ -145,7 +145,7 @@ Do not load these at session start; read one only when a task needs it.
 - Chrome's `canvas.captureStream` + `MediaRecorder` writes a clip's first frame with different colours from the rest (B-LL-002); test clips open on black.
 - A web page is never told a dropped file's path (D-LL-027).
 - The fit's kelvin is searched over 2800–7000 K only, against a 5600 K white balance, with Tanner Helland's approximation (`light-render.ts`); the Blender truth uses the Kim et al. locus. A sodium key sits on the bound.
-- Sony's S-Log3 formula works in 10-bit code / 1023 (full range), not legal range; IRE % is (code − 64) / 876 × 100. 18% grey is code 420.
+- Sony's S-Log3 formula works in 10-bit code / 1023 (full range), not legal range; IRE % is (code − 64) / 876 × 100. Where 18% grey sits is read from Sony's technical summary this phase, not recalled.
 - A CDL's numbers mean nothing without their space: ours apply to S-Log3 / S-Gamut3.Cine codes, before any display transform. Say so in the .cdl.
 - In a .cube the red index changes fastest. A 33-point file is 35,937 rows, about 1 MB of text.
 - The Breakdown already has a section named COLOUR (the palette); the new one is CAPTURE & GRADE.

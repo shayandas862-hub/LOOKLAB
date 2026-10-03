@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { Id, Meta, Source } from './value.ts';
+import { Id, Meta, NumValue, Source } from './value.ts';
+import { CameraRecording, Charts, Gel, LightColour, Monitoring, sampleDefault } from './colour.ts';
 
 export const Location = Meta.extend({
   project_id: Id,
@@ -8,6 +9,8 @@ export const Location = Meta.extend({
   windows: z.array(z.object({ wall: z.enum(['north', 'east', 'south', 'west']), width_m: z.number().positive() })).default([]),
   power: z.array(z.object({ id: Id, amps: z.number().positive(), shared_with: z.string().nullable().default(null) })).default([]),
   hours: z.object({ from: z.string(), to: z.string() }),
+  /** Mains frequency: lamps on mains pulse at twice it, which sets the flicker-free shutter (AD-LL-015). */
+  mains_hz: NumValue.default(sampleDefault(50, 'Hz')),
   sample: z.boolean().default(false),
 });
 export type Location = z.infer<typeof Location>;
@@ -19,14 +22,25 @@ export const KitItem = z.object({
   available: z.boolean().default(true),
   category: z.enum(['light', 'modifier', 'gel', 'grip', 'camera', 'lens', 'other']).default('other'),
   watts: z.number().nonnegative().nullable().default(null),
+  /** A light's colour range from its maker's sheet (AD-LL-014); null until entered. */
+  colour: LightColour.nullable().default(null),
 });
 export type KitItem = z.infer<typeof KitItem>;
 
 export const Kit = Meta.extend({
   project_id: Id,
   items: z.array(KitItem).default([]),
-  camera: z.object({ body: z.string(), lenses_mm: z.array(z.number().positive()) }),
+  camera: z.object({
+    body: z.string(),
+    lenses_mm: z.array(z.number().positive()),
+    /** What the body records and offers, from its maker's documents (AD-LL-014); null until read. */
+    recording: CameraRecording.nullable().default(null),
+  }),
   crew: z.array(z.string()).default([]),
+  /** The gel book we carry, each gel cited (AD-LL-014). */
+  gels: z.array(Gel).default([]),
+  monitoring: Monitoring.default({ external: false, loads_cube: false, cube_sizes: [], source: 'sample' }),
+  charts: Charts.default({ colorchecker: 'none', grey_card: false, source: 'sample' }),
   sample: z.boolean().default(false),
 });
 export type Kit = z.infer<typeof Kit>;

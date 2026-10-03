@@ -3,6 +3,7 @@
 import type {
   Board, Breakdown, Kit, Location, Look, Project, Recipe, Reference, SetPlan, SetSheet,
 } from '../contracts/index.ts';
+import { PROJECT_COLOUR_DEFAULT, sampleDefault } from '../contracts/index.ts';
 
 export const SAMPLE_PROJECT = 'neel';
 export const SAMPLE_SHOT = '12C';
@@ -21,6 +22,7 @@ export function sampleSeed(now: string, user: string, workspace: string) {
   const project: Project = {
     ...meta(P), name: 'Neel', type: 'short film', shoot_from: '2026-10-14', shoot_to: '2026-10-18',
     cloud_allowed: false, sample: true, scenes: [{ id: 'sc12', number: '12', title: 'Kitchen, night' }], shots,
+    colour: PROJECT_COLOUR_DEFAULT,
   };
 
   const reference: Reference = {
@@ -39,6 +41,7 @@ export function sampleSeed(now: string, user: string, workspace: string) {
     light: {
       key_az: s(-60, '°'), key_el: s(25, '°'), key_hardness: s('hard'), key_kelvin: s(2000, 'K'), key_type: s('sodium'),
       fill_kelvin: s(5600, 'K'), fill_kind: s('ambient'), ratio: s(8, ':1'), practicals: s('none'),
+      key_gm: s(0, 'Duv'), fill_gm: s(0, 'Duv'),
     },
     lens: { focal_mm: s(40, 'mm'), dof: s('shallow'), height_m: s(1.2, 'm'), angle: s('slight low, 4°'), movement: s('static') },
     framing: { size: s('MCU'), subject_pos: s('left third'), lead_room: s('right'), aspect: s('2.39:1') },
@@ -49,11 +52,11 @@ export function sampleSeed(now: string, user: string, workspace: string) {
     ...meta('ballygunge-kitchen'), project_id: P, name: 'Ballygunge flat, kitchen',
     floor: { w_m: 3.1, d_m: 4.2, ceiling_m: 2.9 }, windows: [{ wall: 'east', width_m: 1.2 }],
     power: [{ id: 'p5a', amps: 5, shared_with: null }, { id: 'p15a', amps: 15, shared_with: 'fridge' }],
-    hours: { from: '19:00', to: '02:00' }, sample: true,
+    hours: { from: '19:00', to: '02:00' }, mains_hz: sampleDefault(50, 'Hz'), sample: true,
   };
 
   const item = (id: string, name: string, qty: number, category: Kit['items'][number]['category'], watts: number | null = null) =>
-    ({ id, name, qty, available: true, category, watts });
+    ({ id, name, qty, available: true, category, watts, colour: null });
   const kit: Kit = {
     ...meta('neel-kit'), project_id: P, sample: true,
     items: [
@@ -61,7 +64,8 @@ export function sampleSeed(now: string, user: string, workspace: string) {
       item('rgbtube', '4 ft RGB tube', 1, 'light', 40), item('frame44', '4×4 frame + ½ grid', 1, 'modifier'),
       item('flags', 'Flags', 2, 'grip'), item('cto', 'CTO full, ½ gels', 1, 'gel'), item('haze', 'Haze machine', 1, 'other', 700),
     ],
-    camera: { body: 'Sony FX3', lenses_mm: [24, 35, 50, 85] }, crew: ['DP', 'gaffer', 'spark'],
+    camera: { body: 'Sony FX3', lenses_mm: [24, 35, 50, 85], recording: null }, crew: ['DP', 'gaffer', 'spark'],
+    gels: [], monitoring: { external: false, loads_cube: false, cube_sizes: [], source: 'sample' }, charts: { colorchecker: 'none', grey_card: false, source: 'sample' },
   };
 
   const recipe: Recipe = {

@@ -138,7 +138,7 @@ describe.skipIf(!canRun)('Light and lens in Chrome (P3)', () => {
   });
 
   test('the marker names what is estimated and what is still sample, and nothing claims accuracy on real footage', async () => {
-    const marker = await page.locator('[data-testid=sample-marker]').innerText();
+    const marker = (await page.locator('[data-testid=sample-marker]').getAttribute('aria-label'))!; // the full list (B-LL-006)
     expect(marker).toContain('ESTIMATE: key direction, key colour, shot size (from the face marked by hand; not verified on real footage)');
     expect(marker).toMatch(/SAMPLE: key type, hardness, fill, key:fill, practicals, focal length/);
     expect(marker).not.toMatch(/SAMPLE:[^·]*key direction/);
@@ -154,7 +154,7 @@ describe.skipIf(!canRun)('Light and lens in Chrome (P3)', () => {
     await importFile({ name: 'still-with-exif.png', mimeType: 'image/png', buffer: png });
     const r = await row('Focal length');
     expect(r).toEqual({ value: '75 mm (EXIF, 35 mm equiv.)', badge: 'METADATA' });
-    expect(await page.locator('[data-testid=sample-marker]').innerText()).toContain('METADATA: focal length (EXIF)');
+    expect(await page.locator('[data-testid=sample-marker]').getAttribute('aria-label')).toContain('METADATA: focal length (EXIF)');
     expect(errors).toEqual([]);
   }, 90_000);
 });

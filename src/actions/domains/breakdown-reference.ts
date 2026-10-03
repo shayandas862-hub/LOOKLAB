@@ -131,4 +131,26 @@ export const referenceActions: AnyAction[] = [
       return { reference_id: saved.id, shots: saved.shots, cuts, source: 'measured' as const };
     },
   }),
+  defineAction({
+    name: 'breakdown.convert_image',
+    title: 'Convert a photo the browser cannot open',
+    description:
+      'Converts a photo Chrome cannot decode (HEIC/HEIF from an iPhone, TIFF, camera RAW) on this Mac with macOS\'s own sips, and ' +
+      'returns a PNG frame (at most 1024 px), the original\'s pixel size and its EXIF lens tags. Nothing is stored and nothing leaves ' +
+      'the machine; the temporary copy is deleted (D-LL-055). The browser then imports it like any still. Bodies up to 48 MB.',
+    tier: 'T0', effect: 'read', command: false, maxBytes: 48_000_000,
+    input: z.object({
+      file_name: z.string().trim().min(1).max(255),
+      bytes_base64: z.string().min(16).max(64_000_000).regex(/^[A-Za-z0-9+/]+={0,2}$/, 'bytes_base64 must be base64'),
+    }),
+    output: z.object({ png_base64: z.string(), width: z.number().int().positive(), height: z.number().int().positive(), exif: LensExif.nullable() }),
+    handler: async (ctx, i) => {
+      try {
+        const r = await ctx.converter.convert(Buffer.from(i.bytes_base64, 'base64'), i.file_name);
+        return { png_base64: Buffer.from(r.png).toString('base64'), width: r.width, height: r.height, exif: r.exif };
+      } catch (e) {
+        throw new ActionError('invalid_input', '', (e as Error).message);
+      }
+    },
+  }),
 ];

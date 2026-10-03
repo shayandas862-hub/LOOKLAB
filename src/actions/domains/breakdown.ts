@@ -16,7 +16,7 @@ import { shotSize } from '../../core/shot-size.ts';
 import { referenceActions } from './breakdown-reference.ts';
 import { lightActions } from './breakdown-light.ts';
 
-const NUMERIC = new Set(['saturation', 'contrast_stops', 'light.key_az', 'light.key_el', 'light.key_kelvin', 'light.fill_kelvin', 'light.ratio', 'lens.focal_mm', 'lens.height_m']);
+const NUMERIC = new Set(['saturation', 'contrast_stops', 'light.key_az', 'light.key_el', 'light.key_kelvin', 'light.fill_kelvin', 'light.ratio', 'light.key_gm', 'light.fill_gm', 'lens.focal_mm', 'lens.height_m']);
 
 /** "left third (x 0.31, y 0.40)": the nearest thirds landmark, then the exact point. */
 export function subjectText(x: number, y: number): string {

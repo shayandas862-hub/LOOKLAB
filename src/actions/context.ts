@@ -3,6 +3,7 @@ import type { Store } from '../engine/store.ts';
 import type { EventBus } from '../engine/events.ts';
 import type { AiProvider } from '../engine/ai.ts';
 import type { SecretStore } from '../engine/keychain.ts';
+import type { ImageConverter } from '../engine/convert.ts';
 
 /**
  * What one call through the registry spent and decided, filled in by the handler (through callModel) and written to
@@ -25,6 +26,8 @@ export interface ActionContext {
   ai: AiProvider;
   /** The macOS Keychain (an empty one in tests and wherever none is given): the only place a key lives. */
   keychain: SecretStore;
+  /** Converts photos the browser cannot decode (HEIC, TIFF, RAW) on this machine (D-LL-055). */
+  converter: ImageConverter;
   via: Via;
   /** Set by the registry for each call (absent when a handler is called directly). */
   call?: CallMeter;

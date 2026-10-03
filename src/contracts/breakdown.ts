@@ -19,6 +19,8 @@ export const FaceBoxRecord = z.object({
   frame_index: z.number().int().nonnegative(),
 });
 
+const GM_DEFAULT = { value: 0, unit: 'Duv', source: 'sample' as const, updated_by: 'P-LL-001 default', updated_at: '2026-10-02T00:00:00.000Z' };
+
 export const Breakdown = Meta.extend({
   project_id: Id,
   shot_id: Id,
@@ -45,6 +47,9 @@ export const Breakdown = Meta.extend({
     fill_kind: TextValue,
     ratio: NumValue,
     practicals: TextValue,
+    /** Green–magenta of each source, as Duv (positive green); nothing in a frame measures it (AD-LL-016). */
+    key_gm: NumValue.default(GM_DEFAULT),
+    fill_gm: NumValue.default(GM_DEFAULT),
   }),
   lens: z.object({ focal_mm: NumValue, dof: TextValue, height_m: NumValue, angle: TextValue, movement: TextValue }),
   framing: z.object({ size: TextValue, subject_pos: TextValue, lead_room: TextValue, aspect: TextValue }),
@@ -58,7 +63,7 @@ export const EDITABLE_FIELDS = [
   'mood',
   'saturation', 'contrast_stops',
   'light.key_az', 'light.key_el', 'light.key_hardness', 'light.key_kelvin', 'light.key_type',
-  'light.fill_kelvin', 'light.fill_kind', 'light.ratio', 'light.practicals',
+  'light.fill_kelvin', 'light.fill_kind', 'light.ratio', 'light.practicals', 'light.key_gm', 'light.fill_gm',
   'lens.focal_mm', 'lens.dof', 'lens.height_m', 'lens.angle', 'lens.movement',
   'framing.size', 'framing.subject_pos', 'framing.lead_room', 'framing.aspect',
   'tints.shadow', 'tints.mid', 'tints.highlight',

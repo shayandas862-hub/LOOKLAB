@@ -133,7 +133,13 @@ Engine memory during and after a real call is therefore not measured. A value Cl
 **Next: P4.5.** Spec `plans/P-LL-001-colour-grading.md`; design prompt `prompts/08-claude-design-colour.md`; build
 prompt `prompts/09-phase-4-5.md`; its CLAUDE.md is drafted in `prompts/09-phase-4-5-CLAUDE.md`.
 
-## P4.5 · Colour: what to capture and how to grade
+## P4.5 · Colour: what to capture and how to grade — **in progress** (PR-LL-005)
+**Status 2026-10-03.** Done: the five ADs and the tolerances; the grade check (maths and helper actions, usable over
+MCP); mireds and the gel search; the kit, project, location and green–magenta contracts; every common photo format
+imports (D-LL-055); B-LL-006. Not done: the cited documents, the rest of the colour maths, the colour plan and capture
+card, the remaining actions, the Blender colour set, the screens (waiting for the design export of `prompts/08`).
+Next session: `prompts/10-founder-test-and-p4-5.md` (the founder uses the whole app first, then the build continues).
+
 **Goal.** For a reference shot, tell the crew what to put in front of the lens (each light's colour and the kit
 setting or gel that gets it, key:fill, the colours that must physically exist in the set and wardrobe), how to set the
 camera (white balance, profile and gamut, base ISO, exposure targets, recording, frame rate and shutter, charts), and

@@ -11,6 +11,7 @@ import { Decision, Settings, type Via } from '../contracts/index.ts';
 import type { AiProvider } from './ai.ts';
 import { AnthropicProvider } from './anthropic.ts';
 import { EmptyKeychain, type SecretStore } from './keychain.ts';
+import { defaultConverter, type ImageConverter } from './convert.ts';
 import { EventBus } from './events.ts';
 import { createMcpServer, inputJsonSchema, VERSION } from './mcp.ts';
 import { bearer, ensureToken, hostAllowed, RateLimiter, tokenMatches } from './security.ts';
@@ -26,6 +27,8 @@ export interface EngineOptions {
   keychain?: SecretStore;
   /** The model provider; by default Anthropic, reading its key from `keychain` (P4). */
   ai?: AiProvider;
+  /** Converts photos the browser cannot decode; macOS sips by default on a Mac (D-LL-055). */
+  converter?: ImageConverter;
 }
 
 export interface Engine {
@@ -62,7 +65,8 @@ function send(res: ServerResponse, status: number, body: unknown) {
 
 /** Reads a request body up to `limit` bytes; past it, nothing more is kept and TooLarge is thrown. */
 async function readBody(req: IncomingMessage, limit = DEFAULT_MAX_BYTES): Promise<string> {
-  if (Number(req.headers['content-length']) > DRAIN_CAP) {
+  const cap = Math.max(limit, DRAIN_CAP);
+  if (Number(req.headers['content-length']) > cap) {
     req.destroy();
     throw new TooLarge(limit);
   }
@@ -73,7 +77,7 @@ async function readBody(req: IncomingMessage, limit = DEFAULT_MAX_BYTES): Promis
     size += (c as Buffer).length;
     if (size > limit) {
       over = true;
-      if (size > DRAIN_CAP) {
+      if (size > cap) {
         req.destroy();
         break;
       }
@@ -92,6 +96,7 @@ export async function startEngine(opts: EngineOptions): Promise<Engine> {
   const registry = buildRegistry();
   const keychain: SecretStore = opts.keychain ?? new EmptyKeychain();
   const ai: AiProvider = opts.ai ?? new AnthropicProvider(keychain);
+  const converter: ImageConverter = opts.converter ?? defaultConverter();
   const limiter = new RateLimiter(opts.rateLimit?.perSecond ?? 50, opts.rateLimit?.burst ?? 200);
   const user = userInfo().username;
   const workspace = 'local';
@@ -102,7 +107,7 @@ export async function startEngine(opts: EngineOptions): Promise<Engine> {
   const shellQuote = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
 
   const context = (via: Via): ActionContext => ({
-    store, events, ai, keychain, via, user, workspace,
+    store, events, ai, keychain, converter, via, user, workspace,
     now: () => new Date().toISOString(),
     settings: async () => Settings.parse((await store.get('system', 'settings')) ?? { schema_version: 1, api: {} }),
     saveSettings: async (s) => store.put('system', 'settings', Settings.parse(s)),

@@ -5,8 +5,9 @@ import { MemoryStore } from '../../src/engine/store.ts';
 import { EventBus } from '../../src/engine/events.ts';
 import { NoAiProvider, type AiProvider } from '../../src/engine/ai.ts';
 import { EmptyKeychain, type SecretStore } from '../../src/engine/keychain.ts';
+import { NoConverter, type ImageConverter } from '../../src/engine/convert.ts';
 
-export function memoryContext(opts: { ai?: AiProvider; keychain?: SecretStore; start?: string } = {}) {
+export function memoryContext(opts: { ai?: AiProvider; keychain?: SecretStore; converter?: ImageConverter; start?: string } = {}) {
   const store = new MemoryStore();
   const decisions: Decision[] = [];
   const settings = Settings.parse({ schema_version: 1, api: {} });
@@ -17,6 +18,7 @@ export function memoryContext(opts: { ai?: AiProvider; keychain?: SecretStore; s
     events,
     ai: opts.ai ?? new NoAiProvider(),
     keychain: opts.keychain ?? new EmptyKeychain(),
+    converter: opts.converter ?? new NoConverter(),
     user: 'tester',
     workspace: 'local',
     now: () => new Date((clock += 1000)).toISOString(),

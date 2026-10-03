@@ -112,7 +112,9 @@ describe('every action runs on the sample project', () => {
   let registry: Registry;
   beforeEach(async () => {
     const kc = memoryKeychain();
-    ctx = memoryContext({ keychain: kc, ai: stubAi(cannedReply, kc).provider });
+    // A converter standing in for macOS sips: it hands back the one-frame PNG (D-LL-055).
+    const converter = { convert: async () => ({ png: Buffer.from(ONE_FRAME, 'base64'), width: 64, height: 36, exif: null }) };
+    ctx = memoryContext({ keychain: kc, ai: stubAi(cannedReply, kc).provider, converter });
     registry = buildRegistry();
     await seedSampleIfEmpty(ctx.store, '2026-09-30T12:00:00Z', 'tester', 'local');
   });
@@ -125,6 +127,10 @@ describe('every action runs on the sample project', () => {
       'breakdown.get_frame': { reference_id: ref, index: 0 },
       'breakdown.get_reference': { reference_id: ref },
     };
+    // The colour actions run last in registry order: a still of the same frame, then a check of it (P4.5).
+    byRef['colour.import_still'] = { file_name: 'still.png', mime: 'image/png', size_bytes: 10, sha256: 'd'.repeat(64), last_modified: null, png_base64: ONE_FRAME };
+    byRef['colour.check_grade'] = { still_id: 'still-dddddddddddd' };
+    byRef['breakdown.convert_image'] = { file_name: 'IMG_0001.heic', bytes_base64: Buffer.from('a heic, as far as this test knows').toString('base64') };
     for (const a of registry.list()) {
       let input = byRef[a.name] ?? REQUIRED[a.name] ?? {};
       if (a.name === 'log.set_verdict') input = { decision_id: ctx.decisions.at(-1)!.id, verdict: 'agreed' };

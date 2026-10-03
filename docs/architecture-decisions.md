@@ -7,6 +7,60 @@
 
 ---
 
+## 2026-10-02 — P4.5: colour (contracts from P-LL-001 §7)
+
+All five are additive: every new field is optional or defaulted, every stored record still parses, `schema_version`
+stays 1, and every number is a `Value` (architecture §5). Each change lands with a test that records written before it
+still parse.
+
+- **AD-LL-018 — A still and its grade check are records of their own.**
+  **Status: accepted by the founder, 2026-10-02** (answer to the P4.5 questions: "Yes to all five"). Spec: P-LL-001 §7.
+  **Chose:** `Still` (project, shot, file facts as `MediaFile`, its one frame, kind `display` or `log`, face box, chart
+  corners) and `GradeCheck` (the still, the reference and frame it was checked against, the colour plan version,
+  whether the look LUT was applied, one row per measure with both `Value`s, the difference, its unit, the verdict and
+  the threshold version, and one row per swatch). **Rejected:** importing a still as a second reference (a reference is
+  what a look is learned from; a still is what is checked against one, and mixing them would let a test shoot become
+  a look); keeping only the latest check (the history of checks is how a grade converges). **Why:** P-LL-001 §4.6.
+  **Trade-off:** one more import path to keep in step with `breakdown.import_reference`.
+
+- **AD-LL-017 — The Set Sheet carries a capture card, copied from the shot's colour plan when the sheet is generated.**
+  **Status: accepted by the founder, 2026-10-02** (answer to the P4.5 questions: "Yes to all five"). Spec: P-LL-001 §7.
+  **Chose:** `SetSheet` gains `capture` (the crew-facing fields of the colour plan) and `colour_plan_version`.
+  **Rejected:** the sheet reading the live plan (the sheet would change under the crew after printing). **Why:**
+  P-LL-001 §10 and the P7 card. **Trade-off:** a re-planned shot needs its sheet generated again; the sheet names the
+  plan version it copied.
+
+- **AD-LL-016 — The light gains green–magenta; each shot gains a colour plan record.**
+  **Status: accepted by the founder, 2026-10-02** (answer to the P4.5 questions: "Yes to all five"). Spec: P-LL-001 §7.
+  **Chose:** `Breakdown.light` gains `key_gm` and `fill_gm` (Duv, editable, default 0). A new record `ColourPlan`, one per
+  shot at `projects/<id>/colour/<shot_id>.json`, its version rising with each run: the inputs' fingerprint, the split,
+  the assumptions in force, camera, lights, key:fill, set colours, charts, monitoring, the grade (the ten CDL numbers as
+  `Value`s and the space they apply in) and the gaps. **Rejected:** putting the plan inside `Breakdown` (the breakdown
+  holds what was read from the reference; the plan is derived from it, the kit and the split, and changes when they
+  change). **Why:** P-LL-001 §4. **Trade-off:** a plan can be stale against a changed breakdown; the fingerprint says so.
+
+- **AD-LL-015 — The project and the location gain their colour settings.**
+  **Status: accepted by the founder, 2026-10-02** (answer to the P4.5 questions: "Yes to all five"). Spec: P-LL-001 §7.
+  **Chose:** `Project.colour`: delivery (`rec709_g24`), the web file (same codes or converted), grading app, colour
+  management (`rcm` or `yrgb`), frame rate (a `Value`). `Location.mains_hz` (a `Value`, 50). **Rejected:** keeping them
+  in `Settings` (they differ per production and per place). **Why:** the camera rules (frame rate, shutter, flicker)
+  and the export (delivery) need them per shot. **Trade-off:** none found.
+
+- **AD-LL-014 — The kit gains its colour facts: camera recording, each light's colour range, the gel book, monitoring, charts.**
+  **Status: accepted by the founder, 2026-10-02** (answer to the P4.5 questions: "Yes to all five"). Spec: P-LL-001 §7.
+  **Chose:** each light item gains `colour` (CCT range and step, green–magenta range with the maker's unit and its Duv
+  per unit, RGB, flicker-free), each a `Value` with a `cite`; `Kit` gains `gels[]` (maker, number, name, mired shift or
+  published conversion, Duv shift, transmission, sheets, `cite`), `camera.recording` (profiles and gamuts, base ISOs,
+  clip level, codecs with bit depth and chroma, RAW, white-balance and tint ranges, shutter angles, display LUTs, user
+  LUT), `monitoring` and `charts`. `Cite` is {document, page or URL, date read, licence: ok | unclear | typed-by-founder}.
+  A number typed from a maker's document is `manual` with its citation (D-LL-051, P-LL-001 open question 9).
+  **Rejected:** a table of makers' numbers inside the code (a fact about our kit belongs with the kit, editable, cited);
+  a new `Value.source` for document values (its own AD if ever needed). **Why:** every gel, white balance and recording
+  choice in P-LL-001 §4 reads these. **Trade-off:** the kit editor grows; until a value is cited it reads "needs
+  <document>" and is never guessed.
+
+---
+
 ## 2026-10-01 — P4: AI in the app
 
 - **AD-LL-013 — A value names the decision row that wrote it (`Value.decision_id`).**

@@ -11,7 +11,29 @@ const HASH_CHUNK = 8 * 1024 * 1024;
 
 export type Media = 'image' | 'video';
 
+// Photos Chrome cannot decode: iPhone HEIC/HEIF, TIFF and camera RAW. They are converted on this Mac by the engine
+// (breakdown.convert_image, macOS sips, D-LL-055) and then imported like any still.
+const CONVERT_EXT = ['heic', 'heif', 'hif', 'tif', 'tiff', 'dng', 'cr2', 'cr3', 'crw', 'nef', 'nrw', 'arw', 'srf', 'sr2', 'raf', 'orf', 'rw2', 'pef', 'srw', 'x3f', '3fr', 'erf', 'kdc', 'mrw', 'iiq', 'psd', 'jp2'];
+const CONVERT_NAME = new RegExp(`\\.(${CONVERT_EXT.join('|')})$`, 'i');
+const CONVERT_TYPE = /^image\/(heic|heif|heic-sequence|heif-sequence|tiff|x-adobe-dng|x-canon-.*|x-nikon-nef|x-sony-arw|x-fuji-raf|x-olympus-orf|x-panasonic-rw2|x-dcraw|vnd\.adobe\.photoshop|jp2)$/i;
+
+/** What the file picker offers: everything Chrome opens, and the photos the Mac converts. */
+export const ACCEPT = ['image/*', 'video/*', ...CONVERT_EXT.map((e) => `.${e}`)].join(',');
+
+export function needsConversion(file: File): boolean {
+  return CONVERT_TYPE.test(file.type) || CONVERT_NAME.test(file.name);
+}
+
+/** The file's type for the record: the browser's, else one named from the extension. */
+export function mimeOf(file: File, media: Media): string {
+  if (file.type) return file.type;
+  const ext = (/\.([a-z0-9]+)$/i.exec(file.name)?.[1] ?? '').toLowerCase();
+  const known: Record<string, string> = { heic: 'image/heic', heif: 'image/heif', tif: 'image/tiff', tiff: 'image/tiff', dng: 'image/x-adobe-dng', mov: 'video/quicktime', mp4: 'video/mp4' };
+  return known[ext] ?? (ext ? `${media}/x-${ext}` : media === 'image' ? 'image/png' : 'video/mp4');
+}
+
 export function mediaOf(file: File): Media | null {
+  if (needsConversion(file)) return 'image';
   if (file.type.startsWith('video/')) return 'video';
   if (file.type.startsWith('image/')) return 'image';
   if (/\.(mp4|m4v|mov|webm|mkv)$/i.test(file.name)) return 'video';

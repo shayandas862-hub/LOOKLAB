@@ -141,6 +141,66 @@ suite, on a stub client: that only numbers and words leave the machine (D-LL-039
 measured, estimated, EXIF or hand-set value, that bad output is refused, and that an Ask answer quoting a number not in
 the record is refused (D-LL-047). Shot size from the face box (R2, D-LL-046) is a definition, not a measurement.
 
+## 5 · Colour (P4.5): tolerances written before anything runs
+
+Written 2026-10-02, before any colour maths, colour set or colour accuracy test exists (P-LL-001 §9, D-LL-043). **Not
+one of these has run yet.** Results are added below each table when they do, pass or fail; a tolerance is never
+loosened after a run. The Blender colour set's references are made by our own pipeline, so a pass shows the maths is
+consistent and recovers a known balance, gel and grade, nothing about Sony's processing, a real gel on a real LED,
+or Resolve.
+
+### 5.1 Maths tests (unit; no Blender)
+
+| Test | Tolerance |
+|---|---|
+| Mired arithmetic, gel search (exhaustive up to 3 layers, tie order) | exact (10⁻⁹); hand-worked cases, P-LL-001 §4.1's included |
+| S-Log3 encode then decode, 0–1023 | ≤ 10⁻⁹ |
+| S-Log3 against Sony's published table (only if its use is allowed) | every row within 0.5 of a 10-bit code |
+| S-Gamut3.Cine ↔ Rec.709 matrices | white to white and each primary round trip within 10⁻⁶ |
+| CCT and Duv: points built on the locus, and ±0.005 off it | CCT within 1 K, Duv within 10⁻⁵ |
+| CDL forward against the ASC's published examples (only if allowed; else hand-worked cases) | at the document's precision |
+| CDL fit on exact correspondences from a known CDL (24 patches) | each parameter within 10⁻³ |
+| .cube and .cdl: write, parse, compare | identical at the printed precision |
+| Identity LUT (CDL identity, B replaced by identity), trilinear | within 10⁻⁵ |
+| `_look.cube` (trilinear) against the exact pipeline, 10,000 seeded log codes | ΔE00 99th percentile ≤ 1.0, worst ≤ 3.0 |
+| B then B⁻¹ over 0–1 display codes | within 10⁻⁶ below the clip |
+| Grade check of a frame against itself | every row exactly 0, every verdict pass |
+
+### 5.2 The held-out Blender colour set (seed 4, 24 scenes, run once)
+
+| What | Pass |
+|---|---|
+| White balance from the grey patch: (light − camera) in mired | median ≤ 5 mired, worst ≤ 10; Duv median ≤ 0.001 |
+| CDL fit recovers the known grade (λ = 1; true key and fill colours given) | share-weighted ΔE00 between fitted and true grades' outputs: median ≤ 1.0, worst ≤ 2.0 |
+| Grade check measures a known CDL | per swatch \|reported − true ΔE00\| median ≤ 1.0, worst ≤ 2.0; contrast within 0.1 stop; saturation within 1 point; tints within 1 |
+| Set colours: the painted prop and the light-coloured wall | prop SET and wall LIGHT on ≥ 90% of scenes; prop's physical colour within ΔE00 5 median |
+| Key:fill from the cheeks | median error ≤ 0.5 stop, light and dark skin each; otherwise not written (as D-LL-037) |
+| Skin exposure target against the camera file's lit cheek | median within 26 ten-bit codes (⅓ stop) |
+| Key colour through the plan, 2900–6800 K rigs | median ≤ 35 mired; dark skin reported apart |
+| Keys at 1900–2700 K | the plan says "at or beyond the fit's limit" and asks for the value (asserted); error reported, not asserted |
+
+### 5.3 Noise and banding (synthetic, `src/core` only)
+
+**Declared now:** a grade move is "cheap" while noise grows by less than 25% and the largest gradient step stays under
+1 ΔE00. The run reports the ΔE00 and chroma moves at which 10-bit 4:2:0, 10-bit 4:2:2 and 8-bit cross that line;
+P-LL-001's T_move (10 ΔE00) and T_chroma (+10 C*) and its recording rule are then kept or replaced by a D record.
+
+### 5.4 The grade check's verdicts (proposals until the instruments' own noise is measured)
+
+| Measure | Pass | Close |
+|---|---|---|
+| Each reference swatch, matched one-to-one (Hungarian, least total ΔE00) | ΔE00 ≤ 3 | ≤ 6 |
+| Palette overall (share-weighted mean ΔE00 of matched swatches) | ≤ 3 | ≤ 6 |
+| Share of each swatch | ≤ 3 points | ≤ 6 |
+| Contrast | ≤ ⅓ stop | ≤ ⅔ |
+| Saturation | ≤ 3 points | ≤ 6 |
+| Tints, each zone: distance between mean (a*, b*) | ≤ 2 | ≤ 4 |
+
+Beyond Close reads far. A reference swatch with no partner in the still reads far at 3% share or more, and is only
+listed below that.
+
+---
+
 ## Not validated
 
 | Area | Why it matters |

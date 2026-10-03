@@ -55,7 +55,7 @@ describe.skipIf(!canRun)('AI in Chrome on the stub client (P4)', () => {
     expect(text).toMatch(/lonely/);
     expect(text).not.toMatch(/AI \d{1,3}%/);
     expect((await api('breakdown.get')).mood).toMatchObject({ source: 'ai', confidence: 72 });
-    expect(await page.locator('[data-testid=sample-marker]').innerText()).toMatch(/AI: mood \(the model's own rating, not checked\)/);
+    expect(await page.locator('[data-testid=sample-marker]').getAttribute('aria-label')).toMatch(/AI: mood \(the model's own rating, not checked\)/);
   }, 90_000);
 
   test('Ask answers in words and reads "AI · 70"', async () => {

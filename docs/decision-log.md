@@ -23,6 +23,70 @@ Cited by number. Fixed at the start of v1.
 
 ---
 
+## 2026-10-02 — P4.5: colour, what to capture and how to grade
+
+- **D-LL-055 — Every common photo format imports: what Chrome cannot decode (HEIC, TIFF, camera RAW) is converted on this Mac by macOS's own `sips`; videos stay Chrome's.**
+  **Chose (founder, 2026-10-03: "make it heic and all kind of common format acceptable"):** a photo whose type or
+  extension Chrome cannot decode (HEIC/HEIF, TIFF, DNG and the common camera RAW extensions, PSD, JPEG 2000), or any
+  photo Chrome fails to open, is sent from the browser to the engine on this machine (`breakdown.convert_image`, a
+  helper, T0, bodies up to 48 MB; the engine's body cap now follows an action's own limit). The engine writes it to a
+  private temporary folder, runs `/usr/bin/sips` (no dependency; `execFile`, no shell; the file name only picks the
+  extension) for the original's size, a PNG frame of at most 1,024 px (never enlarged) and a 64 px JPEG that carries
+  the EXIF lens tags (read with the same reader as any still, D-LL-034), then deletes the folder. The browser opens the
+  frame like any still; the reference keeps the original's name, size, type and SHA-256. Measured on the M1: a 9 MB
+  HEIC converts in 0.7 s; a HEIC's focal length (50 mm, 75 mm equivalent) survives. **Videos:** this Mac's Chrome
+  decodes H.264 and HEVC (an iPhone-style HEVC MOV made with `avconvert` imports and measures, tested); ProRes is
+  refused with the reason and nothing is imported (tested). The error says "Nothing was imported" when nothing was
+  (it used to say frames had been sent). **Rejected:** a HEIC decoder in the browser (libheif in WebAssembly: a few MB
+  and an LGPL licence to check, for one format); telling people to convert first (iPhone photos are the team's everyday
+  references); converting in the cloud (standing rule 7). **Limits:** macOS only (elsewhere the same message asks for
+  JPG, PNG or WebP); camera video originals Chrome cannot decode (ProRes, 10-bit 4:2:2 XAVC S-I) are refused, not yet
+  converted: converting them with macOS `avconvert` needs the video's bytes on the engine in pieces, its own change.
+  A defensive check for a video that opens but draws nothing was written and then removed: no real clip triggers it
+  (HEVC decodes, ProRes errors), so it could not be tested (rule 1).
+
+- **D-LL-054 — The gel search follows P-LL-001 §4.1 as written: smallest residual first, then fewest layers; fixture settings snap to their step.**
+  **Chose:** `src/core/mired.ts`. A source inside its fixture's range takes the setting nearest the target on the
+  fixture's step grid, no gel. Outside it, every stack of up to three gels (a gel used no more times than the kit
+  has sheets) is tried, the fixture set to the nearer of the two step settings either side of target − stack; ranked
+  by |residual|, then layers, then the product of the gels' transmissions (unknown counts as none, so a gel with a
+  published transmission wins a tie), then gel ids. `chooseBalance` solves the key first and gives the fill only the
+  sheets the key left (one physical sheet cannot sit on two lights). **Observed in the tests:** on a 100 K fixture grid
+  the residual of different stacks differs by a few mired, so "smallest residual first" can pick three layers over one
+  to save about 2 mired (with round test gels, a 2000 K key: one full-CTO-like gel leaves −4.8 mired, three leave −2.2).
+  **Kept as the spec says** until the kit's real gel values are in; then a D record decides whether residuals within
+  a tolerance (about 3 mired, under a crew's perception) should count as equal so that fewer layers win.
+  **Rejected:** rounding the kelvin to the step without comparing both neighbours (it is not always the nearer in mired).
+
+- **D-LL-053 — The grade check's rows: what counts as missing, and how a swatch and a tint zone are judged.**
+  **Chose:** `src/core/grade-check.ts`, following P-LL-001 §4.6. Palettes are paired by the Hungarian method on ΔE00
+  (least total), so only a difference in swatch counts leaves a reference swatch unpaired ("missing in still": far at
+  3% share or more, listed below) or a still swatch over ("extra in still"); a pair that is far apart is a far pair,
+  not a missing one. A swatch's verdict is the worse of its ΔE00 verdict and its share verdict. The palette row is the
+  share-weighted mean ΔE00 of the paired swatches, and names the share with no partner. A tint zone present in one
+  frame only reads far ("in one frame only"); absent in both, it passes ("none in frame"). Differences are still minus
+  reference. Thresholds carry a version (1), the proposals of `validation.md` §5.4. **Rejected:** a ΔE00 cut-off beyond
+  which a pair counts as missing (a second threshold with no measured basis; the far verdict already says it);
+  judging a missing tint zone as a pass (a shadow the reference has and the still lacks is a real difference).
+
+- **D-LL-052 — P4.5 builds the engine side first, starting with the grade check; the screens wait for the colour design export.**
+  **Chose:** the founder's order (2026-10-02): records, cited documents and contracts; then the colour maths in
+  `src/core/`, the grade check's maths first (matching a shot to its reference is what the founder asked about); the
+  Blender colour set; the actions; the screens last, when `prompts/08-claude-design-colour.md` has been run in Claude
+  Design and its export is in `design/`. **Rejected:** hand-built colour screens meanwhile (views are generated from
+  the design, D-LL-014; a hand-built screen would be thrown away). **Why:** the design-catalogue parity test needs the
+  export before any new command exists; the maths and records do not.
+
+- **D-LL-051 — P-LL-001's open questions take its defaults until the founder says otherwise.**
+  **Chose (founder, 2026-10-02: "Accept the defaults"):** 24 fps with a 172.8° shutter under 50 Hz mains; gel values
+  typed from the founder's swatch book (`manual`, cited "swatch book, typed") wherever a maker's gel book cannot clearly
+  be reused; each light's colour range entered by hand until the makes and models are named; the colourist applies the
+  `.cdl` in S-Log3 codes in a non-managed (YRGB) node before `_base.cube`; charts recommended, not assumed (no chart
+  rows until they are owned); Look Lab's own base transform B (P-LL-001 §4.5), not Sony's LUT; the web file keeps the
+  master's code values; a number typed from a maker's document is `manual` with its citation; S-Log3 exposure at
+  Sony's nominal grey. **Rejected:** stopping for each answer (every default can be changed later without rework; the
+  maths takes them as inputs). **Why:** the founder's build style: decide sensible defaults and record them.
+
 ## 2026-10-01 — P4: AI in the app
 
 - **D-LL-050 — P4 closes without an API key: the founder's AI is Claude Code over MCP; the in-app key path stays built and dormant.**

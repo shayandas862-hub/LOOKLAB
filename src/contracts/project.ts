@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Id, Meta } from './value.ts';
+import { Id, Meta, NumValue } from './value.ts';
 
 export const ShotStatus = z.enum(['reference', 'planned', 'sheet_ready']);
 
@@ -20,6 +20,19 @@ export type Shot = z.infer<typeof Shot>;
 
 export const Scene = z.object({ id: Id, number: z.string(), title: z.string() });
 
+/** How the production delivers and grades (AD-LL-015); P-LL-001's defaults (D-LL-051) read as sample until confirmed. */
+export const ProjectColour = z.object({
+  delivery: z.enum(['rec709_g24']),
+  web: z.enum(['same_codes', 'converted']),
+  grading_app: z.string().max(60),
+  management: z.enum(['yrgb', 'rcm']),
+  frame_rate: NumValue,
+});
+export const PROJECT_COLOUR_DEFAULT = {
+  delivery: 'rec709_g24' as const, web: 'same_codes' as const, grading_app: 'DaVinci Resolve', management: 'yrgb' as const,
+  frame_rate: { value: 24, unit: 'fps', source: 'sample' as const, updated_by: 'P-LL-001 default', updated_at: '2026-10-02T00:00:00.000Z' },
+};
+
 export const Project = Meta.extend({
   name: z.string().min(1).max(120),
   type: z.string().default('short film'),
@@ -29,6 +42,7 @@ export const Project = Meta.extend({
   sample: z.boolean().default(false),
   scenes: z.array(Scene).default([]),
   shots: z.array(Shot).default([]),
+  colour: ProjectColour.default(PROJECT_COLOUR_DEFAULT),
 });
 export type Project = z.infer<typeof Project>;
 

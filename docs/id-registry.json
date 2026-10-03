@@ -14,14 +14,14 @@
   },
   "allocated": {
     "vision": 2,
-    "decision": 50,
-    "arch-decision": 13,
-    "progress": 4,
+    "decision": 55,
+    "arch-decision": 18,
+    "progress": 5,
     "plan": 1,
     "working-note": 0,
     "addendum": 0,
     "document": 10,
-    "bug": 5
+    "bug": 6
   },
   "assigned": {
     "document": {

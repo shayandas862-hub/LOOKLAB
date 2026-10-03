@@ -19,6 +19,10 @@ export const col = {
   plans: (p: string) => `projects/${p}/plans`,
   setsheets: (p: string) => `projects/${p}/setsheets`,
   boards: (p: string) => `projects/${p}/boards`,
+  /** Stills for the grade check, each with its one frame beside it (AD-LL-018). */
+  stills: (p: string) => `projects/${p}/stills`,
+  stillFrame: (p: string, id: string) => `projects/${p}/stills/${id}`,
+  gradechecks: (p: string) => `projects/${p}/gradechecks`,
 };
 
 /** The input fields most actions share. Defaults point at the sample shot until projects are real. */

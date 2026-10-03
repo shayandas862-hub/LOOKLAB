@@ -89,7 +89,8 @@ export class Shell extends DCLogic {
       }
       return r;
     },
-    err => { this.toast(err.message, cmd, 'error'); return null; },
+    // `throws`: the caller shows the error itself (an import's error panel), so it is passed on, not toasted.
+    err => { if (opts && opts.throws) throw err; this.toast(err.message, cmd, 'error'); return null; },
   );
 
   commands() { return this.state.actions.filter(a => a.command); }

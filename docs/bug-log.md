@@ -42,6 +42,14 @@ _None._
 
 ## Closed
 
+### B-LL-006 · On the Breakdown the honesty marker grew to four lines and covered the top bar and its buttons
+- **Phase:** found in P4.5, 2026-10-03, by the founder during a walkthrough in the browser pane; the marker's text has grown since P3 (D-LL-038) and P4 (D-LL-042).
+- **Found by:** the founder, pointing at it: "what is this thing … why is that thing fixed?"
+- **Cause:** the sample marker (`src/ui/components/StatusLayer.tsx`) is pinned at the top centre of the window (`position: fixed`, 10 px from the top) over the breadcrumb bar. On most screens it reads "SAMPLE DATA · not measured", one short line that already sits on the breadcrumb. Once a reference is measured, the Breakdown's marker lists every value by source (`markerText()`, D-LL-032, D-LL-038, D-LL-042); in a pane about 1,400 px wide that is four lines, 92 px tall, covering the breadcrumb, the reference's name and the Thirds, Light and Palette buttons. No test checks that the marker covers nothing.
+- **Fix:** 2026-10-03, founder's yes ("do the fix now"). The marker is one line, a count per source ("12 SAMPLE · 3 ESTIMATE · 1 METADATA · 3 MEASURED ⓘ"), placed in the top bar's free space between the breadcrumb and the search box, measured as the window and the bar change; when the summary does not fit there, it becomes a one-line "ⓘ Sample" badge in the empty part of the left rail, above Settings. The full list is its tooltip and its accessible name, and a click opens it as a panel (Escape or a click closes it). `src/ui/components/StatusLayer.tsx`.
+- **Guard:** `tests/ui/formats.e2e.test.ts` ("the marker is one line … covers no button or breadcrumb, wide and narrow"): after a measured import and a light fit, at 1440 × 900 and 1000 × 800, the marker is at most 30 px tall and overlaps no button and no breadcrumb; its full list is readable from its name and from the panel. The tests that read the full list now read the accessible name.
+- **Could it return?** LOW at the two sizes tested. A future top bar with no free space and a rail with no empty strip would leave it nowhere to go; the test would then fail.
+
 ### B-LL-005 · Stopping the launcher with SIGTERM left the engine running, holding its port
 - **Phase:** P4 Task 0, 2026-10-01, the first run of the new launch test (`tests/engine/launch.test.ts`).
 - **Found by:** the test's clean-up: after the launcher (`node bin/looklab.mjs engine`) was killed, `pgrep` still listed its engine, now a child of launchd (parent pid 1), serving its port.

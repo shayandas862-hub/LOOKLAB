@@ -179,7 +179,7 @@ export class Breakdown extends DCLogic {
       overlays: [['thirds','Thirds','breakdown.toggle_thirds'],['light','Light','breakdown.toggle_light'],['palette','Palette','breakdown.toggle_samples']].map(([k,label,cmd]) => ({ label, cmd, bg: ov[k] ? 'var(--bg3)' : 'transparent', color: ov[k] ? 'var(--tx)' : 'var(--tx3)', toggle: () => { run(cmd, label, { on: !ov[k] }, { quiet:true }); this.setState(s => ({ ov: { ...s.ov, [k]: !s.ov[k] } })); } })),
       replace: () => { this.setB('empty'); },
       upload: () => this.pick(),
-      dropHint: 'MP4, WebM, MOV (H.264), JPG, PNG, WebP. Chrome decodes it here; the file is not copied or uploaded.',
+      dropHint: 'Photos: JPG, PNG, HEIC, TIFF, WebP, camera RAW. Videos: MP4, MOV, WebM (H.264). Read on this Mac; nothing is uploaded.',
       importTitle: `Importing ${this.state.importName || 'reference'}`,
       importNote: 'Reading frames in this browser: 2 per second, 512 px. The file is not copied; nothing leaves this computer.',
       upPct: up + '%', upText: this.state.upText,

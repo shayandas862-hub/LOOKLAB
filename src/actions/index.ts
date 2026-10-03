@@ -5,6 +5,7 @@ import { planActions } from './domains/plan.ts';
 import { outputActions } from './domains/output.ts';
 import { systemActions } from './domains/system.ts';
 import { aiSettingsActions } from './domains/ai-settings.ts';
+import { colourActions } from './domains/colour.ts';
 
 export const ALL_ACTIONS: AnyAction[] = [
   ...breakdownActions,
@@ -13,6 +14,7 @@ export const ALL_ACTIONS: AnyAction[] = [
   ...outputActions,
   ...systemActions,
   ...aiSettingsActions,
+  ...colourActions,
 ];
 
 export function buildRegistry(): Registry {

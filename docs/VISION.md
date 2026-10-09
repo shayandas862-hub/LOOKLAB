@@ -15,7 +15,7 @@ what it forces, so any decision can be traced up to the vision it served.
 
 ## 1 · The vision as it stands
 
-**Last verified: 2026-10-01** (V-LL-002 added colour grading).
+**Last verified: 2026-10-09** (V-LL-003 added the Pre-production tab, as direction; its ADs are not yet written).
 
 ### Why Look Lab exists
 
@@ -48,6 +48,13 @@ location and kit and plans the set in 3D, so the crew arrives with a plan.
    A **grade check** measures a still from our test shoot or our grade against the
    reference, in numbers. Every number is T0 maths; a model may choose the
    strategy, never a number.
+6. **Pre-production, script to shots** (V-LL-003, direction; not built): a script is
+   uploaded or generated and broken down; a production bible locks style, light per
+   part, characters and continuity; the film is edited in words as a shot list; each
+   shot becomes a start and an end frame (about 3 s), reviewed side by side and
+   measured against the colour script; the pair goes to the cheapest video model that
+   takes start and end frames. Every generation and decision is logged. Plan:
+   [`plans/P-LL-002-pre-production-generation.md`](../plans/P-LL-002-pre-production-generation.md).
 
 Around it: projects, a shot-by-shot previs board, mood boards, and a library of
 saved looks that becomes the team's taste data.
@@ -59,8 +66,10 @@ producers). Later: the public. People who want numbers they can trust and edit.
 
 ### What it is not
 
-- Not a generator of films. Image models make assets and final stills; the
-  interactive view is a real-time 3D proxy.
+- Not a generator of finished films. Since V-LL-003, Look Lab generates previs and
+  animatic-grade shots for pre-production through image and video models; a
+  generated frame is never a measurement. (Until 2026-10-09 this line read "Not a
+  generator of films".)
 - Not a claim that taste is solved. It measures light, colour, lens and framing;
   it does not say *why* a frame works.
 - Not an AI that decides for the crew. Every value can be set by hand, and every
@@ -76,6 +85,26 @@ producers). Later: the public. People who want numbers they can trust and edit.
 ---
 
 ## 2 · How the vision changed
+
+### V-LL-003 · 2026-10-09 — Look Lab adds a Pre-production tab: script, breakdown, edit in words, start and end frames, video
+- **Was:** V-LL-002 and §1 items 1–5; "Not a generator of films."
+- **Now:** §1, item 6. A script (uploaded or generated) is broken down; a bible locks the style, the light per part,
+  the characters and the continuity rules; the film is edited in words as a shot list; each shot becomes a start frame
+  and an end frame (about 3 s), checked in a sequence strip and measured against the colour script (T0, the existing
+  palette and grade-check code); the pair is sent to the cheapest video model that supports start and end frames.
+  Every generation, decision and process step is recorded. Models make images and video; they still never supply a
+  measured number (D-LL-003).
+- **Caused by:** the founder's request of 2026-10-09, after making the opening of the short film *Dead Man's
+  Telescope* (project DMT) by hand across ChatGPT, Gemini, Google Flow and Kling: the process inferred there
+  (P-LL-002 §2) had no single tool that did it end to end (P-LL-002 §3, public pages only).
+- **Forces:** an AD amending D-LL-039 so generation calls may send the project's own generated images and reference
+  sheets (client footage still never leaves without cloud allowed); an AD for the image and video provider and the
+  model router (keys in the Keychain, a stub provider in tests, prices fetched live, the monthly cap); licence checks
+  per model; a Claude Design pass for the tab; a phase card placed against the unfinished P4.5 (founder's call,
+  P-LL-002 §7–8). Supersedes the §1 line "Not a generator of films", reconciled in §1 on the same day.
+- **Trade-off:** Look Lab stops being purely a measuring tool and takes on paid generation, API costs and model
+  terms; the earlier verdict (2026-10-08) to pause building and let real work decide is answered only in part:
+  the DMT film is the evidence, but the build order is still open.
 
 ### V-LL-002 · 2026-10-01 — Look Lab serves colour grading: what to capture on set, which camera settings, what is left for the grade
 - **Was:** V-LL-001: the breakdown measures a reference's colour (palette, tints, saturation, contrast) and its

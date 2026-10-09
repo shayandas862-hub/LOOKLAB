@@ -13,11 +13,11 @@
     "bug": "B"
   },
   "allocated": {
-    "vision": 2,
+    "vision": 3,
     "decision": 55,
     "arch-decision": 18,
     "progress": 5,
-    "plan": 1,
+    "plan": 2,
     "working-note": 0,
     "addendum": 0,
     "document": 10,

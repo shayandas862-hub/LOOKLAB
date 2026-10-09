@@ -23,6 +23,22 @@ Cited by number. Fixed at the start of v1.
 
 ---
 
+## 2026-10-08 — Parked: the visual dashboard, for the end-to-end suite later
+
+- **D-LL-056 — The founder's visual-dashboard repo is kept as a snapshot in `incubator/visual-dashboard/`, outside everything Look Lab builds, tests or serves.**
+  **Chose (founder, 2026-10-08: "clone this repo and make a side folder inside the repo not connected to the actual
+  code"):** a file copy of `Shayan733/visual-dashboard` at `acc127d` (branch `das-writer-dashboard-test`, the most
+  complete: `main` plus the security hardening and the Das Story Engine), without its git history, in a new top-level
+  `incubator/` that no config reads (`vitest.config.ts` includes `tests/**`, `tsconfig.json` includes `src` and
+  `tests`, Vite's root is `src/ui`). One change: the Firebase web `apiKey` is redacted (hard rule 6). `incubator/README.md`
+  lists what is there and what could be ported later. **Rejected:** a git submodule (ties Look Lab's checkout to
+  another repo's history and network access); copying code into `src/` now (the founder said "integrated later", and
+  P4.5 is not finished: hard rule 2, touch only the current task); only linking the repo (the founder asked for a copy).
+  **Why:** P-LL-002 needs the canvas and the Story Engine at hand when the suite is planned. **Trade-off:** about
+  0.9 MB of code that goes stale against its own repo; it is a snapshot, never synced, and anything taken from it is
+  ported into Look Lab's own shape (actions, zod, generated views). Finding: the repo holds no YouTube or video-analysis
+  pipeline on any branch (P-LL-002 §4 asks where it lives).
+
 ## 2026-10-02 — P4.5: colour, what to capture and how to grade
 
 - **D-LL-055 — Every common photo format imports: what Chrome cannot decode (HEIC, TIFF, camera RAW) is converted on this Mac by macOS's own `sips`; videos stay Chrome's.**

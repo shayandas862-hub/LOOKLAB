@@ -1,0 +1,145 @@
+/* ============================================
+   VISUAL DASHBOARD — Design Tokens
+   Bible Section 3 — Visual Contract
+   All values here are canonical. Do not deviate
+   without updating the Bible first.
+   ============================================ */
+
+:root {
+  /* ── Canvas ── */
+  /* Matches design references (Railway-like deep navy) */
+  --canvas-bg: #1e1e26;
+  --grid-dot: #222222;
+  --grid-size: 22px;
+
+  /* ── Surfaces ── */
+  /* Canonical surfaces (used across nodes, groups, modals, palette) */
+  --surface-1: #16181F; /* cards / modal body */
+  --surface-2: #1C1E28; /* node background */
+  --surface-3: #252525; /* legacy mid surface */
+  --surface-4: #2E2E2E; /* legacy raised surface */
+
+  /* Legacy aliases kept for compatibility */
+  --panel-bg: #181818;
+  --node-bg-resting: #1A1A1A;
+  --node-bg-hover: #202020;
+  --node-bg-selected: #222222;
+
+  /* ── Borders ── (all 0.5px per bible) */
+  --border: #2A2A2A;
+  --border-hover: #444444;
+  --border-selected: #A78BFA;
+  --border-focus: #A78BFA;
+  --border-connecting: #A78BFA;
+
+  /* ── Text ── */
+  --text-primary: #E8E8E8;
+  --text-secondary: #888888;
+  --text-muted: #555555;
+  --text-placeholder: #3A3A3A;
+  /* legacy aliases kept for compatibility */
+  --text-1: #E8E8E8;
+  --text-2: #888888;
+  --text-3: #555555;
+
+  /* ── Accent / Primary ── */
+  --accent: #A78BFA;
+  --accent-hover: #B7A2FF;
+  --accent-glow: rgba(167, 139, 250, 0.2);
+  --accent-glow-strong: rgba(167, 139, 250, 0.4);
+
+  /* Legacy/compat tokens used by older CSS */
+  --accent-primary: var(--accent);
+  --sidebar-border: #1e1e1e;
+  --toolbar-button-bg: var(--surface-3);
+  --toolbar-button-hover: var(--surface-4);
+  --node-border-rest: var(--border);
+
+  /* ── Node Color Palette ── */
+  --color-purple: #534AB7;
+  --color-indigo: #6366f1;
+  --color-violet: #a78bfa;
+  --color-emerald: #10B981;
+  --color-amber: #F59E0B;
+  --color-rose: #EF4444;
+  --color-cyan: #22d3ee;
+  --color-orange: #fb923c;
+  --color-slate: #64748b;
+
+  /* ── Status Colors (bible Section 3.8) ── */
+  --status-todo: #444444;
+  --status-progress: #F59E0B;
+  --status-done: #10B981;
+  --status-blocked: #EF4444;
+
+  /* ── Danger ── */
+  --danger: #EF4444;
+  --danger-hover: #dc2626;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 20px var(--accent-glow);
+  --shadow-node: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 0.5px var(--border);
+  --shadow-node-hover: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 0 0.5px var(--border-hover);
+  --shadow-node-selected: 0 0 0 1.5px var(--border-selected), 0 0 20px var(--accent-glow);
+  --shadow-node-dragging: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 0 1.5px var(--border-selected);
+
+  /* ── Spacing ── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+
+  /* ── Radii (bible Section 3.5) ── */
+  --radius-panel: 11px;
+  --radius-node: 9px;
+  --radius-btn: 7px;
+  --radius-pill: 20px;
+  --radius-swatch: 5px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* ── Geometry (bible Section 3.5) ── */
+  --border-weight: 0.5px;
+  --node-accent-bar-width: 3px;
+  --sidebar-width: 188px;
+  --properties-width: 214px;
+  --topbar-height: 42px;
+  --panel-header-height: 34px;
+  --toolbar-btn-size: 30px;
+
+  /* ── Typography ── */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ── Transitions ── */
+  --transition-fast: 120ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 350ms ease;
+
+  /* ── Z-Index Layers ── */
+  --z-grid: 0;
+  --z-connections: 35;
+  --z-groups: 20;
+  --z-nodes: 30;
+  --z-dragging: 100;
+  --z-toolbar: 500;
+  --z-context-menu: 600;
+  --z-properties: 550;
+  --z-modal: 700;
+  --z-attachment-tray: 620;
+}

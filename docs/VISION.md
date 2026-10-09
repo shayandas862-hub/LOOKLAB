@@ -54,7 +54,7 @@ location and kit and plans the set in 3D, so the crew arrives with a plan.
    shot becomes a start and an end frame (about 3 s), reviewed side by side and
    measured against the colour script; the pair goes to the cheapest video model that
    takes start and end frames. Every generation and decision is logged. Plan:
-   [`plans/P-LL-002-pre-production-generation.md`](../plans/P-LL-002-pre-production-generation.md).
+   [`plans/P-LL-003-pre-production-generation.md`](../plans/P-LL-003-pre-production-generation.md).
 
 Around it: projects, a shot-by-shot previs board, mood boards, and a library of
 saved looks that becomes the team's taste data.
@@ -96,12 +96,12 @@ producers). Later: the public. People who want numbers they can trust and edit.
   measured number (D-LL-003).
 - **Caused by:** the founder's request of 2026-10-09, after making the opening of the short film *Dead Man's
   Telescope* (project DMT) by hand across ChatGPT, Gemini, Google Flow and Kling: the process inferred there
-  (P-LL-002 §2) had no single tool that did it end to end (P-LL-002 §3, public pages only).
+  (P-LL-003 §2) had no single tool that did it end to end (P-LL-003 §3, public pages only).
 - **Forces:** an AD amending D-LL-039 so generation calls may send the project's own generated images and reference
   sheets (client footage still never leaves without cloud allowed); an AD for the image and video provider and the
   model router (keys in the Keychain, a stub provider in tests, prices fetched live, the monthly cap); licence checks
   per model; a Claude Design pass for the tab; a phase card placed against the unfinished P4.5 (founder's call,
-  P-LL-002 §7–8). Supersedes the §1 line "Not a generator of films", reconciled in §1 on the same day.
+  P-LL-003 §7–8). Supersedes the §1 line "Not a generator of films", reconciled in §1 on the same day.
 - **Trade-off:** Look Lab stops being purely a measuring tool and takes on paid generation, API costs and model
   terms; the earlier verdict (2026-10-08) to pause building and let real work decide is answered only in part:
   the DMT film is the evidence, but the build order is still open.

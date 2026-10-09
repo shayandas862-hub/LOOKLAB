@@ -1,7 +1,7 @@
-# P-LL-002 — Pre-production tab: script to shots to frames to video
+# P-LL-003 — Pre-production tab: script to shots to frames to video
 
 **Status:** plan, not yet a decision. Written 2026-10-09 at the founder's request: "document all of the things now… I want these features in Look Lab in a tab called Pre-production." It becomes ADs and Ds (and a phase card) when the founder says yes to §6 and §7.
-**Vision:** V-LL-003. **Evidence:** the *Dead Man's Telescope* film project (code DMT, `~/Desktop/My Films/Dead Man's Telescope/`). That project's process log (O-001…O-019 in its `docs/process-log.md`) and decisions (D-DMT-001…D-DMT-023) are the source of every stage below.
+**Vision:** V-LL-003. **Number:** first committed as P-LL-002 (commit f8aa9e4, branch `docs/p-ll-002-pre-production`); that number had already been minted on main by commit 9a650d8 for the end-to-end suite plan, so this plan is P-LL-003. The f8aa9e4 commit message is the only place the earlier number remains. **Evidence:** the *Dead Man's Telescope* film project (code DMT, `~/Desktop/My Films/Dead Man's Telescope/`). That project's process log (O-001…O-019 in its `docs/process-log.md`) and decisions (D-DMT-001…D-DMT-023) are the source of every stage below.
 
 ---
 

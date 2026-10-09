@@ -54,6 +54,10 @@
 
 **Set Sheet** — the crew document for one shot: lighting plot, gear checklist, camera settings, setup order, power and safety notes. A4 and phone.
 
+**Incubator** — `incubator/`: code parked for later, outside everything Look Lab builds, tests or serves. Holds the founder's visual-dashboard snapshot (D-LL-056). Nothing there is Look Lab until it is ported in as actions.
+
+**Board** (proposed, P-LL-002) — an infinite canvas where references, their breakdowns and the plans made from them sit side by side and linked. Not built.
+
 ## The system
 
 **Action** — a named, typed function in the registry (`breakdown.fit_light`). The only way state changes (AD-LL-002). Name format `<domain>.<verb_noun>`.

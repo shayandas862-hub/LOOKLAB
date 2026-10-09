@@ -7,6 +7,25 @@
 
 ---
 
+## PR-LL-006 · 2026-10-08 — **Side work: the visual-dashboard repo parked in `incubator/`; the end-to-end suite written down as a plan** (P4.5 unchanged)
+
+**No Look Lab code changed.** P4.5 stands where PR-LL-005 left it.
+
+- **Read** `Shayan733/visual-dashboard`, all five branches (`main` `ab5ae27`, `das-writer-dashboard-test` `acc127d`,
+  `claude/microservices-integration-arch-m8pnrn` `75af39d`, `claude/study-database-structure-1buJl` `f538c30`,
+  `phase3-attachments-ui-fixes` `e700917`). It is an infinite-canvas board (vanilla JS: pan and zoom around the
+  cursor, nodes, groups, bezier connections, minimap, command palette, undo, attachments, Firebase sync) and, on
+  `das-writer-dashboard-test`, the Das Story Engine (a TypeScript MCP server for the screenplay pipeline).
+- **Copied** `das-writer-dashboard-test` as files into `incubator/visual-dashboard/` (99 files, 0.9 MB on disk with
+  `incubator/README.md`), Firebase `apiKey` redacted (D-LL-056). Not installed, not run.
+- **Not found:** no YouTube or video-analysis pipeline on any branch (searched youtube, transcript, yt-dlp, gemini);
+  only an empty integrations plug-board naming them. Asked in P-LL-002 §4.
+- **Planned, not built:** P-LL-002, Look Lab as research → analysis → generation plan, with the canvas as the board.
+- **Suite after this change, measured in a Linux cloud container (not the M1):** `npm run test:unit` 402 passed / 0 failed, 34 skipped (the macOS- and Chrome-only files skip off the Mac) across 50 files; `npm run typecheck` clean. The Chrome tests were not run here.
+- Records touched: D-LL-056 (new), P-LL-002 (new), PR-LL-006 (new); cited D-LL-003, D-LL-039, AD-LL-002.
+
+---
+
 ## PR-LL-005 · 2026-10-03 — **P4.5 part 1: the grade check, the light-colour maths, the colour contracts; every common photo format; the honesty marker fixed** (in progress)
 
 **Suite: 444 passed / 0 failed across 51 files (`npm test`, which builds the UI first; Chrome tests run offline); `npm run typecheck` clean.** Baseline at the start of P4.5: 389 / 0 across 42 files (PR-LL-004). Coverage of core, contracts, actions and engine: 95.1% statements, 96.7% lines, 83.1% branches. No colour number comes from a model; no maker's number is in code (none was cited yet, rule 16).

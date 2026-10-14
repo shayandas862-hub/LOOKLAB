@@ -16,11 +16,11 @@ export async function init(canvas) {
 export function renderFrame(f) {
   const t = f / FPS; ident.update(t); const L = ident.look(), g = E.grade;
   E.pass.t = t;
-  E.bloom.strength = 0.4 + 0.6 * L.hit; E.bloom.radius = 0.7; E.bloom.threshold = 1.9; // only hot things glow: the molten D, sparks, the hits
+  E.bloom.strength = 0.4 + 0.15 * L.hit; E.bloom.radius = 0.7; E.bloom.threshold = 1.9; // only hot things glow: the molten D, sparks, the hits
   g.frame.value = f; g.grain.value = 0.03; g.vig.value = 0.42; g.contrast.value = 1.06; g.sat.value = 1.04;
   g.gain.value.set('#FFFFFF'); g.lift.value.setRGB(0.004, 0.003, 0.004);
-  g.flash.value = 0.12 * Math.pow(L.redHit, 3); g.flashCol.value.set('#FFF4E6');
-  g.streak.value = L.streak; g.streakPos.value.set(...L.streakPos);
+  g.flash.value = 0.05 * Math.pow(L.redHit, 3); g.flashCol.value.set('#FFD9A8');
+  g.streakCol.value.setRGB(1.0, 0.72, 0.4); g.streak.value = L.streak; g.streakPos.value.set(...L.streakPos);
   g.chroma.value = 0.004 * L.redHit; g.punch.value = 0.012 * L.redHit;
   g.fade.value = L.fade * L.inFade;
   E.composer.render();

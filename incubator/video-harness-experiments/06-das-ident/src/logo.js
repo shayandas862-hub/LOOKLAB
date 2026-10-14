@@ -61,7 +61,7 @@ function petal(p) {
 // The D: two tubes drawn along their strokes, rounded ends, knobs at the stem's two ends like the marker original.
 function letterD(red) {
   const front = red.depth / 2 + 0.055 + D_RADIUS * 0.55, home = red.home;
-  const mat = withGlint(new THREE.MeshPhysicalMaterial({ color: BRAND.d, metalness: 0.55, roughness: 0.26, clearcoat: 0.6, clearcoatRoughness: 0.1, emissive: new THREE.Color('#FF8A2A'), emissiveIntensity: 0 }));
+  const mat = withGlint(new THREE.MeshPhysicalMaterial({ color: BRAND.d, metalness: 0.1, roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.08, envMapIntensity: 1.8, emissive: new THREE.Color('#FF8A2A'), emissiveIntensity: 0 }));
   const strokes = D_STROKES.map((pts) => {
     const curve = new THREE.CatmullRomCurve3(pts.map(([x, y]) => { const [wx, wy] = toWorld(x, y); return V(wx - home.x, wy - home.y, front); }), false, 'centripetal');
     const segs = 220, radial = 18, geo = new THREE.TubeGeometry(curve, segs, D_RADIUS, radial, false);

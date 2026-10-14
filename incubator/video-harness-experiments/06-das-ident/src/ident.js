@@ -21,9 +21,11 @@ export async function createIdent(renderer) {
   logo.root.traverse((o) => { if (o.isMesh) o.layers.enable(1); });
   const key = new THREE.DirectionalLight('#FFF8F2', 6.5); key.position.set(-6, 7, 10); key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 1, far: 40 }); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02;
-  const rim = new THREE.DirectionalLight('#A9C8FF', 2.4); rim.position.set(7, 6, -8);
+  const rim = new THREE.DirectionalLight('#C8D6FF', 0.9); // gentler: at 2.4 its glint on the cyan petal's edge bloomed into a white flare rim.position.set(7, 6, -8);
   const back = new THREE.PointLight('#FF9A4A', 0, 0, 2); back.position.set(-1.9, 1.3, -2.6);
-  const fill = new THREE.DirectionalLight('#FFFFFF', 3.4); fill.position.set(2, -1, 12); // from the lens, so faces read their true colour
+  // Fill from the lens, so faces read their true colour. A hemisphere light gives only soft light, no mirror highlight:
+  // a directional fill glinted white on the cyan petal's glossy corner just as the D was drawn.
+  const fill = new THREE.HemisphereLight('#FFFFFF', '#000000', 3.6); fill.position.set(2, -1, 12);
   scene.add(key, key.target, rim, back, fill, new THREE.HemisphereLight('#3A2E3A', '#0A0806', 0.35));
 
   const rays = glowAndRays(renderer); scene.add(rays.glow);
@@ -68,15 +70,16 @@ export async function createIdent(renderer) {
 
       const hit = impulse(t, HITS.map(([h, a, d]) => [h, a, d])), redHit = impulse(t, [[CUE.lockRed, 1, 0.6]]);
       const glow = clamp(0.05 + 0.2 * prog(t, 3, 6.5) + 0.65 * ease.outCubic(prog(t, CUE.lockRed - 0.1, CUE.lockRed + 1.2)) - 0.2 * prog(t, CUE.fade[0], CUE.fade[1]), 0, 1);
-      rays.set(0.008 + 0.04 * glow + 0.1 * redHit); back.intensity = 3 + 22 * glow + 70 * redHit;
+      rays.set(0.008 + 0.04 * glow + 0.1 * redHit); back.intensity = 2 + 7 * glow; // no spike at the hit: it caught the cyan petal's edge as a white glare
       air.update(t, glow); motes.update(t, glow); sp.update(t);
       // Sparks from the pen tip travel with it: they live half a second, so the shortcut doesn't show.
       tipSparks.update(t); tipSparks.obj.position.copy(drawing ? tip.getWorldPosition(new THREE.Vector3()) : V(0, -100, 0));
       LOCKS.forEach((L, i) => { const id = ['green', 'amber', 'cyan', 'red'][i]; rings[i].set(burstAt(id, -0.5), id === 'red' ? 16 : 5, prog(t, L, L + (id === 'red' ? 1.4 : 0.9))); });
 
       const c = cam(t), shake = 0.06 * redHit; camera.position.copy(c.pos).add(V(Math.sin(t * 61) * shake, Math.cos(t * 47) * shake, 0)); camera.lookAt(c.tgt); camera.fov = c.fov; camera.updateProjectionMatrix();
+      // The lens streak is warm and brief: gone in about half a second, before the pen starts the D.
       const sp2 = burstAt('red', 0).project(camera);
-      look = { hit, redHit, glow, rays: 0.05 + 0.55 * glow + 0.45 * redHit, streak: 1.3 * redHit, streakPos: [sp2.x * 0.5 + 0.5, sp2.y * 0.5 + 0.5], fade: 1 - prog(t, CUE.fade[0], CUE.fade[1]) * 1, inFade: ease.outCubic(prog(t, 0, 1.0)) };
+      look = { hit, redHit, glow, rays: 0.05 + 0.55 * glow + 0.45 * redHit, streak: 0.9 * Math.pow(impulse(t, [[CUE.lockRed, 1, 0.18]]), 1.5), streakPos: [sp2.x * 0.5 + 0.5, sp2.y * 0.5 + 0.5], fade: 1 - prog(t, CUE.fade[0], CUE.fade[1]) * 1, inFade: ease.outCubic(prog(t, 0, 1.0)) };
     },
     draw(renderer, rt) {
       renderer.setRenderTarget(rt); renderer.render(scene, camera);

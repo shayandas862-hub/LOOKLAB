@@ -124,9 +124,9 @@ animation", with the company's flat logo attached. Built autonomously; decisions
 | Measure the logo | Each shape's box and corner shape, the D's stroke, the words' x-heights and baselines, the colours (median of a patch per shape) | Red #91201A, D #E0A045, green #B8D949 → #E7F392, amber #DD8832 → #DECC46, cyan #60CFEA |
 | Choose the lettering | Seven open-licence serifs compared beside the logo's words | Gelasio Bold (SIL OFL 1.1), drawn as Georgia's open match |
 | 3D logo | Extruded leaf petals with bevels, clear-coat lacquer and per-vertex colour gradients; the D as two gold tubes with knobs; letters from the font's outlines, one mesh each | — |
-| Light by measurement | Rendered colours checked against the logo in CIELAB, lights raised until they matched | First pass: everything at about half the logo's lightness (e.g. white letters L 62 against 100). After, on the final hero still (CIELAB ΔE76 against the logo): red 7.9, green 9.4, amber 7.0 against its gradient's middle, letters 5.7, gold D 11.5 |
+| Light by measurement | Rendered colours checked against the logo in CIELAB, lights raised until they matched | First pass: everything at about half the logo's lightness (e.g. white letters L 62 against 100). After, on the final hero still (CIELAB ΔE76 against the logo): red 11.7, green 7.4, amber 9.4 against its gradient's middle, letters 7.9, gold D 12.6 (after the white-shine fix; before it: 7.9, 9.4, 7.0, 5.7, 11.5) |
 | Sound | Drone and air, whooshes placed at each petal's closest pass to the lens (from the same motion code as the picture), swooshes and thuds at the locks, the big hit, a brass-like D major chord, a pen shimmer, a bell per letter, a glint | 14 s synthesised in about 3 s |
-| Full render | 336 frames at 1920×1080, three motion-blur sub-frames each, plus god rays | 1,694 s (28 min), 5.0 s per frame across 4 browsers on 4 CPU cores, no GPU; no page errors |
+| Full render | 336 frames at 1920×1080, three motion-blur sub-frames each, plus god rays | 1,694 s (28 min), 5.0 s per frame across 4 browsers on 4 CPU cores, no GPU; no page errors. Rendered again after the white-shine fix: 1,674 s |
 | Finish | Master, 1080p, 720p, hero still, contact sheet | 1 min 52 s; -14.4 LUFS, peaks -1.3 dBFS; master 50 MB, 1080p 20 MB, 720p 11 MB |
 | Checker | `verify.mjs` | 1 flag, on frame 1: the checker reads the camera a frame late, so the first frame looks like a jump. From the motion code itself: top camera speed 2.1 m/s, top turn 0.11 rad/s |
 
@@ -143,6 +143,7 @@ animation", with the company's flat logo attached. Built autonomously; decisions
 | White letters bloomed into a halo | Hero still | Bloom only on hot things: the molten D, sparks, the hits |
 | The score came out silent (NaN) | Loudness reading of -70 LUFS | A fractional power of a slightly negative sine at an envelope's edge; envelopes now clamped |
 | The hit turned the frame muddy brown | Contact sheet | Less flash and ray wash at the hit; the lens streak and sparks carry it |
+| A white shine as the D started (7.2–8.4 s): a pink-white lens-flare burst on the red petal, and a white glare on the cyan petal's corner | **The founder**, watching the delivered ident | Flare: its white core removed; the streak is now a thin warm line gone in half a second. Glare: found by switching each light off and measuring the corner (only the front fill changed it, 235 → 163): a mirror highlight of the fill light on the glossy bevel. The fill is now a hemisphere light, which lights the faces but makes no mirror highlights; the light behind no longer spikes at the hit, the rim light is gentler, and bloom barely rises at the hits. The gold D, which took its shine from the old fill, is less metallic so it keeps its colour |
 
 ### What wasn't checked
 

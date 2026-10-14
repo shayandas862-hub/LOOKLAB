@@ -81,7 +81,7 @@ const Grade = {
       if (streak > 0.0) {
         // An anamorphic lens streak: a thin horizontal line through the light, with a soft core.
         vec2 q = (vUv - streakPos) * vec2(1.7778, 1.0);
-        c += streakCol * streak * (exp(-abs(q.y) * 260.0) * exp(-abs(q.x) * 1.6) * 1.4 + exp(-dot(q, q) * 90.0) * 0.6 + exp(-abs(q.y) * 40.0) * exp(-abs(q.x) * 3.0) * 0.12);
+        c += streakCol * streak * (exp(-abs(q.y) * 320.0) * exp(-abs(q.x) * 2.2) * 1.2 + exp(-abs(q.y) * 40.0) * exp(-abs(q.x) * 3.0) * 0.08);
       }
       c *= mix(1.0, smoothstep(1.25, 0.3, length(d * vec2(1.0, 0.82)) * 1.3), vig);
       vec2 g = gl_FragCoord.xy + vec2(frame * 37.0, frame * 91.0);

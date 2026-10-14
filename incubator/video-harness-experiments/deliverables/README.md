@@ -52,7 +52,7 @@ a hold. What it is and how close it is to the logo: [`../06-das-ident/README.md`
 |---|---|
 | `06-das-ident/das_ident_1080p.mp4` | The ident: 1920×1080, 24 fps, 14 s, sound at -14.4 LUFS, peaks -1.3 dBFS (20 MB) |
 | `06-das-ident/das_ident_720p.mp4` | The same, smaller (11 MB) |
-| `06-das-ident/das_ident_master.mp4` | The render's own quality, for editing (50 MB) |
+| `06-das-ident/das_ident_master.mp4` | The render's own quality, for editing (49 MB) |
 | `06-das-ident/das_logo_3d.png` | The 3D logo as a still (1920×1080, lossless), for posters and thumbnails |
 | `06-das-ident/das_ident_sound.wav` | The sound alone, loudness-matched (48 kHz, 16-bit) |
 | `06-das-ident/contact.png` | 12 frames across the ident |

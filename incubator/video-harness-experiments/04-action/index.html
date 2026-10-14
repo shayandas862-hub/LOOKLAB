@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ACTION</title>
+<script type="importmap">
+{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }
+</script>
+<style>
+@font-face { font-family: 'Anton'; font-weight: 400; src: url(node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 700; src: url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2) format('woff2'); }
+html, body { margin: 0; background: #000; overflow: hidden; width: 1920px; height: 1080px; }
+canvas { display: block; position: absolute; inset: 0; }
+#overlay { position: absolute; inset: 0; pointer-events: none; color: #fff; overflow: hidden; }
+#overlay > * { position: absolute; }
+.mono { font-family: 'JetBrains Mono'; }
+.anton { font-family: 'Anton'; text-transform: uppercase; line-height: 0.86; }
+.chrome { background: linear-gradient(180deg, #ffffff 0%, #d9dde3 38%, #6d727b 52%, #f4f5f7 64%, #9aa0a8 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+</style>
+</head>
+<body>
+<canvas id="out" width="1920" height="1080"></canvas>
+<div id="overlay"></div>
+<script type="module">
+import { init, renderFrame, probe } from './src/main.js';
+window.renderFrame = renderFrame; window.probe = probe;
+window.ready = init(document.getElementById('out'), document.getElementById('overlay'));
+</script>
+</body>
+</html>

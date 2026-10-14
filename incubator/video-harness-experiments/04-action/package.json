@@ -1,0 +1,12 @@
+{
+  "name": "film4-action",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fontsource/anton": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "playwright-core": "^1.56.1",
+    "three": "^0.169.0"
+  }
+}

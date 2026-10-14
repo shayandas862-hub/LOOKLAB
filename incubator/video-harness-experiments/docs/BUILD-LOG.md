@@ -111,3 +111,40 @@ taken without asking are in `05-one-sentence/PLAN.md` and [`DECISIONS.md`](DECIS
 - Finished files: `deliverables/05-one-sentence/`
 - Decisions: [`DECISIONS.md`](DECISIONS.md) 11–18
 
+
+## Session 2, continued — 2026-10-14: the Das Production studio ident (06)
+
+**Asked for:** "Take this image and generate a 3D production level film studio, Hollywood type, for this logo and
+animation", with the company's flat logo attached. Built autonomously; decisions 19–24 in [`DECISIONS.md`](DECISIONS.md).
+
+### What was built
+
+| Step | What | Measured |
+|---|---|---|
+| Measure the logo | Each shape's box and corner shape, the D's stroke, the words' x-heights and baselines, the colours (median of a patch per shape) | Red #91201A, D #E0A045, green #B8D949 → #E7F392, amber #DD8832 → #DECC46, cyan #60CFEA |
+| Choose the lettering | Seven open-licence serifs compared beside the logo's words | Gelasio Bold (SIL OFL 1.1), drawn as Georgia's open match |
+| 3D logo | Extruded leaf petals with bevels, clear-coat lacquer and per-vertex colour gradients; the D as two gold tubes with knobs; letters from the font's outlines, one mesh each | — |
+| Light by measurement | Rendered colours checked against the logo in CIELAB, lights raised until they matched | First pass: everything at about half the logo's lightness (e.g. white letters L 62 against 100). After, on the final hero still (CIELAB ΔE76 against the logo): red 7.9, green 9.4, amber 7.0 against its gradient's middle, letters 5.7, gold D 11.5 |
+| Sound | Drone and air, whooshes placed at each petal's closest pass to the lens (from the same motion code as the picture), swooshes and thuds at the locks, the big hit, a brass-like D major chord, a pen shimmer, a bell per letter, a glint | 14 s synthesised in about 3 s |
+| Full render | 336 frames at 1920×1080, three motion-blur sub-frames each, plus god rays | 1,694 s (28 min), 5.0 s per frame across 4 browsers on 4 CPU cores, no GPU; no page errors |
+| Finish | Master, 1080p, 720p, hero still, contact sheet | 1 min 52 s; -14.4 LUFS, peaks -1.3 dBFS; master 50 MB, 1080p 20 MB, 720p 11 MB |
+| Checker | `verify.mjs` | 1 flag, on frame 1: the checker reads the camera a frame late, so the first frame looks like a jump. From the motion code itself: top camera speed 2.1 m/s, top turn 0.11 rad/s |
+
+### Problems found, and how
+
+| Problem | Found by | Fix |
+|---|---|---|
+| The whole frame washed out to orange | First stills | The glow, rays and haze were each several times too strong; the visible glow and the rays' light source are now set apart |
+| "o", "a", "p" and "d" broke: the counters came out solid and the letters hollow | Still of the words | TrueType outlines run clockwise; the shapes are now built with that winding |
+| Haze in front of the logo greyed the brand colours | Contact sheet | Haze only behind the logo |
+| The first four seconds were empty: the petals arrived from off screen too late | Contact sheet | The petals now swirl round the logo's centre from the first frame and fall out of the swirl into place |
+| The light behind the logo leaked through the gap and tinted "as" orange | Hero still | The light moved behind the red petal, worked out for the hero camera's parallax |
+| Everything rendered at about half the logo's lightness, and warm | Measuring the hero frame against the brand colours | Key and fill raised, the grade's warm gain removed; neutral tone mapping, which keeps brand hues |
+| White letters bloomed into a halo | Hero still | Bloom only on hot things: the molten D, sparks, the hits |
+| The score came out silent (NaN) | Loudness reading of -70 LUFS | A fractional power of a slightly negative sine at an envelope's edge; envelopes now clamped |
+| The hit turned the frame muddy brown | Contact sheet | Less flash and ray wash at the hit; the lens streak and sparks carry it |
+
+### What wasn't checked
+
+- **The sound by ear.** Checked as a spectrogram, a waveform and section levels against the picture's cues.
+- **How it looks on the founder's screens and in an edit.** It's graded for a dark room and a neutral display.

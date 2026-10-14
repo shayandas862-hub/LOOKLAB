@@ -1,0 +1,12 @@
+{
+  "name": "film6-das-ident",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fontsource/gelasio": "^5.2.0",
+    "opentype.js": "^1.3.4",
+    "playwright-core": "^1.56.1",
+    "three": "^0.169.0"
+  }
+}

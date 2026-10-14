@@ -1,4 +1,4 @@
-# video-harness-experiments: five films made by code
+# video-harness-experiments: five films and an ident, made by code
 
 Experiments for the founder's gen-video agent, made in Claude Code on the web on 2026-10-13 and 14.
 **Not part of Look Lab.** Nothing here is imported, built, tested or served by Look Lab. It sits in `incubator/`,
@@ -16,8 +16,9 @@ Rendering the same code twice gives the same video.
 | `03-first-light/` | First Light | 40 s, 24 fps, 13 shots | A character film with a story: two characters, blocking, depth of field, soft shadows, a colour grade, a score with foley and wordless voices | about 2 h 15 min |
 | `04-action/` | ACTION | 1:32, 24 fps, 46 bars | A brand film: eight worlds, three product spots, a checker catch, a hard-rock track and gang shouts in code, every cut on the beat | 68 min (measured) |
 | `05-one-sentence/` | ONE SENTENCE | 1:32, 24 fps, 46 bars | The tool at work: one sentence planned, routed, built, checked and cut in one travelling camera; every number on screen read from the film or measured from its pixels (ΔE00) | 66 min (measured) |
+| `06-das-ident/` | DAS PRODUCTION ident | 14 s, 24 fps | A 3D studio ident from the founder's company logo: measured shapes and colours, lacquer and gold, god rays, sound from the same motion | 28 min (measured) |
 
-Films 01–03's MP4s are not committed; the code makes them again. The finished files of films 04 and 05 are in
+Films 01–03's MP4s are not committed; the code makes them again. The finished files of films 04 and 05 and the ident are in
 [`deliverables/`](deliverables/), and the build is written up in [`docs/`](docs/): the build log, the decisions
 and the plan for generated video on top of code video.
 

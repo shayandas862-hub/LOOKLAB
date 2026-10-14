@@ -31,6 +31,17 @@ Plain list for now: IDs come when the product has a name and a records code. **N
 | 17 | The same faceless hero, now wearing the running shoe | A new character | A recurring character builds the brand |
 | 18 | Title ONE SENTENCE; closing line "One sentence in. A world out." | ONE TAKE | Hidden cuts mean it isn't literally one take |
 
+### 06, the Das Production ident: taken without asking (the founder sent the logo and asked for a Hollywood-style 3D ident; any can be overruled)
+
+| # | Chose | Rejected | Why |
+|---|---|---|---|
+| 19 | A 14 s ident: swirl, lock, draw, name, glint, hold | A 5 s sting; a 30 s piece | Long enough for one idea told in full (swirl, lock, draw, name), short enough to sit before every film |
+| 20 | Rebuild the logo faithfully: shapes, layout and colours measured from the image, lights set until the hero frame matched | Redesigning or "improving" the logo | It's the company's mark; the 3D version must be recognisably the same logo |
+| 21 | Gelasio Bold for "as production" | Georgia Bold, which the lettering resembles | Georgia is a Microsoft font with unclear rights for this use; unclear means no. Swap in the original if its licence is held |
+| 22 | Original trailer-style sound in D major (D for Das): drone, whooshes from the real motion, hits, a brass-like chord, bells per letter | Imitating any studio's fanfare | Owned outright; no soundalike risk |
+| 23 | 16:9 at 1080p first | Vertical and square versions in the same pass | The ident's job is to open films; social cuts on request (each needs its own framing) |
+| 24 | Kept with the films on the experiments branch, in `deliverables/06-das-ident/` | A separate repo | One place to download everything, as asked for the films |
+
 ## Open
 
 | Question | Status |
@@ -38,6 +49,6 @@ Plain list for now: IDs come when the product has a name and a records code. **N
 | Is the code-made music good enough? | Riff test, ACTION and ONE SENTENCE sent; waiting for the founder's ears |
 | The product's name, for the end cards | PRD question 12 |
 | Where finished films live and how they're handed over (the 30 MB chat limit) | Recommended: storage the founder owns plus a private link, with a small preview in chat. Not yet decided; part of PRD question 10; provider and cost need checking |
-| The 9:16 versions | Not made for either film: each needs its cameras re-framed per scene, then a full render (68 min for ACTION, 66 min for ONE SENTENCE, in the cloud) |
+| The 9:16 versions | Not made for either film, or the ident: each needs its cameras re-framed per scene, then a full render (68 min for ACTION, 66 min for ONE SENTENCE, in the cloud) |
 | Films 01–03's MP4s | Never committed, not in this container. Their code renders them again (several hours in the cloud); say if they're wanted |
 | The PRD's 12 questions | Parked mid-session; resume after the films |

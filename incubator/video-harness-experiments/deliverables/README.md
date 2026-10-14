@@ -42,6 +42,21 @@ cut) in one travelling camera, and comes out as a world. Plan and autonomous dec
 **Not here:** the master at full bitrate (367 MB, over GitHub's 100 MB limit). The code renders it again (66 min in
 the cloud, measured 2026-10-14); the 1080p file is the same picture at a lower bitrate.
 
+## 06 · DAS PRODUCTION ident (2026-10-14)
+
+A 14-second 3D studio ident for Das Production, made entirely in code from the company's own logo: four lacquered
+petals swirl in and lock together, the D is drawn in molten gold, the name stands up letter by letter, a glint,
+a hold. What it is and how close it is to the logo: [`../06-das-ident/README.md`](../06-das-ident/README.md).
+
+| File | What it is |
+|---|---|
+| `06-das-ident/das_ident_1080p.mp4` | The ident: 1920×1080, 24 fps, 14 s, sound at -14.4 LUFS, peaks -1.3 dBFS (20 MB) |
+| `06-das-ident/das_ident_720p.mp4` | The same, smaller (11 MB) |
+| `06-das-ident/das_ident_master.mp4` | The render's own quality, for editing (50 MB) |
+| `06-das-ident/das_logo_3d.png` | The 3D logo as a still (1920×1080, lossless), for posters and thumbnails |
+| `06-das-ident/das_ident_sound.wav` | The sound alone, loudness-matched (48 kHz, 16-bit) |
+| `06-das-ident/contact.png` | 12 frames across the ident |
+
 **Films 01–03** (the earlier session): their MP4s were never committed and aren't in this container. Their code is in
 `../01-look-lab-pitch/`, `../02-brief-to-film/` and `../03-first-light/` and renders them again.
 

@@ -89,6 +89,13 @@ that are meant to be quick:
 
 The thresholds are a first guess, not a standard.
 
+## Research
+
+[`reports/Face scan to styled character.md`](reports/Face%20scan%20to%20styled%20character.md) (2026-10-14) explains how
+a user could scan their own face, choose hair and an outfit, and appear as that character in images, 3D and video. It
+covers which tools can be licensed commercially, prices, the law on face data, and a build order. The cited notes behind it are in
+`research_notes/Face scan to styled character/`.
+
 ## What the next step is
 
 [`NEXT-SESSION-PRD.md`](NEXT-SESSION-PRD.md) is the paste-ready prompt for the next session: sharpening the PRD for

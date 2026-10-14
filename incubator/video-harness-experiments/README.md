@@ -14,8 +14,11 @@ Rendering the same code twice gives the same video.
 | `01-look-lab-pitch/` | Look Lab pitch | 15 s, 60 fps | 2D motion graphics: type, UI, data, a palette measured from a still; music and sound design in code | about 15 min |
 | `02-brief-to-film/` | Brief to film | 15 s, 60 fps | 3D in three.js: motion blur from 180° shutter subframes, bloom, reflections, a camera on a spline, a sound lane drawn from the score | about 60 min |
 | `03-first-light/` | First Light | 40 s, 24 fps, 13 shots | A character film with a story: two characters, blocking, depth of field, soft shadows, a colour grade, a score with foley and wordless voices | about 2 h 15 min |
+| `04-action/` | ACTION | 1:32, 24 fps, 46 bars | A brand film: eight worlds, three product spots, a checker catch, a hard-rock track and gang shouts in code, every cut on the beat | 68 min (measured) |
 
-The delivered MP4s are not committed. The founder has them, and the code makes them again.
+Films 01–03's MP4s are not committed; the code makes them again. Film 04's finished files are in
+[`deliverables/`](deliverables/), and the build is written up in [`docs/`](docs/): the build log, the decisions
+and the plan for generated video on top of code video.
 
 Fonts (all SIL Open Font Licence, installed from npm through `@fontsource`):
 - Film 1: Geist and Instrument Serif.

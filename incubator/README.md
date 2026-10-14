@@ -65,3 +65,17 @@ generated from `design/`, behaviour in `src/ui/logic/`, every write an action in
    pattern is the salvage, not the code.
 5. **Not taken:** Firebase auth, Firestore and Storage sync. Look Lab is local-first (footage stays on the Mac,
    hard rule 7) and has its own store.
+
+## `video-harness-experiments/`
+
+Three short films made entirely in code in Claude Code on the web (2026-10-13 to 14), as the first proof for the
+founder's gen-video agent, a separate product from Look Lab. Every frame is a function of time; headless Chrome renders
+it frame by frame; ffmpeg writes the MP4; the music is synthesised in Node from the same timeline. They are:
+- a 15 s Look Lab pitch (2D motion graphics)
+- a 15 s 3D piece in three.js
+- a 40 s character film with 13 shots
+
+Only the code is here. The MP4s and `node_modules` are not committed (`.gitignore`). How to run each one, in the cloud
+or on a Mac with Chrome's GPU, is in its [README](video-harness-experiments/README.md). The paste-ready prompt for the
+next session, sharpening that product's PRD, is
+[`NEXT-SESSION-PRD.md`](video-harness-experiments/NEXT-SESSION-PRD.md).

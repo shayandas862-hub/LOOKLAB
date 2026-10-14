@@ -59,3 +59,22 @@ Each one was caught by looking at rendered stills or contact sheets, not by the 
 - Finished files: `deliverables/04-action/`
 - Decisions: [`DECISIONS.md`](DECISIONS.md)
 - The next experiment, gen video on top of code video: [`NEXT-GEN-VIDEO.md`](NEXT-GEN-VIDEO.md)
+
+## Session 2, continued — 2026-10-14: the second brand film, ONE SENTENCE (05)
+
+**Asked for:** push everything so it can be downloaded, document the build, then make a second 1:30 film with a more
+enhanced concept, planned and made autonomously ("one step higher than before"). The concept and every decision
+taken without asking are in `05-one-sentence/PLAN.md` and [`DECISIONS.md`](DECISIONS.md) (11–18).
+
+### What was built
+
+| Step | What | Measured |
+|---|---|---|
+| Plan | One sentence through the product's loop as one travelling camera; 46 bars at 120 BPM / 24 fps | — |
+| Sound | A new track in A minor: clean arpeggio intro, riff, a solo over the checker (B♭ under the mistake, resolving on A at the pass), a harmonised anthem lead, "GO!" and "HEY!" shouts | Section levels -20.6 dB (brief) rising to -12.7 dB (world) before loudness normalising |
+| True numbers | Frame, timecode, bar·beat, lens and camera speed on screen every frame, read from the film's own clock and camera | — |
+| Colour check | `src/measure.js`: renders the shoe and a mask into a float target, averages the displayed colour (three.js ACES replicated) in CIELAB and compares it with the brand orange by CIEDE2000 | Matches Sharma, Wu & Dalal (2005) on 3 pairs to 4 decimals. Shot 1 off-brand: ΔE00 5.29 (fail, pass under 2.0); repainted: 0.67 (pass) |
+| Motion check on screen | Each shot camera's top speed over its 48 frames | 0.15, 0.05, 0.19, 0.19 m/s (all under the 8 m/s mark) |
+| Scenes | Brief, plan and gates, make (four lanes), check, cut, breath, world, end | 7 scene modules, every file under 300 lines (largest 181) |
+
+**Status at this point:** the full render is running; the finished files and the render, loudness and checker numbers follow.

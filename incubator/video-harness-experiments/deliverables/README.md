@@ -50,7 +50,7 @@ a hold. What it is and how close it is to the logo: [`../06-das-ident/README.md`
 
 | File | What it is |
 |---|---|
-| `06-das-ident/das_ident_1080p.mp4` | The ident: 1920×1080, 24 fps, 14 s, sound at -14.4 LUFS, peaks -1.3 dBFS (20 MB) |
+| `06-das-ident/das_ident_1080p.mp4` | The ident: 1920×1080, 24 fps, 14 s, 15.5 Mbit/s, sound at -14.4 LUFS, peaks -1.6 dBFS (26 MB, the most that fits a 30 MB chat limit) |
 | `06-das-ident/das_ident_720p.mp4` | The same, smaller (11 MB) |
 | `06-das-ident/das_ident_master.mp4` | The render's own quality, for editing (49 MB) |
 | `06-das-ident/das_logo_3d.png` | The 3D logo as a still (1920×1080, lossless), for posters and thumbnails |

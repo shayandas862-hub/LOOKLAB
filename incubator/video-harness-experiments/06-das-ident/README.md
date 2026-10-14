@@ -85,3 +85,14 @@ node render.mjs video --workers 4         # → out/silent.mp4
 node render.mjs stills 12.5 && bash finish.sh   # master, 1080p, 720p, hero still, contact sheet, loudness
 node verify.mjs                           # the motion checker
 ```
+
+### Changing one moment without rendering everything again
+
+- **Preview first:** `PREVIEW=1 node render.mjs clip 6.5 9.5` renders just that stretch without motion blur, about
+  three times faster, with the sound under it.
+- **Then re-render only what changed:** the full render is made of 2-second pieces, `out/chunk_000.mp4` to
+  `chunk_006.mp4`, each with a `.done` marker. Delete only the pieces whose seconds the change touches, and run
+  `node render.mjs video` again; the other pieces are reused as they are.
+- **If the old pieces are gone,** cut them from the previous `out/silent.mp4`, losslessly (every piece starts on a
+  keyframe): `ffmpeg -ss 10 -i silent.mp4 -frames:v 48 -c copy chunk_005.mp4 && touch chunk_005.mp4.done`.
+- **Whole-ident changes** (lighting, colour, the camera) touch every frame, so they still need the full render.

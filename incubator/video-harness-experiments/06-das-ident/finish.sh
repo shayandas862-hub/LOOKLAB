@@ -13,9 +13,9 @@ ffmpeg -hide_banner -loglevel error -y -i silent.mp4 -i score_lim.wav -map 0:v -
 ENC="-c:v libx264 -preset slower -tune film -pix_fmt yuv420p -movflags +faststart"
 two() { # scale, bitrate, name
   ffmpeg -hide_banner -loglevel error -y -i silent.mp4 -vf "$1" $ENC -b:v "$2" -maxrate "$2" -bufsize "$2" -pass 1 -passlogfile x264 -an -f mp4 /dev/null
-  ffmpeg -hide_banner -loglevel error -y -i silent.mp4 -i score_lim.wav -map 0:v -map 1:a -vf "$1" $ENC -b:v "$2" -maxrate "$2" -bufsize "$2" -pass 2 -passlogfile x264 -c:a aac -b:a 256k -shortest "$3"
+  ffmpeg -hide_banner -loglevel error -y -i silent.mp4 -i score_lim.wav -map 0:v -map 1:a -vf "$1" $ENC -b:v "$2" -maxrate "$2" -bufsize "$2" -pass 2 -passlogfile x264 -c:a aac -b:a 320k -shortest "$3"
 }
-two "scale=1920:1080" 12000k das_ident_1080p.mp4
+two "scale=1920:1080" 15500k das_ident_1080p.mp4   # the most that fits under the chat's 30 MB at 14 s
 two "scale=1280:720:flags=lanczos" 6000k das_ident_720p.mp4
 rm -f x264*.log*
 cp stills/still_12.500.png das_logo_3d.png

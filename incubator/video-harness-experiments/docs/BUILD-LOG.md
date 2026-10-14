@@ -144,6 +144,7 @@ animation", with the company's flat logo attached. Built autonomously; decisions
 | The score came out silent (NaN) | Loudness reading of -70 LUFS | A fractional power of a slightly negative sine at an envelope's edge; envelopes now clamped |
 | The hit turned the frame muddy brown | Contact sheet | Less flash and ray wash at the hit; the lens streak and sparks carry it |
 | A white shine as the D started (7.2–8.4 s): a pink-white lens-flare burst on the red petal, and a white glare on the cyan petal's corner | **The founder**, watching the delivered ident | Flare: its white core removed; the streak is now a thin warm line gone in half a second. Glare: found by switching each light off and measuring the corner (only the front fill changed it, 235 → 163): a mirror highlight of the fill light on the glossy bevel. The fill is now a hemisphere light, which lights the faces but makes no mirror highlights; the light behind no longer spikes at the hit, the rim light is gentler, and bloom barely rises at the hits. The gold D, which took its shine from the old fill, is less metallic so it keeps its colour |
+| A gold line across the red petal and a sparkle at its centre as it locked (7.2–7.6 s) | **The founder**, with a screenshot | Both removed (the lens streak and the red petal's spark burst); the rings, the glow behind and the other petals' sparks stay. A first attempt also took out the rings and calmed the glow; the founder stopped it ("not those"), and those edits were put back before the narrower change |
 
 ### What wasn't checked
 

@@ -15,6 +15,7 @@ canvas { display: block; position: absolute; inset: 0; }
 <canvas id="out" width="1920" height="1080"></canvas>
 <script type="module">
 import { init, renderFrame, probe } from './src/main.js';
+window.PREVIEW = new URLSearchParams(location.search).has('preview');
 window.renderFrame = renderFrame; window.probe = probe;
 window.ready = init(document.getElementById('out'));
 </script>

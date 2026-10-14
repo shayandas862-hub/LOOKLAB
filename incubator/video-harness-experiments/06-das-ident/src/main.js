@@ -9,7 +9,7 @@ export async function init(canvas) {
   await document.fonts.ready;
   E = createEngine(canvas);
   ident = await createIdent(E.renderer);
-  E.pass.active = ident; E.pass.k = 3;
+  E.pass.active = ident; E.pass.k = window.PREVIEW ? 1 : 3; // preview: no motion blur, three times faster
   return { ok: true };
 }
 

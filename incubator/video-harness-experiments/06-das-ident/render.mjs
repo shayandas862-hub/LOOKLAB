@@ -35,7 +35,7 @@ async function openPage(browser, port) {
   const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.error('[page]', m.text()); });
   page.on('pageerror', (e) => console.error('[page error]', e.message));
-  await page.goto(`http://127.0.0.1:${port}/index.html`);
+  await page.goto(`http://127.0.0.1:${port}/index.html${process.env.PREVIEW ? '?preview' : ''}`); // PREVIEW=1: no motion blur, for quick checks
   const info = await page.evaluate(() => window.ready);
   if (!info) throw new Error('page failed to initialise: check the console above or run node --check on src/*.js');
   return { page, info };

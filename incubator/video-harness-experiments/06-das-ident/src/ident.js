@@ -35,7 +35,7 @@ export async function createIdent(renderer) {
   const burstAt = (id, z = 0.3) => homes[id].clone().setZ(z);
   const sp = sparks([
     { t: CUE.lockGreen, at: burstAt('green'), n: 70, speed: 2.4, life: 1.2, seed: 11 }, { t: CUE.lockAmber, at: burstAt('amber'), n: 70, speed: 2.4, life: 1.2, seed: 23 },
-    { t: CUE.lockCyan, at: burstAt('cyan'), n: 70, speed: 2.4, life: 1.2, seed: 37 }, { t: CUE.lockRed, at: burstAt('red'), n: 320, speed: 5.5, life: 2.0, seed: 41 },
+    { t: CUE.lockCyan, at: burstAt('cyan'), n: 70, speed: 2.4, life: 1.2, seed: 37 },
   ]); scene.add(sp.obj);
   const tip = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 3.2, 1.2) })); logo.red.group.add(tip);
   const tipSparks = sparks(Array.from({ length: 14 }, (_, i) => ({ t: CUE.dStem[0] + i * 0.09, at: V(0, 0, 0), n: 10, speed: 1.0, life: 0.5, seed: 100 + i })));
@@ -77,9 +77,9 @@ export async function createIdent(renderer) {
       LOCKS.forEach((L, i) => { const id = ['green', 'amber', 'cyan', 'red'][i]; rings[i].set(burstAt(id, -0.5), id === 'red' ? 16 : 5, prog(t, L, L + (id === 'red' ? 1.4 : 0.9))); });
 
       const c = cam(t), shake = 0.06 * redHit; camera.position.copy(c.pos).add(V(Math.sin(t * 61) * shake, Math.cos(t * 47) * shake, 0)); camera.lookAt(c.tgt); camera.fov = c.fov; camera.updateProjectionMatrix();
-      // The lens streak is warm and brief: gone in about half a second, before the pen starts the D.
+      // No gold streak and no spark burst on the red petal as it locks (the founder's note).
       const sp2 = burstAt('red', 0).project(camera);
-      look = { hit, redHit, glow, rays: 0.05 + 0.55 * glow + 0.45 * redHit, streak: 0.9 * Math.pow(impulse(t, [[CUE.lockRed, 1, 0.18]]), 1.5), streakPos: [sp2.x * 0.5 + 0.5, sp2.y * 0.5 + 0.5], fade: 1 - prog(t, CUE.fade[0], CUE.fade[1]) * 1, inFade: ease.outCubic(prog(t, 0, 1.0)) };
+      look = { hit, redHit, glow, rays: 0.05 + 0.55 * glow + 0.45 * redHit, streak: 0, streakPos: [sp2.x * 0.5 + 0.5, sp2.y * 0.5 + 0.5], fade: 1 - prog(t, CUE.fade[0], CUE.fade[1]) * 1, inFade: ease.outCubic(prog(t, 0, 1.0)) };
     },
     draw(renderer, rt) {
       renderer.setRenderTarget(rt); renderer.render(scene, camera);

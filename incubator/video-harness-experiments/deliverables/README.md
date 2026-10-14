@@ -22,6 +22,26 @@ The 1:32 brand film, every frame and sound made by code. Plan and decisions: [`.
 **Not here:** the 1080p master at full bitrate (417 MB). GitHub refuses files over 100 MB; the code renders it
 again (68 min in the cloud, measured 2026-10-14), and the 1080p file above is the same picture at a lower bitrate.
 
+## 05 · ONE SENTENCE (2026-10-14)
+
+The second 1:32 brand film, made entirely in code: one sentence goes through the tool's loop (plan, route, make, check,
+cut) in one travelling camera, and comes out as a world. Plan and autonomous decisions:
+[`../05-one-sentence/PLAN.md`](../05-one-sentence/PLAN.md); what's new and how it's made:
+[`../05-one-sentence/README.md`](../05-one-sentence/README.md).
+
+| File | What it is |
+|---|---|
+| `05-one-sentence/one_sentence_1080p.mp4` | The film: 1920×1080, 24 fps, 1:32, sound at -13.9 LUFS, peaks -1.4 dBFS (71 MB) |
+| `05-one-sentence/one_sentence_720p.mp4` | The same film, small enough to send in a chat (25 MB) |
+| `05-one-sentence/one_sentence_make_16s.mp4` | Cut-down: 0:28–0:44, the four lanes build and film the four shots |
+| `05-one-sentence/one_sentence_check_12s.mp4` | Cut-down: 0:44–0:56, the checker measures the wrong orange (ΔE00 5.3 ✗) and the fix (0.1 ✓) |
+| `05-one-sentence/one_sentence_hook_8s.mp4` | Cut-down: 0:24–0:32, the flight through the gates, "GO!", the drop |
+| `05-one-sentence/one_sentence_soundtrack.wav` | The soundtrack alone, loudness-matched (48 kHz, 16-bit) |
+| `05-one-sentence/contact.png` | 16 frames across the film |
+
+**Not here:** the master at full bitrate (367 MB, over GitHub's 100 MB limit). The code renders it again (66 min in
+the cloud, measured 2026-10-14); the 1080p file is the same picture at a lower bitrate.
+
 **Films 01–03** (the earlier session): their MP4s were never committed and aren't in this container. Their code is in
 `../01-look-lab-pitch/`, `../02-brief-to-film/` and `../03-first-light/` and renders them again.
 

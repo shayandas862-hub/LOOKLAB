@@ -73,8 +73,41 @@ taken without asking are in `05-one-sentence/PLAN.md` and [`DECISIONS.md`](DECIS
 | Plan | One sentence through the product's loop as one travelling camera; 46 bars at 120 BPM / 24 fps | — |
 | Sound | A new track in A minor: clean arpeggio intro, riff, a solo over the checker (B♭ under the mistake, resolving on A at the pass), a harmonised anthem lead, "GO!" and "HEY!" shouts | Section levels -20.6 dB (brief) rising to -12.7 dB (world) before loudness normalising |
 | True numbers | Frame, timecode, bar·beat, lens and camera speed on screen every frame, read from the film's own clock and camera | — |
-| Colour check | `src/measure.js`: renders the shoe and a mask into a float target, averages the displayed colour (three.js ACES replicated) in CIELAB and compares it with the brand orange by CIEDE2000 | Matches Sharma, Wu & Dalal (2005) on 3 pairs to 4 decimals. Shot 1 off-brand: ΔE00 5.29 (fail, pass under 2.0); repainted: 0.67 (pass) |
-| Motion check on screen | Each shot camera's top speed over its 48 frames | 0.15, 0.05, 0.19, 0.19 m/s (all under the 8 m/s mark) |
+| Colour check | `src/measure.js`: renders the shoe and a mask into a float target, averages the displayed accent colour (three.js ACES replicated) in CIELAB, and compares it by CIEDE2000 with the same shot rendered in the brand colour | Matches Sharma, Wu & Dalal (2005) on 3 pairs to 4 decimals. In the final render: shot 1 off-brand ΔE00 5.30 (fail, pass under 2.0); repainted and measured at a later frame, 0.14 (pass; near zero by construction, same paint as the reference). An earlier build, before later changes to shot 1's framing, read 5.29 / 0.67 |
+| Motion check on screen | Each shot camera's top speed over its 48 frames | 0.10, 0.05, 0.19, 0.19 m/s in the final render (all under the 8 m/s mark) |
 | Scenes | Brief, plan and gates, make (four lanes), check, cut, breath, world, end | 7 scene modules, every file under 300 lines (largest 181) |
+| Full render | 2,208 frames at 1920×1080 | 3,953 s (66 min), 1.79 s per frame, 4 browsers on 4 CPU cores, no GPU; no page errors |
+| Re-render | 3 chunks (0:56–1:02) after the contact sheet showed two near-empty seconds | 144 frames in 262 s with 3 browsers |
+| Finish | Master, 1080p, 720p, three cut-downs, contact sheet | 12 min; -13.9 LUFS, peaks -1.4 dBFS; 1080p 71 MB, 720p 25 MB, master 367 MB (not committed) |
+| Checker | `verify.mjs` over all 2,208 frames, after the fixes below | 139 flags, all intended: single frames at on-beat cuts, whip pans between the four sets, the rush through the gates (0:26.6–0:27.7, up to 22 m/s), and the crane over the sentence (1:23.6–1:27.5, up to 22 m/s at 70 m up, turning under 1 rad/s) |
 
-**Status at this point:** the full render is running; the finished files and the render, loudness and checker numbers follow.
+### Problems found, and how
+
+| Problem | Found by | Fix |
+|---|---|---|
+| The riff came out in C♯ major | Checking the notes' pitches | Riff notes written as fixed A-minor pentatonic steps |
+| The wireframe sneaker read as a blob | Still of the shot packages | Outline edges only; figures drawn as wire |
+| The shot packages sat under the cards | Same still | Raised above the cards |
+| The deliberate mistake barely failed (ΔE00 2.42) | The measurement itself: ACES squeezes bright oranges together | A further-off orange for the mistake: 5.3 |
+| The product shot was blown out | Still of MAKE | Lights and reflections turned down |
+| Shot 1 was framed too far away; the timeline was cut off | Stills | Both reframed |
+| The runner ran through the camera at 1:13, then still filled half the frame | Stills, then a contact sheet | The path moved 1.5 m further out, and the sentence in the sand with it |
+| The sentence in the sand read mirrored from above | Still of the crane | Text axis flipped; the camera's up turns to the text's up as it rises |
+| The end mark sat too high | Still of the end card | Camera reset |
+| The pan from the shoe to the runner turned at 6 rad/s | Motion checker | It blends the viewing angle instead of two points, over 1.5 s |
+| The swing to the side at the title (9.3 m/s), the push-in at the fail (12.4 m/s) | Motion checker | Longer, gentler eases |
+| The crane over the sentence ran past 40 m/s | Motion checker | Starts a second earlier and eases over 5 s: 22 m/s |
+| Two near-empty seconds at 0:58 | Contact sheet of the finished film | The camera now follows the shots down and travels along the timeline before the monitor rises |
+| The docs carried an earlier build's ΔE (0.67) after the film changed | Reading the values the final render printed | Docs now quote the final render: 5.30 and 0.14 |
+
+### What wasn't checked
+
+- **The music by ear.** It was checked only as levels per section and pitch. The founder's ears decide.
+- **Render speed on the 8 GB M1.** It hasn't been timed.
+
+### Where things are
+
+- Code: `05-one-sentence/`
+- Finished files: `deliverables/05-one-sentence/`
+- Decisions: [`DECISIONS.md`](DECISIONS.md) 11–18
+

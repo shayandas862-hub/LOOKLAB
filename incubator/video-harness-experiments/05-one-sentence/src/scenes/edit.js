@@ -83,7 +83,14 @@ export async function createEdit(sh, sets) {
     if (t < CUE.fail) { const f = ease.inOutSine(prog(t, CUE.check, CUE.fail)); return { pos: L(V(-3.4, 1.5, 3.2), V(1.6, 1.45, 3.6), f), tgt: L(V(-1.6, 1.2, 0), V(0.9, 1.2, 0), f), fov: 34 }; }
     if (t < CUE.allPass) { const f = ease.inOutSine(prog(t, CUE.fail, CUE.fail + 1.2)); return { pos: L(V(1.6, 1.45, 3.6), V(-2.2, 1.12, 2.55), f), tgt: L(V(0.9, 1.2, 0), V(-2.55, 1.08, 0), f), fov: 34 }; }
     if (t < CUE.toTimeline) { const f = ease.inOutSine(prog(t, CUE.allPass, CUE.toTimeline)); return { pos: L(V(-2.2, 1.12, 2.55), V(0, 2.0, 6.2), f), tgt: L(V(-2.55, 1.08, 0), V(0, 1.1, 0), f), fov: 34 }; }
-    if (t < CUE.breath) { const f = ease.inOutSine(prog(t, CUE.toTimeline, CUE.play)); return { pos: L(V(0, 2.0, 6.2), V(0, 1.9, 7.6), f), tgt: L(V(0, 1.1, 0), V(0, 1.75, 0.4), f), fov: lerp(34, 40, f) }; }
+    if (t < CUE.breath) {
+      // Follow the shots down onto the timeline and look along it as the waveform lights, then pull back as the
+      // monitor rises. The two moves overlap so the camera never stops.
+      const a = ease.inOutSine(prog(t, CUE.toTimeline, CUE.play - 1)), b = ease.inOutSine(prog(t, CUE.play - 1.3, CUE.play + 0.4));
+      const P = [V(0, 2.0, 6.2), V(-2.6, 1.15, 3.6), V(0, 1.9, 7.6)], T = [V(0, 1.1, 0), V(0.6, 0.3, 1.5), V(0, 1.75, 0.4)];
+      const at = (k) => k[0].clone().addScaledVector(k[1].clone().sub(k[0]), a).addScaledVector(k[2].clone().sub(k[1]), b);
+      return { pos: at(P), tgt: at(T), fov: lerp(34, 40, b) };
+    }
     // Drift in until the 16:9 monitor fills the frame exactly at the end of the breath.
     const f = ease.inOutCubic(prog(t, CUE.breath, CUE.world)), d = (MON[1] / 2) / Math.tan((34 * Math.PI) / 360);
     return { pos: L(V(0, 1.9, 7.6), MONP.clone().add(V(0, 0, d)), f), tgt: L(V(0, 1.75, 0.4), MONP, f), fov: lerp(40, 34, f) };

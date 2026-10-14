@@ -16,14 +16,16 @@ autonomously are in [`PLAN.md`](PLAN.md).
   - The bottom line shows the frame, the timecode, the bar and beat, the lens and the camera's speed. They are read
     from the film's own clock and camera each frame.
   - The lens on each storyboard card is the lens its shot is filmed with (`fovOf(mm)` in `src/timeline.js`).
-  - The ΔE00 on the checker is measured from rendered pixels when the film starts (`src/measure.js`): the shoe's
-    displayed colour against the brand orange, CIEDE2000, checked against Sharma's (2005) test pairs.
+  - The ΔE00 on the checker is measured from rendered pixels when the film starts (`src/measure.js`). It compares
+    the shoe's displayed accent colour with the same shot rendered in the brand colour, using CIEDE2000 (checked
+    against Sharma's 2005 test pairs). The reference is that brand-colour render, not the bare hex value.
   - The camera speeds in the CHECK gallery are each shot camera's real top speed.
   - The waveform on the timeline is the film's own score, decoded from `out/score.wav`.
 - **A real brief, made.** The four cards become four sets (dune at dawn, stride, the shoe, city at night). Each is
   built on the beat and filmed with its card's lens.
 - **A deliberate mistake, caught.** Shot 1 is first made with an off-brand orange. The checker measures it at
-  ΔE00 5.3 (fail, the pass mark is under 2.0). It's repainted and measured again at 0.7 (pass).
+  ΔE00 5.3 (fail, the pass mark is under 2.0). It's repainted and measured again, at a later frame of the shot:
+  0.1 (pass). The pass is near zero by construction: it's the same paint as the reference, seen a moment later.
 - **A new track:** hard rock in A minor. It opens on a clean arpeggio, has a guitar solo over the checker (a B♭ under
   the mistake that resolves on the pass), a harmonised lead over the world, and a gang shout of "GO!".
 
@@ -67,3 +69,7 @@ node verify.mjs                           # the motion checker
 ```
 
 On an 8 GB M1, use `--workers 2`.
+
+In the cloud container (software WebGL, 4 cores, no GPU) the full film rendered in 66 min with 4 workers: 2,208
+frames at 1.79 s per frame, and `finish.sh` took 12 min (measured 2026-10-14). The Mac's GPU hasn't been timed.
+The finished files are in [`../deliverables/05-one-sentence/`](../deliverables/05-one-sentence/).

@@ -25,7 +25,7 @@ Plain list for now: IDs come when the product has a name and a records code. **N
 | 11 | The product's own loop as the story: brief → plan → route → make → check → cut → world | Another "imagine anything" montage | "One step higher": it shows the system being built, which is what the posts are about |
 | 12 | One travelling camera with hidden cuts | Beat cuts like ACTION | A visible step up in craft, and the loop reads as one flow |
 | 13 | Every number on screen is true: read from the film's clock and camera, or measured from its own pixels | Decorative numbers | Honesty is the brand; the end card says so, so it has to be true |
-| 14 | A deliberate off-brand mistake that the checker catches, measured (ΔE00 5.3 fail, 0.7 pass) | A staged "fail" with an invented number | Shows the verifier idea from `NEXT-GEN-VIDEO.md` working, in numbers |
+| 14 | A deliberate off-brand mistake that the checker catches, measured (ΔE00 5.3 fail, 0.1 pass) | A staged "fail" with an invented number | Shows the verifier idea from `NEXT-GEN-VIDEO.md` working, in numbers |
 | 15 | Made entirely in code; the AI lane is shown as one of four gates | Generated shots in this film | No fal key in this session; the generated pass is the next experiment |
 | 16 | A new track in the same family: A minor, clean intro, solo over the checker, "GO!" | Reusing ACTION's track | A new film needs its own riff |
 | 17 | The same faceless hero, now wearing the running shoe | A new character | A recurring character builds the brand |
@@ -35,9 +35,9 @@ Plain list for now: IDs come when the product has a name and a records code. **N
 
 | Question | Status |
 |---|---|
-| Is the code-made music good enough? | Riff test and ACTION sent; ONE SENTENCE rendering; waiting for the founder's ears |
+| Is the code-made music good enough? | Riff test, ACTION and ONE SENTENCE sent; waiting for the founder's ears |
 | The product's name, for the end cards | PRD question 12 |
 | Where finished films live and how they're handed over (the 30 MB chat limit) | Recommended: storage the founder owns plus a private link, with a small preview in chat. Not yet decided; part of PRD question 10; provider and cost need checking |
-| The 9:16 versions | Not made for either film: each needs its cameras re-framed per scene, then a full render (68 min for ACTION in the cloud) |
+| The 9:16 versions | Not made for either film: each needs its cameras re-framed per scene, then a full render (68 min for ACTION, 66 min for ONE SENTENCE, in the cloud) |
 | Films 01–03's MP4s | Never committed, not in this container. Their code renders them again (several hours in the cloud); say if they're wanted |
 | The PRD's 12 questions | Parked mid-session; resume after the films |

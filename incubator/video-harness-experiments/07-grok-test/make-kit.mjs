@@ -9,7 +9,7 @@ import { chromium } from '../05-one-sentence/node_modules/playwright-core/index.
 const HERE = path.dirname(new URL(import.meta.url).pathname), FILM = path.resolve(HERE, '../05-one-sentence'), KIT = path.join(HERE, 'kit');
 // [file, shot index, seconds into the shot]: the frame the clip starts from (S1 at 2 s: earlier, a sun glint sat on the heel).
 // TRY='[["name",0,1.5]]' node make-kit.mjs renders other moments instead, for choosing.
-const SHOTS = process.env.TRY ? JSON.parse(process.env.TRY) : [['S1_dune', 0, 2.0], ['S2_stride', 1, 1.0], ['S3_shoe', 2, 0.0], ['S4_city', 3, 1.0]];
+const SHOTS = process.env.TRY ? JSON.parse(process.env.TRY) : [['S1_dune', 0, 2.0], ['S2_stride', 1, 1.0], ['S3_shoe', 2, 0.0], ['S3_shoe_end', 2, 6.0], ['S4_city', 3, 1.0]];
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.woff2': 'font/woff2', '.json': 'application/json' };
 const server = http.createServer((req, res) => {
   const p = path.join(FILM, decodeURIComponent(new URL(req.url, 'http://x').pathname));

@@ -21,6 +21,7 @@ hand with Grok.
 | `S1_dune.png` | The shoe on a dune crest at dawn | 35 mm |
 | `S2_stride.png` | A leg and shoe mid-stride on a red track | 85 mm |
 | `S3_shoe.png` | The shoe on a turntable in a dark studio | 50 mm |
+| `S3_shoe_end.png` | The same shot 6 s later: the last frame for a 6 s clip (the turntable has turned the shoe to three-quarter front, the camera has glided round) | 50 mm |
 | `S4_city.png` | A runner in a visor helmet in a neon city at night | 24 mm |
 
 Made by `make-kit.mjs`, which draws each shot clean (no on-screen numbers) from film 05's code.
@@ -37,7 +38,17 @@ are worth it.
 
 ## The prompts
 
-**S3 · the shoe (start here)**
+**S3 · the shoe, 6 s, first and last frame (start here):** first frame `S3_shoe.png`, last frame `S3_shoe_end.png`
+> Photoreal premium product shot, 6 seconds. The white running shoe with the orange stripes stands on a turntable
+> in a dark studio, with a glowing orange ring around its base. The turntable turns smoothly and slowly while the
+> camera glides gently around it, so the shoe goes from the side view in the first frame to the three-quarter front
+> view in the last frame. Soft studio light, gentle reflections on the black floor, a warm orange glow on the wall
+> behind. Keep the shoe's shape, laces and orange stripes exactly as in the images. No text, no logos, no people.
+
+Because both ends come from the code, the code can also render every frame in between; the clip is then compared
+with it frame by frame (where the shoe is, how it's turned), not only at its first frame.
+
+**S3 · the shoe, first frame only** (if the last-frame option isn't wanted)
 > Photoreal premium product shot. The white running shoe with the orange stripe stands on a slowly turning
 > turntable in a dark studio, an orange glowing ring around its base. Soft studio light, gentle reflections on the
 > floor. The camera orbits slowly. Keep the shoe's shape, its laces and its orange stripes exactly as in the image.

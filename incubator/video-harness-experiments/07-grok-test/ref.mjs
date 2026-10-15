@@ -1,6 +1,7 @@
 // The code's own version of a Grok clip's 6 s, frame by frame, for measuring against: the shot itself, a mask of
 // the shoe's orange accents, and a mask of the whole shoe, at 1920×1080.
 //   node ref.mjs [shot=2] [frames=145]   → ref/beauty_000.png, ref/stripe_000.png, ref/shoe_000.png …
+//   ONLY=stage,shoe renders just those passes. STRUCTURE=1 also writes ref/depth_000.png (near white, far black) and ref/lines_000.png (outlines), for control models.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -26,9 +27,10 @@ const snap = async (file) => fs.writeFileSync(path.join(OUT, file), await page.s
 const t0 = Date.now();
 for (let n = 0; n < frames; n++) {
   const u = n / 24, id = String(n).padStart(3, '0');
-  await page.evaluate(([i, u]) => window.renderShot(i, u), [shot, u]); await snap(`beauty_${id}.png`);
-  await page.evaluate(([i, u]) => window.renderMask(i, u, 'stripe'), [shot, u]); await snap(`stripe_${id}.png`);
-  await page.evaluate(([i, u]) => window.renderMask(i, u, 'shoe'), [shot, u]); await snap(`shoe_${id}.png`);
+  const only = process.env.ONLY ? process.env.ONLY.split(',') : null, want = (w) => !only || only.includes(w);
+  if (want('beauty')) { await page.evaluate(([i, u]) => window.renderShot(i, u), [shot, u]); await snap(`beauty_${id}.png`); }
+  for (const w of ['stripe', 'shoe', 'stage']) if (want(w)) { await page.evaluate(([i, u, w]) => window.renderMask(i, u, w), [shot, u, w]); await snap(`${w}_${id}.png`); }
+  if (process.env.STRUCTURE) for (const w of ['depth', 'lines']) { await page.evaluate(([i, u, w]) => window.renderMask(i, u, w), [shot, u, w]); await snap(`${w}_${id}.png`); }
   if (n % 24 === 0) console.log(`frame ${n} · ${((Date.now() - t0) / 1000).toFixed(0)} s`);
 }
 console.log(`done: ${frames} frames in ${((Date.now() - t0) / 1000).toFixed(0)} s`);

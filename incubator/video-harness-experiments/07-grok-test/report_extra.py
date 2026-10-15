@@ -16,9 +16,10 @@ def stripe_like(rgb):
     return ((hue < 40) | (hue > 345)) & (sat > 0.35) & (mx > 0.3)
 def erode(m):
     e = m.copy(); e[1:] &= m[:-1]; e[:-1] &= m[1:]; e[:, 1:] &= m[:, :-1]; e[:, :-1] &= m[:, 1:]; return e
+FPS = r['file']['fps']; refn = lambda n: int(round(n / FPS * 24))  # the code's frame at the same moment
 start, drift = None, []
 for n in range(len(r['frames'])):
-    B = load(f'ref/beauty_{n:03d}.png'); m = erode(load(f'ref/stripe_{n:03d}.png', 'L') > 0.5); col = np.median(lab(B[m & stripe_like(B)]), 0)
+    q = refn(n); B = load(f'ref/beauty_{q:03d}.png'); m = erode(load(f'ref/stripe_{q:03d}.png', 'L') > 0.5); col = np.median(lab(B[m & stripe_like(B)]), 0)
     start = col if start is None else start; drift.append(de00(start, col))
 sd = np.array(drift); aligned = [f for f in r['frames'] if f['cover'] >= 0.9 and 'de_code_same_frame' in f]; dc = np.array([f['de_code_same_frame'] for f in aligned])
 out = {'code_self_drift_median': round(float(np.median(sd)), 2), 'code_self_drift_worst_tenth': round(float(np.percentile(sd, 90)), 2),

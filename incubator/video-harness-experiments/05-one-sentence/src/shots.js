@@ -31,7 +31,16 @@ export function renderShot(i, u) {
 // 'shoe' draws the whole shoe white; everything else is black. Unlit, no tone mapping, straight to the canvas.
 import * as THREE from 'three';
 const WHITE = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }), BLACK = new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false });
+// 'depth': distance from the camera as brightness (near white, far black), linear between the shot's near and far
+// planes. 'lines': the scene's creases and outlines in white over black, hidden lines removed.
+const DEPTH = new THREE.ShaderMaterial({ uniforms: { near: { value: 0.4 }, far: { value: 3.2 } }, toneMapped: false,
+  vertexShader: 'varying float vZ; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vZ = -mv.z; gl_Position = projectionMatrix * mv; }',
+  fragmentShader: 'uniform float near, far; varying float vZ; void main(){ float d = 1.0 - clamp((vZ - near) / (far - near), 0.0, 1.0); gl_FragColor = vec4(vec3(d), 1.0); }' });
+const OCCLUDER = new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+const LINE = new THREE.LineBasicMaterial({ color: 0xffffff, toneMapped: false });
+const edgeCache = new Map();
 export function renderMask(i, u, what) {
+  if (what === 'depth' || what === 'lines') return renderStructure(i, u, what);
   const s = sets[i], t = CUE.sets[i] + 2 + u;
   if (s.shoe) s.shoe.paint(RUNNER);
   s.update(t, u); const camera = s.shot(u);
@@ -40,11 +49,40 @@ export function renderMask(i, u, what) {
   s.scene.traverse((o) => {
     if (!o.isMesh && !o.isPoints && !o.isLine && !o.isSprite) return;
     saved.push([o, o.material]);
-    const hit = what === 'stripe' ? o.material === accent : inShoe.has(o);
+    // 'stage': the small set pieces around the shoe (turntable, ring), so a generated frame's object outline can drop them.
+    const small = () => { o.geometry.computeBoundingSphere(); return o.geometry.boundingSphere.radius * Math.max(o.scale.x, o.scale.y, o.scale.z) < 1; };
+    const hit = what === 'stripe' ? o.material === accent : what === 'stage' ? !inShoe.has(o) && small() : inShoe.has(o);
     o.material = hit ? WHITE : BLACK;
   });
   s.scene.background = new THREE.Color(0x000000); s.scene.fog = null;
   const R = E.renderer; R.setRenderTarget(null); R.render(s.scene, camera);
   saved.forEach(([o, m]) => (o.material = m)); s.scene.background = bg; s.scene.fog = fog;
+  return { ok: true };
+}
+
+function renderStructure(i, u, what) {
+  const s = sets[i], t = CUE.sets[i] + 2 + u;
+  if (s.shoe) s.shoe.paint(RUNNER);
+  s.update(t, u); const camera = s.shot(u);
+  const saved = [], added = [], bg = s.scene.background, fog = s.scene.fog, all = [];
+  s.scene.traverse((o) => all.push(o)); // collect first: lines added below must not be visited (and hidden) by this pass
+  all.forEach((o) => {
+    if (o.isPoints || o.isSprite || o.isLine) { saved.push([o, 'visible', o.visible]); o.visible = false; return; }
+    if (!o.isMesh) return;
+    const glow = o.material && o.material.blending === THREE.AdditiveBlending;   // light-only planes have no surface
+    saved.push([o, 'material', o.material]);
+    if (glow) { saved.push([o, 'visible', o.visible]); o.visible = false; return; }
+    o.material = what === 'depth' ? DEPTH : OCCLUDER;
+    if (what === 'lines') {
+      let g = edgeCache.get(o.geometry); if (!g) { g = new THREE.EdgesGeometry(o.geometry, 28); edgeCache.set(o.geometry, g); }
+      const l = new THREE.LineSegments(g, LINE); o.add(l); added.push([o, l]);
+    }
+  });
+  // Depth range fitted to the subject: from just in front of the shoe to a little behind the plinth, so its shape reads.
+  if (s.shoe) { const sp = new THREE.Box3().setFromObject(s.shoe.group).getBoundingSphere(new THREE.Sphere()); const d = camera.position.distanceTo(sp.center); DEPTH.uniforms.near.value = d - sp.radius * 1.6; DEPTH.uniforms.far.value = d + sp.radius * 3.5; }
+  s.scene.background = new THREE.Color(0x000000); s.scene.fog = null;
+  const R = E.renderer; R.setRenderTarget(null); R.render(s.scene, camera);
+  added.forEach(([o, l]) => o.remove(l));
+  saved.reverse().forEach(([o, k, v]) => (o[k] = v)); s.scene.background = bg; s.scene.fog = fog;
   return { ok: true };
 }

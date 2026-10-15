@@ -66,3 +66,20 @@ don't hold it (the middle), fades it out to land on the 3D end frame, and leaves
 it turns too far, comes closer, and swings back. A real skin and a held skeleton don't come from one image-to-video
 step. The next tests: re-skin the two frames as pictures first and animate between real frames, or a model that
 takes the code's depth, outline and mask videos (Wan VACE through fal).
+
+
+## Overlap, re-measured with a calibrated method (2026-10-15)
+
+The first overlap readings above (0.63 and 0.47) found the shoe by colour, and gave the code's own shot only 0.66,
+so they were too rough to judge by. The shoe is now outlined by a background-removal model (rembg, isnet-general-use,
+MIT) minus the code's turntable (`segment.py`). On the same clips:
+
+| Clip | Median | Worst tenth |
+|---|---|---|
+| The code's own shot (the calibration) | 0.995 | 0.988 |
+| S3 take 1 | 0.902 | 0.834 |
+| S3 take 2 | 0.570 | 0.429 |
+
+**Found while calibrating:** the code's own product shot has a sweep light that jumps back to its start every 2 s
+(`sets.js`, `productSet.update`, `(u % 2) / 2`). The flicker reading caught it (6.3 % on the code itself). It's a
+flaw in film 05's shot, noted here and not fixed in this test.

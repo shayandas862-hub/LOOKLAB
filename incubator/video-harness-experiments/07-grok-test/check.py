@@ -17,6 +17,7 @@ clip = Path(sys.argv[1])
 start, end = Path(sys.argv[2] if len(sys.argv) > 2 else HERE / 'kit/S3_shoe.png'), Path(sys.argv[3] if len(sys.argv) > 3 else HERE / 'kit/S3_shoe_end.png')
 ref = Path(sys.argv[4] if len(sys.argv) > 4 else HERE / 'ref')
 name = clip.stem
+SEG = HERE / 'report' / f'{name}_seg'
 (HERE / 'report').mkdir(exist_ok=True)
 
 def probe(p):
@@ -67,7 +68,9 @@ def crop(img, s, x0, y0, mode=Image.BILINEAR):
     im = Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8))
     return np.asarray(im.transform((W, H), Image.AFFINE, (1 / s, 0, x0, 0, 1 / s, y0), resample=mode), np.float32) / 255
 def corr(a, b): a, b = a - a.mean(), b - b.mean(); return float((a * b).sum() / math.sqrt((a * a).sum() * (b * b).sum() + 1e-12))
+import os
 best = (-2, None)
+if os.environ.get('MAP') == 'full': best = (corr(crop(Sy, W / 1920, 0, 0), F0y), (W / 1920, 0.0, 0.0))
 # Coarse search on quarter-size images (our 480x270 against the clip at a quarter), then refine at full size.
 Sq = np.asarray(Image.fromarray((Sy * 255).astype(np.uint8)).resize((480, 270), Image.BILINEAR), np.float32) / 255
 Fq = np.asarray(Image.fromarray((F0y * 255).astype(np.uint8)).resize((W // 4, H // 4), Image.BILINEAR), np.float32) / 255
@@ -75,13 +78,13 @@ def crop_q(img, s, x0, y0):
     im = Image.fromarray((img * 255).astype(np.uint8))
     return np.asarray(im.transform((W // 4, H // 4), Image.AFFINE, (1 / s, 0, x0 / 4, 0, 1 / s, y0 / 4), resample=Image.BILINEAR), np.float32) / 255
 base = max(W / 1920, H / 1080)
-for s in np.arange(base, base * 1.35, 0.01):
+for s in (np.arange(base, base * 1.35, 0.01) if os.environ.get('MAP') != 'full' else []):
     for y0 in np.arange(0, 1080 - H / s + 1, 8):
         for x0 in np.arange(0, 1920 - W / s + 1, 8):
             c = corr(crop_q(Sq, s, x0, y0), Fq)
             if c > best[0]: best = (c, (s, x0, y0))
 s, x0, y0 = best[1]
-for step in (4, 1):
+for step in ((4, 1) if os.environ.get('MAP') != 'full' else ()):
     for ds in (-0.006, -0.003, 0, 0.003, 0.006) if step == 4 else (-0.0015, 0, 0.0015):
         for dy in range(-step * 2, step * 2 + 1, step):
             for dx in range(-step * 2, step * 2 + 1, step):
@@ -105,9 +108,11 @@ def erode(m):
     e = m.copy(); e[1:] &= m[:-1]; e[:-1] &= m[1:]; e[:, 1:] &= m[:, :-1]; e[:, :-1] &= m[:, 1:]; return e
 ref_mask0 = erode(load(ref / 'stripe_000.png', 'L') > 0.5)
 ref_col = np.median(lab(S0[ref_mask0 & stripe_like(S0)]), 0)
+REF_FPS = 24  # the code's reference frames; clip frame n is matched to the code at the same moment, n / FPS seconds
+refn = lambda n: int(round(n / FPS * REF_FPS))
 rows = []
 for n in range(N):
-    m_file, b_file, sh_file = ref / f'stripe_{n:03d}.png', ref / f'beauty_{n:03d}.png', ref / f'shoe_{n:03d}.png'
+    r = refn(n); m_file, b_file, sh_file = ref / f'stripe_{r:03d}.png', ref / f'beauty_{r:03d}.png', ref / f'shoe_{r:03d}.png'
     if not m_file.exists(): break
     m = erode(crop(load(m_file, 'L'), s, x0, y0, Image.NEAREST) > 0.5)
     sel = m & stripe_like(frames[n]); cover = float(sel.sum() / max(1, m.sum()))
@@ -116,10 +121,18 @@ for n in range(N):
         col = np.median(lab(frames[n][sel]), 0); row['de_start'] = round(de00(ref_col, col), 2)
         B = crop(load(b_file), s, x0, y0); bs = m & stripe_like(B)
         if bs.sum() >= 15: row['de_code_same_frame'] = round(de00(np.median(lab(B[bs]), 0), col), 2)
-    # Shoe overlap (extra): white-ish or stripe-ish pixels near where the code puts the shoe, against the code's mask.
+    # Shoe overlap. With report/<clip>_seg (segment.py: a background-removal model's outline of the main object), the
+    # outline minus the code's turntable, against the code's shoe mask. Without it: a rough colour-based reading.
     shoe = crop(load(sh_file, 'L'), s, x0, y0, Image.NEAREST) > 0.5
-    ys, xs = np.nonzero(shoe)
-    if len(xs):
+    seg_file, stage_file = SEG / f'{n:03d}.png', ref / f'stage_{r:03d}.png'
+    if seg_file.exists() and stage_file.exists():
+        seg = load(seg_file, 'L') > 0.5; stage = crop(load(stage_file, 'L'), s, x0, y0, Image.NEAREST) > 0.5
+        for _ in range(4): stage = stage | np.roll(stage, 1, 0) | np.roll(stage, -1, 0) | np.roll(stage, 1, 1) | np.roll(stage, -1, 1)
+        obj = seg & ~(stage & ~shoe)
+        row['shoe_iou'] = round(float((obj & shoe).sum() / max(1, (obj | shoe).sum())), 3); row['iou_method'] = 'segmentation'
+        ys = []  # skip the rough reading
+    else: ys, xs = np.nonzero(shoe)
+    if len(ys):
         pad = 20; box = np.zeros_like(shoe); box[max(0, ys.min() - pad):ys.max() + pad, max(0, xs.min() - pad):xs.max() + pad] = True
         L = lab(frames[n]); whiteish = (L[..., 0] > 55) & (np.hypot(L[..., 1], L[..., 2]) < 30)
         g = (whiteish | stripe_like(frames[n])) & box
@@ -145,7 +158,7 @@ result = {
                                       'mark': grade(float(np.percentile(de, 90)), 5, 10), 'start_colour_lab': [round(float(v), 1) for v in ref_col]},
     '2b_stripe_colour_de00_vs_code_same_frame': {'median': round(float(np.median(dec)), 2), 'worst_tenth': round(float(np.percentile(dec, 90)), 2), 'note': 'extra: against the code\'s own frame at the same moment'},
     '4_flicker_percent': {'worst': round(float(flick.max()), 2), 'p95': round(float(np.percentile(flick, 95)), 2), 'mark': grade(float(flick.max()), 3, 6)},
-    'extra_shoe_overlap_iou': {'median': round(float(np.median(iou)), 3), 'lowest': round(float(iou.min()), 3), 'note': 'rough: shoe found by colour near where the code puts it'},
+    'shoe_overlap_iou': {'median': round(float(np.median(iou)), 3), 'worst_tenth': round(float(np.percentile(iou, 10)), 3), 'lowest': round(float(iou.min()), 3), 'method': 'segmentation (rembg isnet-general-use) minus the code\'s turntable' if SEG.exists() else 'rough: shoe found by colour near where the code puts it'},
     'frames': rows,
 }
 (HERE / 'report' / f'{name}.json').write_text(json.dumps(result, indent=1))
@@ -163,7 +176,7 @@ img.save(HERE / 'report' / f'{name}_stripe.png')
 
 enc = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W * 2 + 8}x{H}', '-r', str(FPS), '-i', '-', '-c:v', 'libx264', '-crf', '17', '-pix_fmt', 'yuv420p', str(HERE / 'report' / f'{name}_compare.mp4')], stdin=subprocess.PIPE)
 for n in range(min(N, len(rows))):
-    B = crop(load(ref / f'beauty_{n:03d}.png'), s, x0, y0); pair = np.zeros((H, W * 2 + 8, 3), np.float32); pair[:, :W] = B; pair[:, W + 8:] = frames[n]
+    B = crop(load(ref / f'beauty_{refn(n):03d}.png'), s, x0, y0); pair = np.zeros((H, W * 2 + 8, 3), np.float32); pair[:, :W] = B; pair[:, W + 8:] = frames[n]
     enc.stdin.write((np.clip(pair, 0, 1) * 255).astype(np.uint8).tobytes())
 enc.stdin.close(); enc.wait()
 print(json.dumps({k: v for k, v in result.items() if k != 'frames'}, indent=1))

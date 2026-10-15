@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ONE SENTENCE · clean shots</title>
+<script type="importmap">
+{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }
+</script>
+<style>html, body { margin: 0; background: #000; overflow: hidden; width: 1920px; height: 1080px; } canvas { display: block; }</style>
+</head>
+<body>
+<canvas id="out" width="1920" height="1080"></canvas>
+<script type="module">
+import { init, renderShot } from './src/shots.js';
+window.renderShot = renderShot;
+window.ready = init(document.getElementById('out'));
+</script>
+</body>
+</html>

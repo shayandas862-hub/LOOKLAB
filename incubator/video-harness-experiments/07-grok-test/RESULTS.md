@@ -42,3 +42,27 @@ for later clips (below), not loosened for this one.
 The stripe's colour against **the code's own frame at the same moment**, on frames where the stripe sits where the
 code puts it (cover ≥ 0.9): median ≤ 5 and worst tenth ≤ 10 is a pass; median ≤ 10 is usable with work; otherwise a
 fail. The number of frames it was measured on is always reported.
+
+## S3 take 2 · one prompt asking for a real shoe on the skeleton, first and last frame given (checked 2026-10-15)
+
+Prompt: the single "use the two images as the exact guide … replace the 3D model with a real, photographed premium
+running shoe built on that same shape …" prompt (in the chat, 2026-10-15). Same frames as take 1.
+
+**The file:** 464×688 (vertical), 24 fps, 6.04 s, 145 frames, no sound; the same middle-strip crop of our frame.
+
+| # | Check | Result | Mark |
+|---|---|---|---|
+| 1 | It starts from our frame | 0.999 | **Pass** |
+| 1b | It ends on our last frame (extra) | 0.612: it ends near our end pose, but shifted and larger | **Fail** |
+| 2 | The stripe against the code at the same moment (the replaced mark) | Median 2.9, worst tenth 5.2 ΔE00, but on **10 of 145 frames** only (the first half second). After that the shoe isn't where the code puts it (the stripe mask's cover falls to about 0.1), so colour can't be judged against the skeleton | **Pass on 10 frames; not measurable on the rest** |
+| 3 | The shoe keeps its shape (by eye) | Changes: a knit-mesh texture appears from about 1 s and fades out by 4 s; the lace bars turn into pegs at 4–5 s | **Changes** |
+| 4 | No flicker | Worst 0.99 % | **Pass** |
+| 5 | Nothing that shouldn't be there | None seen | **Pass** |
+
+**Shoe overlap** with where the code puts it (extra): median 0.47, lowest 0.28 (take 1: 0.63, 0.56).
+
+**What it shows:** asked to make the shoe real between two 3D frames, Grok adds real texture only where the frames
+don't hold it (the middle), fades it out to land on the 3D end frame, and leaves the code's path in the meantime:
+it turns too far, comes closer, and swings back. A real skin and a held skeleton don't come from one image-to-video
+step. The next tests: re-skin the two frames as pictures first and animate between real frames, or a model that
+takes the code's depth, outline and mask videos (Wan VACE through fal).

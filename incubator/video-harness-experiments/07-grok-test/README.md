@@ -70,6 +70,27 @@ with it frame by frame (where the shoe is, how it's turned), not only at its fir
 > a glowing visor runs past, wearing white running shoes with an orange stripe. The face stays hidden behind the
 > visor. Wet ground reflecting pink and blue neon, the camera moving with the runner. No readable signs or text.
 
+## Skin on skeleton: re-skinning the code's own video (after take 1)
+
+Take 1 showed that animating a picture keeps the picture's look: Grok moved our render but added no real "skin".
+The next test gives the model the code's whole shot as a video and asks it to change only the surface.
+
+**Route 1, by hand, Grok's video edit.** `kit/S3_skeleton_6s.mp4` is the code's own 6 s of the shoe (1920×1080,
+24 fps). Guides from 2026 say Grok Imagine can restyle an uploaded video (up to about 8.7 s and 50 MB) while keeping
+its motion; this needs confirming in the app. Prompt:
+> Turn this into real product footage. Keep the camera move, the shoe's shape, its position and the turntable
+> exactly as they are. Make it photoreal: the shoe in real white leather and knit mesh with fine stitching, orange
+> rubber stripes, a matte rubber sole; real studio lighting with soft reflections on a glossy black floor; the
+> orange ring a real LED light. No text, no logos, no people.
+
+Because the motion should be kept, the code's masks line up with every frame, so the checker's colour and shape
+readings hold for the whole clip.
+
+**Route 2, automatic, Wan VACE through fal.** It takes control videos the code makes (depth, outlines, masks, pose)
+so the structure can't drift; this session then runs render → generate → measure → retry → put the exact brand
+colours back through the masks. It needs a fal key in the environment's settings, read as `FAL_KEY`, and a new
+session. fal's listing (checked 2026-10-15) gave a price per video and 81–240 frames; both need confirming.
+
 ## The pass marks (written 2026-10-15, before any clip came back)
 
 These are first guesses. A clip that fails one is reported as failing, and the marks aren't loosened afterwards.

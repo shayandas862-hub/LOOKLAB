@@ -21,7 +21,7 @@ Rendering the same code twice gives the same video.
 
 Films 01–03's MP4s are not committed; the code makes them again. The finished files of films 04 and 05 and the ident are in
 [`deliverables/`](deliverables/), and the build is written up in [`docs/`](docs/): the build log, the decisions
-and the plan for generated video on top of code video.
+and the plan for generated video on top of code video. The proposed system and its process are in [`docs/PROPOSED-ARCHITECTURE.md`](docs/PROPOSED-ARCHITECTURE.md); a plain-words guide to the media crafts and workflows is in [`docs/MEDIA-PRIMER.md`](docs/MEDIA-PRIMER.md).
 
 Fonts (all SIL Open Font Licence, installed from npm through `@fontsource`):
 - Film 1: Geist and Instrument Serif.

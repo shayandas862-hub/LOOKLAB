@@ -11,8 +11,8 @@
 <body>
 <canvas id="out" width="1920" height="1080"></canvas>
 <script type="module">
-import { init, renderShot } from './src/shots.js';
-window.renderShot = renderShot;
+import { init, renderShot, renderMask } from './src/shots.js';
+window.renderShot = renderShot; window.renderMask = renderMask;
 window.ready = init(document.getElementById('out'));
 </script>
 </body>

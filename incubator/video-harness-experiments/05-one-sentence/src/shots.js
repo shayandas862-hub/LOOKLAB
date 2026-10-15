@@ -26,3 +26,25 @@ export function renderShot(i, u) {
   E.composer.render();
   return { mm: Math.round(12 / Math.tan((camera.fov * Math.PI) / 360)) };
 }
+
+// Masks for measuring a generated clip against the shot: 'stripe' draws only the shoe's orange accents white,
+// 'shoe' draws the whole shoe white; everything else is black. Unlit, no tone mapping, straight to the canvas.
+import * as THREE from 'three';
+const WHITE = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }), BLACK = new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false });
+export function renderMask(i, u, what) {
+  const s = sets[i], t = CUE.sets[i] + 2 + u;
+  if (s.shoe) s.shoe.paint(RUNNER);
+  s.update(t, u); const camera = s.shot(u);
+  const accent = s.shoe.materials.accent, inShoe = new Set(); s.shoe.group.traverse((o) => inShoe.add(o));
+  const saved = [], bg = s.scene.background, fog = s.scene.fog;
+  s.scene.traverse((o) => {
+    if (!o.isMesh && !o.isPoints && !o.isLine && !o.isSprite) return;
+    saved.push([o, o.material]);
+    const hit = what === 'stripe' ? o.material === accent : inShoe.has(o);
+    o.material = hit ? WHITE : BLACK;
+  });
+  s.scene.background = new THREE.Color(0x000000); s.scene.fog = null;
+  const R = E.renderer; R.setRenderTarget(null); R.render(s.scene, camera);
+  saved.forEach(([o, m]) => (o.material = m)); s.scene.background = bg; s.scene.fog = fog;
+  return { ok: true };
+}

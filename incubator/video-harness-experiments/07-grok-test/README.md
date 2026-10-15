@@ -83,6 +83,9 @@ These are first guesses. A clip that fails one is reported as failing, and the m
 | 5 | Nothing that shouldn't be there | By eye: no added text or logos, no faces (S2, S4 stay faceless), any watermark noted | None | — | Any |
 | 6 | The file | Resolution, frame rate, length: recorded, not judged | — | — | — |
 
+**Mark 2 was replaced after take 1** (it would have failed the code's own frames, whose light changes as the shoe turns):
+see `RESULTS.md`. Results per clip are there too.
+
 What happens after: the passing clips are matched in colour, the Das ident goes in front, titles and logos are
 added from code, and it's cut to a code-made score. It's a test cut, kept out of `deliverables/` until the
 terms are checked.

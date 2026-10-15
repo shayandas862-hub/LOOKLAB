@@ -75,7 +75,7 @@ with it frame by frame (where the shoe is, how it's turned), not only at its fir
 Take 1 showed that animating a picture keeps the picture's look: Grok moved our render but added no real "skin".
 The next test gives the model the code's whole shot as a video and asks it to change only the surface.
 
-**Route 1, by hand, Grok's video edit.** `kit/S3_skeleton_6s.mp4` is the code's own 6 s of the shoe (1920×1080,
+**Route 1, by hand, Grok's video edit** (not available in the founder's Grok, as it turned out: see the next section). `kit/S3_skeleton_6s.mp4` is the code's own 6 s of the shoe (1920×1080,
 24 fps). Guides from 2026 say Grok Imagine can restyle an uploaded video (up to about 8.7 s and 50 MB) while keeping
 its motion; this needs confirming in the app. Prompt:
 > Turn this into real product footage. Keep the camera move, the shoe's shape, its position and the turntable
@@ -90,6 +90,37 @@ readings hold for the whole clip.
 so the structure can't drift; this session then runs render → generate → measure → retry → put the exact brand
 colours back through the masks. It needs a fal key in the environment's settings, read as `FAL_KEY`, and a new
 session. fal's listing (checked 2026-10-15) gave a price per video and 81–240 frames; both need confirming.
+
+## Skin on skeleton in Grok: re-skin the frames, then animate (2026-10-15)
+
+The founder confirmed Grok has no video-to-video (the third-party guides above were wrong for their app), and it
+animates between the frames it's given, keeping their look. So the skin goes onto the frames first:
+
+1. **Edit `S3_shoe.png` and `S3_shoe_end.png` into real product photos** with Grok's image edit, same prompt for
+   both, keeping the composition exactly. Save as `S3_real_start.png` and `S3_real_end.png`.
+2. **Animate between them**: first frame `S3_real_start.png`, last frame `S3_real_end.png`, 6 s, 16:9.
+3. **Upload all three here.** The two pictures are checked against the code's frames (did the shoe stay where the
+   code put it, are the orange parts in the same places and on brand), then the video, as before.
+
+**Picture prompt (the same for both frames):**
+> Turn this 3D render into a real product photograph. Keep the exact composition: the same camera angle, the same
+> shoe position, size and outline, and the turntable exactly where it is. Make the shoe a real premium running shoe:
+> white engineered knit mesh upper with fine texture, soft white leather overlays with fine stitching, the orange
+> accents as real glossy orange rubber overlays in exactly the same places and shapes, white laces through real
+> eyelets, the rounded collar at the heel as a padded heel collar, a white foam midsole with a thin orange stripe
+> and a dark rubber outsole. Real studio product photography: soft key light, gentle reflections on the glossy black
+> floor, the orange ring as a real LED light strip, a warm orange glow on the back wall. Photoreal, sharp, 16:9. No
+> text, no logos, no people.
+
+**Video prompt (first frame `S3_real_start.png`, last frame `S3_real_end.png`, 6 s):**
+> Real product footage, 6 seconds. The same real running shoe on a slowly turning turntable in a dark studio. The
+> turntable turns smoothly and the camera glides gently around it, from the side view in the first frame to the
+> three-quarter front view in the last frame. The shoe's materials, stitching and orange overlays stay identical
+> the whole time. Soft studio light, real reflections on the glossy black floor, the orange LED ring glowing
+> steadily. Photoreal, 16:9. No text, no logos, no people.
+
+The risk to watch: the two pictures are edited separately, so they may come out as two slightly different shoes. If
+they do, the video will morph between them; then edit the start frame only and animate from it alone.
 
 ## The pass marks (written 2026-10-15, before any clip came back)
 

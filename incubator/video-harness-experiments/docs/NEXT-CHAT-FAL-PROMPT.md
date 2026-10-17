@@ -29,6 +29,11 @@ apply here. Work only in `incubator/video-harness-experiments/` on branch `shaya
 the commands, the expected numbers, what to record and the rules. Open other files only when a step says to, or when
 a step fails and the error points there.
 
+**The fal key** is a network secret on this environment: the proxy adds it to fal's requests, so `$FAL_KEY` is
+empty here and that's expected. The runbook's step 0 checks it for free.
+
+**Talk to me in very short answers,** split into small numbered parts. I can't hold much detail in one turn.
+
 **My budget for this test: $10.** Before sending anything to fal, read today's prices on fal's pages, tell me the
 total for the nine clips, and wait for my yes. Don't go over the cap.
 

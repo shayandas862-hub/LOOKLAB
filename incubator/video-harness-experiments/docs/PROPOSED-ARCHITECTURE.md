@@ -1,7 +1,8 @@
 # The proposed system, and how a film goes through it
 
 Written 2026-10-15. **Proposed, not proven:** the central bet (part 3, "the skin") is what Test 1
-(`../08-skin-test/`) checks. This page is updated when Test 1 has a result. **Not part of Look Lab.**
+(`../08-skin-test/`) checks. Updated 2026-10-17 with Test 1's interim result (shape held, colour missed; ratings
+pending). **Not part of Look Lab.**
 
 ## In one sentence
 
@@ -51,13 +52,13 @@ Three rules make it work:
 Most shots in a brand film are a mix: the code makes the frame, the model paints it, and the code puts the
 logo back.
 
-## What's proven, and what isn't (2026-10-15)
+## What's proven, and what isn't (updated 2026-10-17, Test 1 interim)
 
 | | Evidence |
 |---|---|
 | **Proven** | Code makes whole films and their music, cut to the beat (04 ACTION, 05 ONE SENTENCE); a studio ident from a logo with colours matched by measurement (06); a checker that measures a clip against the code's truth (the code itself scores 0.995) |
-| **Shown** | Picture-to-video (Grok) holds a moved 3D render (0.90) but can't add a real skin without losing the skeleton (0.57) |
-| **Not proven** | Skin on skeleton: real and exact together (Test 1); that buyers value the exactness (Test 2: blind "which would you ship"); the cost and time per usable second (Test 3: a real multi-shot job) |
+| **Shown** | Picture-to-video (Grok) holds a moved 3D render (0.90) but can't add a real skin without losing the skeleton (0.57). **Test 1 on fal (one rigid product shot, Wan models):** the code's depth video holds the shape (C: overlap 0.96–0.97, 3/3 takes pass) where words (0.42–0.66) and pictures (0.71–0.80) don't; but no way keeps the brand orange (C 8.3–11.8 ΔE00 against a mark of 5; [`RESULTS.md`](../08-skin-test/RESULTS.md)) |
+| **Not proven** | Skin on skeleton: real and exact together (Test 1 fails it on colour; realism ratings pending); brand colour held by the skin or put back by the Fixer; a deforming subject such as a human; that buyers value the exactness (Test 2: blind "which would you ship"); the cost and time per usable second (Test 3: a real multi-shot job) |
 
 ## What it needs decided (the parked PRD questions)
 

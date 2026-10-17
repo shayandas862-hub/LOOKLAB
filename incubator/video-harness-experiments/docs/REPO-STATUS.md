@@ -1,6 +1,6 @@
 # Where everything is, and its status (the whole repo, every branch)
 
-Read from GitHub and the clone on **2026-10-15**, after `git fetch --all`; updated 2026-10-17 for Test 1's handover. Kept on branch
+Read from GitHub and the clone on **2026-10-15**, after `git fetch --all`; updated 2026-10-17 for Test 1's handover and its interim result. Kept on branch
 `shayan/kind-hamilton-nvl2fl`; update it when a branch moves.
 
 ## The repo
@@ -41,7 +41,7 @@ All paths are under `incubator/video-harness-experiments/`. The index is [`../RE
 | Folder | What | Status |
 |---|---|---|
 | `07-grok-test/` | Film 05's shots as starting frames for Grok Imagine; a checker that measures each clip against the code | **Done for S3, takes 1 and 2.** Take 1 held the shape (0.90) but added no real surface; take 2 added a real surface and lost the shape (0.57). Results in `RESULTS.md` |
-| `08-skin-test/` | Test 1 on fal: words only (A) vs pictures (B) vs the code's depth video (C), 3 takes each, pass marks written first | **Ready to run in a new session.** Everything it needs is in git: the inputs, the code's reference frames (`07-grok-test/ref-pack/`), the step-by-step `RUNBOOK.md` and the scripts (run, check, blind set, verdict). Needs: `FAL_KEY` in the environment's settings, a new session started with `docs/NEXT-CHAT-FAL-PROMPT.md`, the founder's yes to the total (cap **$10**), and the founder's blind realism ratings |
+| `08-skin-test/` | Test 1 on fal: words only (A) vs pictures (B) vs the code's depth video (C), 3 takes each, pass marks written first | **Run 2026-10-17; interim result in `RESULTS.md`.** 9 clips, $4.36. C holds the shape (0.96–0.97, 3/3) where A and B don't; no clip keeps the brand orange (C 8.3–11.8 ΔE00, mark 5), so none can be real and exact. Waiting on: the blind realism ratings, then the contact sheet and `verdict.py`. Clips not in git |
 
 ### Documents
 
@@ -81,7 +81,7 @@ These live only in the cloud session's disk. **That disk is wiped when the sessi
 | The founder's Grok clips | `07-grok-test/clips/S3_take1.mp4`, `S3_take2.mp4` | 1.6 MB | **The originals are in the founder's Grok account.** Kept out of git because Grok's terms aren't confirmed |
 | The code's reference frames for the checker, unpacked | `07-grok-test/ref/` | about 290 MB | Rebuilt in about 30 s by `07-grok-test/unpack-ref.sh` from `ref-pack/`, which **is** in git (48 MB) |
 | The checker's readings and comparison videos | `07-grok-test/report/`, `07-grok-test/clips/CODE_itself.mp4` | about 25 MB | Re-made by `check.py` (`08-skin-test/check-all.sh calibrate` remakes the code's own clip) |
-| Test 1's clips, logs, ratings and verdict (none yet) | `08-skin-test/out/` | — | Kept out until fal's and Wan's terms are checked; the numbers go into `08-skin-test/RESULTS.md`, which is committed |
+| Test 1's clips, logs, ratings and verdict | `08-skin-test/out/` | about 17 MB of clips (plus the blind copies) | Kept out until fal's and Wan's terms are checked; the numbers are in `08-skin-test/RESULTS.md`, which is committed |
 | Installed packages | `node_modules/` in each folder | — | `npm install` |
 
 The ignore rules are in `.gitignore` files (`out/`, `node_modules/`; and `clips/`, `ref/`, `report/` in 07).
@@ -91,7 +91,7 @@ The ignore rules are in `.gitignore` files (`out/`, `node_modules/`; and `clips/
 | | Item |
 |---|---|
 | **Done** | Films 01–06; the Das Production ident; the Grok test for S3 (takes 1 and 2); the checker, calibrated (the code itself scores 0.995); the architecture and media primer docs; the face-scan research |
-| **Ready, waiting on the founder** | Test 1 on fal: add the key, start a new session with `docs/NEXT-CHAT-FAL-PROMPT.md`, say yes to the total, then rate the clips blind. The deep-research prompt: paste it into a new chat. The Pre-production tab plan: yes or no to merging |
+| **Ready, waiting on the founder** | Test 1 on fal: run 2026-10-17 (interim: shape held, colour missed); the blind realism ratings are the one thing left. The next test the founder chose: 15 s of a 3D human, route C only, from the marketing work's human model (branch `shayan/eloquent-fermi-bggugr`), planned with its own pass marks before any spend. The deep-research prompt: paste it into a new chat. The Pre-production tab plan: yes or no to merging |
 | **Open questions** | The PRD's 12 questions (`NEXT-SESSION-PRD.md`); where the gen-video agent lives for good (`NEXT-SESSION-PRD.md` suggests its own new repo) |
 | **Not started** | Test 2 (blind "which would you ship" with brand and production people); Test 3 (cost and time per usable second on a real multi-shot job); the Fixer (logo and brand colour put back through the masks); 9:16 versions; MP4s of films 01–03; a verdict on the music |
 | **Look Lab (separate product)** | P4.5 colour in progress on `main`; untouched here |

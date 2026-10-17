@@ -55,6 +55,7 @@ All paths are under `incubator/video-harness-experiments/`. The index is [`../RE
 | `docs/DECISIONS.md` | The decisions made while building (1–24) and the fixes from the founder's notes |
 | `docs/NEXT-CHAT-DEEP-RESEARCH-PROMPT.md` | **New:** a paste-ready prompt for a new chat: does this product exist already, in pieces, and are the big players building it? |
 | `docs/NEXT-CHAT-FAL-PROMPT.md` | **New:** the paste-ready prompt for the session that runs Test 1 on fal, how the architecture plays in it, and how its context is kept small |
+| `docs/NEXT-CHAT-CAFE-PROMPT.md` | **New:** the paste-ready prompt for the next session: a real product (an açaí café), research to shot list, code skeleton, keyframes painted as stills, then animated with first frame + last frame + depth |
 | `08-skin-test/RUNBOOK.md` | **New:** Test 1 step by step, for that session: commands, expected numbers, rules |
 | `CLAUDE.md` (this folder) | **New:** the standing rules for any Claude session working in this folder (not Look Lab's) |
 | `docs/REPO-STATUS.md` | This page |

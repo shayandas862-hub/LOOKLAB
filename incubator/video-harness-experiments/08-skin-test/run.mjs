@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fal } from '@fal-ai/client';
 
-const HERE = path.dirname(new URL(import.meta.url).pathname), OUT = path.join(HERE, 'out'), IN = path.join(OUT, 'inputs');
+const HERE = path.dirname(new URL(import.meta.url).pathname), OUT = path.join(HERE, 'out'), IN = path.join(HERE, 'inputs');
 const DRY = process.argv.includes('--dry'), MAX_REQUESTS = 9, SEEDS = [11, 22, 33];
 const LOOK = 'Real product footage of a premium white running shoe on a slowly turning black turntable in a dark studio. White engineered knit mesh upper, white leather overlays with fine stitching, glossy orange rubber zig-zag overlays on the side, a white foam midsole with a thin orange stripe, dark rubber outsole, white laces. A thin orange LED ring glows around the turntable\'s edge; warm orange light on the back wall; soft reflections on the glossy black floor. Photoreal, sharp, shot on a 50 mm lens. No text, no logos, no people.';
 const MOVE = 'The camera starts at the shoe\'s side, toe to the left, and glides gently round while the turntable turns, ending on a three-quarter front view, toe to the right.';
@@ -21,12 +21,13 @@ const WAYS = [
 const key = process.env.FAL_KEY;
 if (!DRY && !key) { console.error('FAL_KEY is not set. Add it in the environment settings (Network secrets or an environment variable), then start a new session.'); process.exit(1); }
 if (key) fal.config({ credentials: key });
-for (const f of ['first.png', 'last.png', 'depth_16fps.mp4']) if (!fs.existsSync(path.join(IN, f))) { console.error(`missing out/inputs/${f}: run bash prep.sh first`); process.exit(1); }
+for (const f of ['first.png', 'last.png', 'depth_16fps.mp4']) if (!fs.existsSync(path.join(IN, f))) { console.error(`missing inputs/${f}: run bash prep.sh first`); process.exit(1); }
+fs.mkdirSync(OUT, { recursive: true });
 
 const TYPES = { '.png': 'image/png', '.mp4': 'video/mp4' };
 const uploaded = {};
 async function url(file) {
-  if (DRY) return `<upload of out/inputs/${file}>`;
+  if (DRY) return `<upload of inputs/${file}>`;
   if (!uploaded[file]) uploaded[file] = await fal.storage.upload(new Blob([fs.readFileSync(path.join(IN, file))], { type: TYPES[path.extname(file)] }));
   return uploaded[file];
 }

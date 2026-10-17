@@ -18,12 +18,12 @@ Rendering the same code twice gives the same video.
 | `05-one-sentence/` | ONE SENTENCE | 1:32, 24 fps, 46 bars | The tool at work: one sentence planned, routed, built, checked and cut in one travelling camera; every number on screen read from the film or measured from its pixels (ΔE00) | 66 min (measured) |
 | `06-das-ident/` | DAS PRODUCTION ident | 14 s, 24 fps | A 3D studio ident from the founder's company logo: measured shapes and colours, lacquer and gold, god rays, sound from the same motion | 28 min (measured) |
 | `07-grok-test/` | Grok test | — | Film 05's code-made shots as starting frames for Grok; the clips measured against them with pass marks written first. Done for S3: take 1 held the shape but added no real surface, take 2 added one and lost the shape (`RESULTS.md`). A test, not for commercial use | — |
-| `08-skin-test/` | Test 1 on fal (ready, not run) | 6 s | Skin on skeleton: words only vs pictures vs the code's depth video, 3 takes each, pass marks written first. Needs `FAL_KEY`, a $10 cap and the founder's yes | — |
+| `08-skin-test/` | Test 1 on fal (ready, not run) | 6 s | Skin on skeleton: words only vs pictures vs the code's depth video, 3 takes each, pass marks written first. Everything is in git; run it from `RUNBOOK.md` in a new session with `FAL_KEY` (prompt: `docs/NEXT-CHAT-FAL-PROMPT.md`) | — |
 
 Films 01–03's MP4s are not committed; the code makes them again. The finished files of films 04 and 05 and the ident are in
 [`deliverables/`](deliverables/), and the build is written up in [`docs/`](docs/): the build log, the decisions
 and the plan for generated video on top of code video. The proposed system and its process are in [`docs/PROPOSED-ARCHITECTURE.md`](docs/PROPOSED-ARCHITECTURE.md); a plain-words guide to the media crafts and workflows is in [`docs/MEDIA-PRIMER.md`](docs/MEDIA-PRIMER.md).
-Where everything is, on every branch, and its status: [`docs/REPO-STATUS.md`](docs/REPO-STATUS.md). A paste-ready prompt for a new chat's deep research (does this product already exist, in pieces, and are the big players building it?): [`docs/NEXT-CHAT-DEEP-RESEARCH-PROMPT.md`](docs/NEXT-CHAT-DEEP-RESEARCH-PROMPT.md).
+Rules for any Claude session working here: [`CLAUDE.md`](CLAUDE.md). Where everything is, on every branch, and its status: [`docs/REPO-STATUS.md`](docs/REPO-STATUS.md). A paste-ready prompt for a new chat's deep research (does this product already exist, in pieces, and are the big players building it?): [`docs/NEXT-CHAT-DEEP-RESEARCH-PROMPT.md`](docs/NEXT-CHAT-DEEP-RESEARCH-PROMPT.md).
 
 Fonts (all SIL Open Font Licence, installed from npm through `@fontsource`):
 - Film 1: Geist and Instrument Serif.

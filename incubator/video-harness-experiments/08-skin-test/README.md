@@ -84,16 +84,8 @@ Checked 2026-10-15 from fal's listing: VACE 14B at $0.08 per video second at 720
 runner stops at 9 requests and logs every request; a cap of **$10** for the whole test is proposed and needs the
 founder's yes.
 
-## Run it (needs `FAL_KEY` in the environment's settings, then a new session)
+## Run it
 
-```sh
-cd "incubator/video-harness-experiments/08-skin-test"
-npm install
-bash prep.sh                       # inputs: the code's depth video at 16 fps (97 frames), first and last frames
-node run.mjs --dry                 # shows every request without sending anything
-node run.mjs                       # makes the 9 clips into out/, logs out/runs.json
-for f in out/*.mp4; do
-  <venv with rembg>/bin/python -I ../07-grok-test/segment.py "$f"      # outlines for the overlap reading
-  MAP=full python3 -I ../07-grok-test/check.py "$f" ../07-grok-test/kit/S3_shoe.png ../07-grok-test/kit/S3_shoe_end.png ../07-grok-test/ref
-done
-```
+Step by step, with the expected numbers and the rules for the session: [`RUNBOOK.md`](RUNBOOK.md). The prompt that
+starts that session: [`../docs/NEXT-CHAT-FAL-PROMPT.md`](../docs/NEXT-CHAT-FAL-PROMPT.md). It needs `FAL_KEY` in the
+environment's settings, then a new session.

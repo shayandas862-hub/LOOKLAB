@@ -24,8 +24,10 @@ The question: does a skeleton from code (C) give **real and exact together**, wh
 
 ## Rules for this session (the founder's, plus context budget)
 
-- **Keys:** `FAL_KEY` is read from the environment. Never print it, echo it, write it to a file or log, or ask for it
-  in the chat. To check it's there: `[ -n "$FAL_KEY" ] && echo set || echo missing`.
+- **Keys:** in the cloud the fal key is a **network secret**: the agent proxy adds it to requests for `queue.fal.run`
+  and `rest.fal.ai`, so `$FAL_KEY` is empty in the session and that is expected. Run Node with
+  `NODE_USE_ENV_PROXY=1` so its requests go through the proxy. Locally, `FAL_KEY` comes from the environment. Never
+  print, echo, write down or ask for the key.
 - **Money:** nothing is sent to fal before step 4's price check and the founder's yes to the total. Hard cap: the
   amount the founder gave (default **$10**). `run.mjs` stops at 9 requests per run.
 - **Prices and model abilities** are read from fal's pages at the time, with the date; never from memory.
@@ -49,16 +51,20 @@ All commands run from this folder: `cd "incubator/video-harness-experiments/08-s
 ### 0 · Check the start (1 min)
 ```sh
 git branch --show-current                    # shayan/kind-hamilton-nvl2fl
-[ -n "$FAL_KEY" ] && echo set || echo missing
 ls inputs                                    # depth_16fps.mp4  first.png  last.png
+# the key, free: asks fal for an upload slot (no upload, no generation). 401 = the secret isn't attached
+NODE_USE_ENV_PROXY=1 node -e "fetch('https://rest.fal.ai/storage/upload/initiate?storage_type=fal-cdn-v3',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content_type:'text/plain',file_name:'check.txt'})}).then(r=>console.log(r.ok?'fal key works':'fal key NOT attached, status '+r.status)).catch(e=>console.log('fal NOT reachable:',e.cause?.code||e.message))"
 node -e "fetch('https://queue.fal.run/').then(r => console.log('fal reachable, status', r.status)).catch(e => console.log('fal NOT reachable:', e.cause?.code || e.message))"
 ```
 "fal reachable, status 404" is right: fal answered (checked 2026-10-17). If it's not reachable, see
 `/root/.ccr/README.md` (Node's fetch may need `NODE_USE_ENV_PROXY=1`), or the environment's network settings may
 block fal: tell the founder.
 
-If the key is missing: stop. The founder adds `FAL_KEY` in the environment's settings (the cloud environment menu
-in the session's title bar, then Edit: Network secrets, or an environment variable) and starts a new session.
+If it says "NOT attached": stop. The founder checks the network secret on the session's cloud environment (allowed
+websites `queue.fal.run` and `rest.fal.ai`; header `Authorization`, prefix `Key`) and starts a new session.
+
+From here on, run every `node` command that calls fal as `NODE_USE_ENV_PROXY=1 node …` (step 5:
+`NODE_USE_ENV_PROXY=1 node run.mjs > out/logs/run.log 2>&1`).
 
 ### 1 · Install (about 1 min; about 760 MB on disk with the model)
 ```sh
@@ -103,7 +109,7 @@ If it's over the cap, say so and stop.
 
 ### 5 · Generate (time not known yet; run in the background)
 ```sh
-node run.mjs > out/logs/run.log 2>&1         # → out/A_seed11.mp4 … out/C_seed33.mp4, out/runs.json
+NODE_USE_ENV_PROXY=1 node run.mjs > out/logs/run.log 2>node run.mjs > out/logs/run.log 2>&1         #1   # → out/A_seed11.mp4 … out/C_seed33.mp4, out/runs.json
 tail -n 12 out/logs/run.log
 ```
 Each finished clip prints one line with its time. If a request fails, the error is in `out/runs.json` and the clip is

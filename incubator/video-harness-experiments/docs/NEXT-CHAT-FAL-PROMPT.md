@@ -5,11 +5,12 @@ purpose, so the new session has room to work (see "How the context is kept small
 
 ## Before you paste it (the founder)
 
-1. **Add the key.** In Claude Code on the web, open the cloud environment menu in the session's title bar, then
-   Edit. Add your fal API key under Network secrets (or as an environment variable) with the name `FAL_KEY`. Never
-   paste the key into a chat.
-2. **Start a new session** on the repo `shayandas862-hub/LOOKLAB`, branch `shayan/kind-hamilton-nvl2fl`. A
-   session only sees a key that was added before it started.
+1. **Add the key** to a cloud environment of its own (for example `video-tests`, Full network access), under
+   Network secrets: name `fal`; allowed websites `queue.fal.run` and `rest.fal.ai`; header `Authorization` with the
+   prefix changed from `Bearer` to `Key`; the key as the value. Not as an environment variable (those are visible).
+   Never paste the key into a chat.
+2. **Start a new session in that environment** on the repo `shayandas862-hub/LOOKLAB`, branch
+   `shayan/kind-hamilton-nvl2fl`. The session never sees the key: the proxy adds it to fal's requests.
 3. **Check the budget line** in the prompt ($10). Change it if you want a different cap.
 4. Paste everything below the line.
 

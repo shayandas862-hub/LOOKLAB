@@ -18,8 +18,11 @@ const WAYS = [
   { id: 'C', endpoint: 'fal-ai/wan-vace-14b/depth', files: { video_url: 'depth_16fps.mp4' }, input: (u) => ({ prompt: LOOK, video_url: u.video_url, preprocess: false, ...SAME }) },
 ];
 
-const key = process.env.FAL_KEY;
-if (!DRY && !key) { console.error('FAL_KEY is not set. Add it in the environment settings (Network secrets or an environment variable), then start a new session.'); process.exit(1); }
+// In a cloud session the key is a network secret: the agent proxy adds "Authorization: Key …" to requests for
+// queue.fal.run and rest.fal.ai, so FAL_KEY stays unset. Node's fetch only goes through that proxy with NODE_USE_ENV_PROXY=1.
+const key = process.env.FAL_KEY, viaProxy = !key && !!process.env.HTTPS_PROXY;
+if (!DRY && !key && !viaProxy) { console.error('FAL_KEY is not set. Add it as a network secret on the cloud environment (or export it locally), then start a new session.'); process.exit(1); }
+if (!DRY && viaProxy && process.env.NODE_USE_ENV_PROXY !== '1') { console.error('Run as NODE_USE_ENV_PROXY=1 node run.mjs, so fal requests go through the proxy that adds the key.'); process.exit(1); }
 if (key) fal.config({ credentials: key });
 for (const f of ['first.png', 'last.png', 'depth_16fps.mp4']) if (!fs.existsSync(path.join(IN, f))) { console.error(`missing inputs/${f}: run bash prep.sh first`); process.exit(1); }
 fs.mkdirSync(OUT, { recursive: true });

@@ -34,8 +34,8 @@ and the models' terms are checked. Read this first, then only the file a step na
 3. Whether to compare against Higgsfield itself on the same shot (needs a Higgsfield account).
 
 ## Next, in order
-1. On the founder's Mac: `tools/ref.sh` on the reference videos below; study the contact sheets and transcripts;
-   note what to borrow in `VIDEOS.md`.
+1. ~~On the founder's Mac: `tools/ref.sh` on the reference videos below~~ Done 2026-10-18: all five, notes and what to
+   borrow for S3 in `VIDEOS.md` ("Added 2026-10-18"). $0 spent.
 2. `PLAN.md`: S3's pass marks, written before anything is made (shape against the bowl mask, stripe order and
    layers, brand colour after the Fixer, flicker, the founder's realism score ≥ 3.5 / 5).
 3. The checker's known gap: count only the outline touching the code's object (Test 1b's glowing-floor patch).

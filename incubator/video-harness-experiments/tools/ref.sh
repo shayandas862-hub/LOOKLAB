@@ -17,8 +17,14 @@ else
   [ -x "$HERE/.venv/bin/yt-dlp" ] || { python3 -m venv "$HERE/.venv" && "$HERE/.venv/bin/pip" install -q yt-dlp; }
   ID="$("$HERE/.venv/bin/yt-dlp" --print id "$SRC")"; DIR="$HERE/out/$ID"; mkdir -p "$DIR"
   "$HERE/.venv/bin/yt-dlp" -q --no-warnings -f "bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720]/b" \
-    --merge-output-format mp4 --write-auto-subs --write-subs --sub-langs "en.*,en" --sub-format vtt \
-    --write-info-json -o "$DIR/video.%(ext)s" "$SRC" > "$DIR/download.log" 2>&1
+    --merge-output-format mp4 --write-info-json -o "$DIR/video.%(ext)s" "$SRC" > "$DIR/download.log" 2>&1
+  # Captions one track per call (several at once got HTTP 429 on 2026-10-18): the speech-recognition track first,
+  # then "en". A missing transcript doesn't stop the cuts and the sheet.
+  for L in en-orig en; do
+    if ls "$DIR"/*.vtt > /dev/null 2>&1; then break; fi
+    "$HERE/.venv/bin/yt-dlp" -q --no-warnings --skip-download --write-subs --write-auto-subs --sub-langs "$L" \
+      --sub-format vtt -o "$DIR/video.%(ext)s" "$SRC" >> "$DIR/download.log" 2>&1 || sleep 10
+  done
   VIDEO="$DIR/video.mp4"
 fi
 
@@ -50,12 +56,17 @@ with open(d + '/shots.csv', 'w') as f:
     for i, (a, b) in enumerate(zip(edges, edges[1:]), 1): f.write(f'{i},{a:.2f},{b:.2f},{b - a:.2f}\n')
 EOF
 
-# One frame from the middle of each shot, 48 to a sheet.
+# One frame from the middle of each shot, 48 to a sheet. Homebrew's plain ffmpeg has no drawtext (no freetype): then
+# the frames go unnumbered and the sheet reads row by row, 8 to a row.
+HAS_TEXT="$(ffmpeg -hide_banner -filters 2>/dev/null | grep -c ' drawtext ' || true)"
 rm -f "$DIR"/shot_*.jpg "$DIR"/sheet_*.png
 tail -n +2 "$DIR/shots.csv" | while IFS=, read -r n a b len; do
+  VF="scale=320:-2"
+  if [ "$HAS_TEXT" -gt 0 ]; then
+    VF="$VF,drawtext=text='$n':x=8:y=8:fontsize=22:fontcolor=white:box=1:boxcolor=black@0.6"
+  fi
   ffmpeg -hide_banner -loglevel error -y -ss "$(python3 -c "print(($a + $b) / 2)")" -i "$VIDEO" -frames:v 1 \
-    -vf "scale=320:-2,drawtext=text='$n':x=8:y=8:fontsize=22:fontcolor=white:box=1:boxcolor=black@0.6" \
-    "$DIR/$(printf 'shot_%03d.jpg' "$n")" < /dev/null
+    -vf "$VF" "$DIR/$(printf 'shot_%03d.jpg' "$n")" < /dev/null
 done
 N="$(ls "$DIR"/shot_*.jpg | wc -l | tr -d ' ')"
 for ((s = 1, k = 1; s <= N; s += 48, k++)); do
@@ -64,4 +75,5 @@ for ((s = 1, k = 1; s <= N; s += 48, k++)); do
 done
 
 echo "$ID: $(printf '%.1f' "$DUR") s, $N shots (average $(python3 -c "print(round($DUR / max($N, 1), 2))") s), $(wc -w < "$DIR/transcript.txt" | tr -d ' ') words of transcript"
+[ "$HAS_TEXT" -gt 0 ] || echo "(sheets unnumbered: this ffmpeg has no drawtext; shot n is row by row, 8 to a row)"
 echo "→ $DIR"

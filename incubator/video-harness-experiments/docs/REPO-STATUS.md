@@ -42,6 +42,7 @@ All paths are under `incubator/video-harness-experiments/`. The index is [`../RE
 |---|---|---|
 | `07-grok-test/` | Film 05's shots as starting frames for Grok Imagine; a checker that measures each clip against the code | **Done for S3, takes 1 and 2.** Take 1 held the shape (0.90) but added no real surface; take 2 added a real surface and lost the shape (0.57). Results in `RESULTS.md` |
 | `08-skin-test/` | Test 1 on fal: words only (A) vs pictures (B) vs the code's depth video (C), 3 takes each, pass marks written first | **Run 2026-10-17; interim result in `RESULTS.md`.** 9 clips, $4.36. C holds the shape (0.96–0.97, 3/3) where A and B don't; no clip keeps the brand orange (C 8.3–11.8 ΔE00, mark 5), so none can be real and exact. Waiting on: the blind realism ratings, then the contact sheet and `verdict.py`. Clips not in git |
+| `09-runner-test/` | Test 1b on fal: film 4's last 15 s (the faceless runner), route C only, pass marks written first | **Run 2026-10-17, 1 take, $1.21; result in `RESULTS.md`.** Not real and exact: the runner reads 0.833 against a mark of 0.85 (holds in the walk, slips in the orbit); the founder rates the look 1 out of 5. Clip not in git |
 
 ### Documents
 
@@ -91,7 +92,7 @@ The ignore rules are in `.gitignore` files (`out/`, `node_modules/`; and `clips/
 | | Item |
 |---|---|
 | **Done** | Films 01–06; the Das Production ident; the Grok test for S3 (takes 1 and 2); the checker, calibrated (the code itself scores 0.995); the architecture and media primer docs; the face-scan research |
-| **Ready, waiting on the founder** | Test 1 on fal: run 2026-10-17 (interim: shape held, colour missed); the blind realism ratings are the one thing left. The next test the founder chose: 15 s of a 3D human, route C only, from the marketing work's human model (branch `shayan/eloquent-fermi-bggugr`), planned with its own pass marks before any spend. The deep-research prompt: paste it into a new chat. The Pre-production tab plan: yes or no to merging |
+| **Ready, waiting on the founder** | Test 1 on fal: run 2026-10-17 (interim: shape held, colour missed); the blind realism ratings are the one thing left. Test 1b (the runner, 15 s, route C): run 2026-10-17, not real and exact (`09-runner-test/RESULTS.md`). Next, proposed: the same depth video on one stronger control model, priced first. The deep-research prompt: paste it into a new chat. The Pre-production tab plan: yes or no to merging |
 | **Open questions** | The PRD's 12 questions (`NEXT-SESSION-PRD.md`); where the gen-video agent lives for good (`NEXT-SESSION-PRD.md` suggests its own new repo) |
 | **Not started** | Test 2 (blind "which would you ship" with brand and production people); Test 3 (cost and time per usable second on a real multi-shot job); the Fixer (logo and brand colour put back through the masks); 9:16 versions; MP4s of films 01–03; a verdict on the music |
 | **Look Lab (separate product)** | P4.5 colour in progress on `main`; untouched here |

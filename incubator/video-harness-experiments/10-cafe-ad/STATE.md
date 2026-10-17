@@ -20,8 +20,8 @@ and the models' terms are checked. Read this first, then only the file a step na
 | Passes for the AI steps: clean frame, depth (near white, glass left out), masks (bowl, tops, plinth, honey, float) | `src/passes.js` | `node render.mjs passes 7.5 12 81 --name s3 --passes beauty,depth,mask:bowl,mask:tops` → `out/passes/s3/` |
 | fal model menu with prices read 2026-10-17 | `MODELS.md` | — |
 | Reference-video tool: link or file → transcript, cut list, contact sheet | `../tools/ref.sh` | `tools/ref.sh <youtube-link or file>` → `tools/out/<id>/` (links only work from a home connection: YouTube blocks cloud servers) |
-| How AI ad platforms (Higgsfield and others) build ads | `PLATFORMS.md` (if present) | — |
-| Two Higgsfield "Blender + Higgsfield" videos: what they show | `VIDEOS.md` (if present) | — |
+| How AI ad platforms (Higgsfield, Kling, Runway, Creatify) build ads, stated vs inferred | `PLATFORMS.md` | — |
+| The two Higgsfield "Blender + Higgsfield" videos, from public pages (no transcript reachable from the cloud) | `VIDEOS.md` | — |
 
 ## Waiting on the founder
 1. **Budget** for Test 2 (fal balance about $4.43 on 2026-10-17, the founder's figure).
@@ -48,6 +48,13 @@ and the models' terms are checked. Read this first, then only the file a step na
 - `https://youtu.be/AdjllfZuqYM` Higgsfield: "A $1,000,000 AD Using Just 2 tools"
 - `https://youtu.be/VlBbcYQBlOo` "Create a Cinematic Product Ad with Higgsfield AI (FULL Workflow)"
 - `https://youtu.be/nAyV8ZzbG2w` "The AI Ad Workflow That Agencies Don't Want You To Know"
+
+## What the research says we lack (PLATFORMS.md, VIDEOS.md)
+1. A product reference pack (real photos of the bowl, the café's logo file) passed into the image and video calls:
+   needs the café's yes first.
+2. A step that puts the real logo and end card back over the video through the previs masks, with the checker
+   deciding when to retry (our Fixer, planned, not built).
+3. Finishing: an upscaler (on fal: needs checking), the edit, music.
 
 ## Found along the way
 - A full 360° starts and ends on the same view: its first and last keyframes would be the same picture. Paint three

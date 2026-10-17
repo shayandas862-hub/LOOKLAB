@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Blend previs</title>
+<script type="importmap">
+{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }
+</script>
+<style>
+html, body { margin: 0; background: #000; overflow: hidden; width: 720px; height: 1280px; }
+canvas { display: block; position: absolute; inset: 0; }
+#overlay { position: absolute; inset: 0; pointer-events: none; color: #fff; font-family: 'Inter', sans-serif; }
+#hud { position: absolute; left: 24px; top: 22px; font-size: 15px; letter-spacing: 0.06em; opacity: 0.75; text-shadow: 0 1px 3px #0008; }
+#card { position: absolute; left: 0; right: 0; top: 150px; text-align: center; opacity: 0; }
+#card .name { font-family: 'Caladea', serif; font-style: italic; font-weight: 700; font-size: 150px; line-height: 1; text-shadow: 0 2px 14px #fff3; }
+#card .line { font-size: 30px; font-weight: 600; letter-spacing: 0.08em; margin-top: 10px; color: #2a1424; }
+#card .place { font-size: 20px; letter-spacing: 0.12em; margin-top: 8px; color: #2a1424; opacity: 0.8; }
+#note { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; opacity: 0; font-size: 14px; letter-spacing: 0.05em; color: #fff; opacity: 0.7; }
+</style>
+</head>
+<body>
+<canvas id="out" width="720" height="1280"></canvas>
+<div id="overlay"><div id="hud"></div><div id="card"><div class="name"></div><div class="line"></div><div class="place"></div></div><div id="note"></div></div>
+<script type="module">
+import { init, renderFrame, renderAt, renderPass } from './src/main.js';
+Object.assign(window, { renderFrame, renderAt, renderPass });
+window.ready = init(document.getElementById('out'), document.getElementById('overlay'));
+</script>
+</body>
+</html>

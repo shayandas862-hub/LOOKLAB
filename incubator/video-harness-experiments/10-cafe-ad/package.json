@@ -1,0 +1,10 @@
+{
+  "name": "test2-cafe-ad",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "playwright-core": "^1.56.1",
+    "three": "0.169.0"
+  }
+}

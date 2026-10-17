@@ -1,6 +1,6 @@
 # Test 1 runbook: for the Claude Code session that runs it
 
-Written 2026-10-17 and rehearsed from a fresh clone (step 0–4 and the scripts). **This is the only file a session
+Written 2026-10-17 and rehearsed from a fresh clone (steps 0–4 for real; steps 7–9's scripts on stand-in clips). **This is the only file a session
 needs to read to run Test 1.** The why, the pass marks and what each outcome means are in [`README.md`](README.md);
 read it once, at step 6. Not part of Look Lab (D-LL-056). A test, not for commercial use.
 
@@ -51,18 +51,24 @@ All commands run from this folder: `cd "incubator/video-harness-experiments/08-s
 git branch --show-current                    # shayan/kind-hamilton-nvl2fl
 [ -n "$FAL_KEY" ] && echo set || echo missing
 ls inputs                                    # depth_16fps.mp4  first.png  last.png
+node -e "fetch('https://queue.fal.run/').then(r => console.log('fal reachable, status', r.status)).catch(e => console.log('fal NOT reachable:', e.cause?.code || e.message))"
 ```
-If the key is missing: stop. The founder adds `FAL_KEY` in the environment's settings (the cloud environment menu in
-the session's title bar, then Edit: Network secrets, or an environment variable) and starts a new session.
+"fal reachable, status 404" is right: fal answered (checked 2026-10-17). If it's not reachable, see
+`/root/.ccr/README.md` (Node's fetch may need `NODE_USE_ENV_PROXY=1`), or the environment's network settings may
+block fal: tell the founder.
 
-### 1 · Install (3–5 min, about 400 MB on disk)
+If the key is missing: stop. The founder adds `FAL_KEY` in the environment's settings (the cloud environment menu
+in the session's title bar, then Edit: Network secrets, or an environment variable) and starts a new session.
+
+### 1 · Install (about 1 min; about 760 MB on disk with the model)
 ```sh
 mkdir -p out/logs && npm ci > out/logs/npm.log 2>&1            # @fal-ai/client 1.10.1 (MIT)
 python3 -m venv "$HOME/t1env" && "$HOME/t1env/bin/pip" install -q rembg==2.0.85 onnxruntime==1.31.0
 export PY="$HOME/t1env/bin/python"            # used by every step below; set it again in each new shell
 ```
 The checker also needs `ffmpeg` and `ffprobe` (present in the cloud image; `apt-get install -y ffmpeg` if not). The
-background-removal model (`isnet-general-use`, 178 MB, from rembg's GitHub releases) downloads on first use, at step 3.
+background-removal model (`isnet-general-use`, 171 MB, from rembg's GitHub releases) downloads on first use, at step 3.
+The Python packages take 585 MB.
 Versions used on 2026-10-15: rembg 2.0.85, onnxruntime 1.31.0, numpy 2.5.4, Pillow 12.3.0, Python 3.13.
 
 ### 2 · Unpack the code's reference frames (about 30 s)
@@ -79,8 +85,9 @@ the exact beauty frames from film 05's code and check that clip again:
 bash check-all.sh calibrate
 ```
 This makes the code's own shot into a clip exactly like a fal clip (720p, 16 fps, 97 frames) and checks it. Expected
-(rehearsed 2026-10-17 from a fresh clone): **overlap 0.995 / worst tenth 0.988**, colour ΔE00 median about 0.6 on
-97/97 frames. If the overlap is below 0.99, stop: the checker isn't set up the same way, and nothing after this
+(rehearsed 2026-10-17 from a fresh clone, 3 min 8 s): **overlap 0.995 / worst tenth 0.988**, colour ΔE00 median 0.68
+on 97/97 frames, flicker worst 6.32 %. The code's own sweep light reads as 6.3 % flicker, so flicker in step 6 is
+compared with that, not judged on its own (it isn't one of Test 1's marks). If the overlap is below 0.99, stop: the checker isn't set up the same way, and nothing after this
 would be comparable. Report what you see.
 
 ### 4 · Prices, the dry run, and the founder's yes (5 min)

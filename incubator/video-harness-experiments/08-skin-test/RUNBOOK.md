@@ -109,7 +109,7 @@ If it's over the cap, say so and stop.
 
 ### 5 · Generate (time not known yet; run in the background)
 ```sh
-NODE_USE_ENV_PROXY=1 node run.mjs > out/logs/run.log 2>node run.mjs > out/logs/run.log 2>&1         #1   # → out/A_seed11.mp4 … out/C_seed33.mp4, out/runs.json
+NODE_USE_ENV_PROXY=1 node run.mjs > out/logs/run.log 2>&1   # → out/A_seed11.mp4 … out/C_seed33.mp4, out/runs.json
 tail -n 12 out/logs/run.log
 ```
 Each finished clip prints one line with its time. If a request fails, the error is in `out/runs.json` and the clip is

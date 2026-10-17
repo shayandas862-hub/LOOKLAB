@@ -42,6 +42,13 @@ Plain list for now: IDs come when the product has a name and a records code. **N
 | 23 | 16:9 at 1080p first | Vertical and square versions in the same pass | The ident's job is to open films; social cuts on request (each needs its own framing) |
 | 24 | Kept with the films on the experiments branch, in `deliverables/06-das-ident/` | A separate repo | One place to download everything, as asked for the films |
 
+## 2026-10-17
+
+| # | Chose | Rejected | Why |
+|---|---|---|---|
+| 25 | Test 1 runs as designed: "looks real" is the founder's blind rating, with no Look Lab check added | Adding Look Lab's light fit or grade check to Test 1 | Test 1's checks were fixed before any clip; the light fit reads light from a face's cheek and this shot has no face; it is checked only on Blender faces and fails on dark skin; it says where light comes from, not whether a clip looks real |
+| 26 | Look Lab's light fit and grade check are tried in a later test with a person in the shot: light from where the plan says, colour against the planned look | Never using them | The founder sees them as important checks; they fit a shot with a face, not this one |
+
 ## Open
 
 | Question | Status |

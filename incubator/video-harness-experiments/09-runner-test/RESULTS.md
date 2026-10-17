@@ -32,6 +32,28 @@ worlds at the end all line up with the code. One runner throughout, white suit a
 look is a dark blue CG render, not footage: the screens are empty, the worlds are dark shapes, the floor carries grid
 lines.
 
+## Why it failed (diagnosis after the result; the verdict above stands)
+
+**The runner mark.** `diagnose.py` looks at the orbit frames (6.25–11.6 s of the clip), where the overlap dropped:
+
+| What | Orbit frames |
+|---|---|
+| The code's runner body that the clip's outline misses | 2–7 % |
+| Extra outline beyond the code's runner | 3–35 % of the runner's area |
+| Of that extra, lying away from the body (over 12 px off) | 53–96 %, mostly 75–96 % |
+
+So in the orbit the generated runner's body stays where the code puts it; the shortfall comes from the outline model
+(rembg) taking in a patch of the glowing grid the AI painted on the floor beside the runner. In the walk (before
+6.25 s) the outline sits on the code's runner within 1 % of its height (overlap 0.91–0.95). This is a limit of the
+checker on a busy generated scene, found after the result: the take still fails the mark as measured. A stricter
+outline (for example, only the part touching the code's runner) has to be written down before any next run, not
+applied to this one.
+
+**The look (1 out of 5).** Seen beside the code: a dark blue CG render, not footage; the screens are empty, the worlds
+are dark shapes, the floor carries glowing grid lines. Not tested, so only candidates: this model's quality (Wan
+2.1-based VACE); a crisp, low-poly synthetic depth video leading it towards a CG look; one prompt asking for eight
+worlds at once; the longest length the model allows (241 frames).
+
 ## The request (from `out/runs.json`)
 
 | | |

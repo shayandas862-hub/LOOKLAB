@@ -23,6 +23,25 @@ Cited by number. Fixed at the start of v1.
 
 ---
 
+## 2026-10-17 — Marketing: one archive for every published post
+
+- **D-LL-057 — Every published post is archived in a new top-level `marketing/`, outside everything Look Lab builds, tests or serves: one folder per `post_id` holding the exact files that went out and their SHA-256.**
+  **Chose (founder, 2026-10-17: "make a place to store that that would be used for PR and marketing channels and
+  create a standard"):** `marketing/posts/<YYYY-MM-DD-slug>/` with the post text, the first comment, the uploaded
+  video, the cover, the comment picture, the script that made them and a `manifest.json` (where it went and when, the
+  hash of every file, the source of every clip and every number, the engine rules it breaks); `marketing/verify.mjs`
+  checks every manifest against its files; `marketing/README.md` is the standard and the workflow. The id is the one
+  the LinkedIn engine's Notion `posts.post_id` already uses, so the repo, Notion, LinkedIn and the website Journal
+  match on one key. No config reads the folder (`tsconfig.json` includes `src` and `tests`, `vitest.config.ts`
+  includes `tests/**`, Vite's root is `src/ui`). **Rejected:** a separate marketing repo (splits the films' code from
+  the files made from it, and the founder asked for it "in the repo"); Git LFS (a second storage system to set up,
+  where the branch's films already sit in plain git at up to 71 MB); Notion or Drive as the store (no hash to prove a
+  copy is the published one, and a 45 MB file cannot be sent from a session through a tool call); keeping only links
+  (LinkedIn re-encodes every upload, so the live post is not the file). **Why:** nothing held what was posted: post 1's
+  video exists only on the founder's device and its text only on LinkedIn. **Trade-off:** each video post adds about
+  45 MB to the repo's history for good; files over 95 MB stay out (`not_in_git[]`, made again from `build/`). Found
+  while setting it up: Notion `posts` holds two real posts (CL-01 and CL-02, both text), neither video post.
+
 ## 2026-10-08 — Parked: the visual dashboard, for the end-to-end suite later
 
 - **D-LL-056 — The founder's visual-dashboard repo is kept as a snapshot in `incubator/visual-dashboard/`, outside everything Look Lab builds, tests or serves.**

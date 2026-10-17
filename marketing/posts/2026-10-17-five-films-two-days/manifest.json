@@ -1,0 +1,202 @@
+{
+  "post_id": "2026-10-17-five-films-two-days",
+  "title": "Five films in two days. Every frame made in code.",
+  "channel": "linkedin",
+  "format": "video",
+  "pillar": "P1 Build Log",
+  "status": "ready",
+  "published_at": null,
+  "post_url": null,
+  "notion_post": null,
+  "website_post": null,
+  "files": [
+    {
+      "path": "post.md",
+      "role": "the post text, exactly as given to the founder to paste (hashtags included)",
+      "bytes": 2409,
+      "sha256": "471d014686c9a1088f46e2c35466cb7625ce4b4c7a9e911ab740beda2c7b0cee"
+    },
+    {
+      "path": "comment.md",
+      "role": "the first comment, pinned, with media/comment.png attached",
+      "bytes": 550,
+      "sha256": "290c3a6ecbfdc39e8e0cd7d999f4f8fefd5b226828078ce0c3f1aa8b518c7115"
+    },
+    {
+      "path": "media/video.mp4",
+      "role": "the video for upload: 1920x1080, 24 fps, H.264 High, AAC 48 kHz stereo, 2:07.9 (the light copy)",
+      "bytes": 44909076,
+      "sha256": "d44cbc8b034f9de69fd5e31e89b7b7b7f42cd68928a59df9884353284d36f06d"
+    },
+    {
+      "path": "media/thumbnail.png",
+      "role": "the video's cover: film 05 at 1:20.5 (ONE SENTENCE.)",
+      "bytes": 2325335,
+      "sha256": "b67f6afe6c7bd953cd3fce397b880f904d97c0489f68c127685c49a7716fe39e"
+    },
+    {
+      "path": "media/comment.png",
+      "role": "the two number cards, attached to the first comment",
+      "bytes": 103757,
+      "sha256": "4e38361c79cce951ea4781a60459d9a18a2a07d00d01fa498b231837b09d1625"
+    },
+    {
+      "path": "build/build.py",
+      "role": "the script that cut the video and drew the cards; inputs under sources[]",
+      "bytes": 14931,
+      "sha256": "77d001be425e9dd7fc913cffa4b9a2f58c7682cd00555645a637669377d1653b"
+    }
+  ],
+  "not_in_git": [
+    {
+      "what": "the full-quality copy of the same cut (CRF 19, 7.2 Mbit/s)",
+      "bytes": 115301825,
+      "sha256": "fb5d0bc22f5f5962d6c85d58ad417067e87739c154cbf820755ed272195a6a27",
+      "why": "115 MB is over GitHub's 100 MB limit; build/build.py makes it again from the sources"
+    }
+  ],
+  "sources": [
+    {
+      "what": "film 01 Look Lab pitch, one still at 7.6 s (the opener)",
+      "repo": "shayandas862-hub/LOOKLAB",
+      "branch": "shayan/kind-hamilton-nvl2fl",
+      "commit": "009a11039e698b9fd144c4483832088bd3885025",
+      "path": "incubator/video-harness-experiments/01-look-lab-pitch",
+      "used": "rendered with: node render.mjs stills 7.6"
+    },
+    {
+      "what": "film 02 Brief to film, one still at 12.4 s",
+      "repo": "shayandas862-hub/LOOKLAB",
+      "branch": "shayan/kind-hamilton-nvl2fl",
+      "commit": "009a11039e698b9fd144c4483832088bd3885025",
+      "path": "incubator/video-harness-experiments/02-brief-to-film",
+      "used": "rendered with: node render.mjs stills 12.4"
+    },
+    {
+      "what": "film 03 First Light, one still at 31.0 s",
+      "repo": "shayandas862-hub/LOOKLAB",
+      "branch": "shayan/kind-hamilton-nvl2fl",
+      "commit": "009a11039e698b9fd144c4483832088bd3885025",
+      "path": "incubator/video-harness-experiments/03-first-light",
+      "used": "rendered with: node render.mjs stills 31.0"
+    },
+    {
+      "what": "film 04 ACTION, the under-the-sea world",
+      "repo": "shayandas862-hub/LOOKLAB",
+      "branch": "shayan/kind-hamilton-nvl2fl",
+      "commit": "009a11039e698b9fd144c4483832088bd3885025",
+      "path": "incubator/video-harness-experiments/deliverables/04-action/action_1080p.mp4",
+      "used": "0:32.0-0:34.0, with its sound"
+    },
+    {
+      "what": "film 04 ACTION, the continuous camera move (step inside, crane up)",
+      "repo": "shayandas862-hub/LOOKLAB",
+      "branch": "shayan/kind-hamilton-nvl2fl",
+      "commit": "009a11039e698b9fd144c4483832088bd3885025",
+      "path": "incubator/video-harness-experiments/deliverables/04-action/action_1080p.mp4",
+      "used": "1:16.0-1:28.0, with its sound"
+    },
+    {
+      "what": "film 05 ONE SENTENCE, whole and untouched",
+      "repo": "shayandas862-hub/LOOKLAB",
+      "branch": "shayan/kind-hamilton-nvl2fl",
+      "commit": "009a11039e698b9fd144c4483832088bd3885025",
+      "path": "incubator/video-harness-experiments/deliverables/05-one-sentence/one_sentence_1080p.mp4",
+      "used": "0:00-1:32; thumbnail from 1:20.5"
+    },
+    {
+      "what": "06 Das Production ident, the logo hold",
+      "repo": "shayandas862-hub/LOOKLAB",
+      "branch": "shayan/kind-hamilton-nvl2fl",
+      "commit": "009a11039e698b9fd144c4483832088bd3885025",
+      "path": "incubator/video-harness-experiments/deliverables/06-das-ident/das_ident_1080p.mp4",
+      "used": "0:11.2-0:14.0, faded in over 0.25 s"
+    },
+    {
+      "what": "fonts for the new cards: Anton, JetBrains Mono (SIL OFL 1.1, from @fontsource)",
+      "path": "npm: @fontsource/anton, @fontsource/jetbrains-mono"
+    }
+  ],
+  "numbers": [
+    {
+      "claim": "five films in two days (2026-10-13 and 14), every frame made in code",
+      "source": "incubator/video-harness-experiments/README.md (films 01-06) and docs/BUILD-LOG.md, branch shayan/kind-hamilton-nvl2fl"
+    },
+    {
+      "claim": "film lengths 15 s, 15 s, 40 s and 13 shots, 1:32, 1:32",
+      "source": "incubator/video-harness-experiments/README.md, the films table"
+    },
+    {
+      "claim": "frames: 900 (15 s at 60 fps), 900, 960 (40 s at 24 fps), 2,208, 2,208, ident 336; total 7,512",
+      "source": "README.md (length and fps) and docs/BUILD-LOG.md (2,208 and 336 frames)"
+    },
+    {
+      "claim": "problems found by the checks: film 3: 2, film 4: 11, film 5: 14, ident: 9; by the founder: 3 (ident); total 36 and 3",
+      "source": "docs/BUILD-LOG.md, the 'Problems found, and how' tables (rows counted; 'Found by' = founder counted apart); film 3 from README.md 'Check the motion'"
+    },
+    {
+      "claim": "shot 1 measured ΔE00 5.3 against the brand colour, pass under 2.0; repainted 0.1 (0.14 unrounded)",
+      "source": "05-one-sentence/README.md and docs/BUILD-LOG.md (final render 5.30 and 0.14)"
+    },
+    {
+      "claim": "CIEDE2000 matches Sharma, Wu and Dalal (2005) on 3 pairs to 4 decimals",
+      "source": "docs/BUILD-LOG.md, film 05, colour check"
+    },
+    {
+      "claim": "2,208 frames rendered in 66 minutes on 4 CPU cores, no GPU",
+      "source": "05-one-sentence/README.md and docs/BUILD-LOG.md (3,953 s)"
+    },
+    {
+      "claim": "1920x1080, 24 fps, 120 BPM, one beat = 12 frames",
+      "source": "05-one-sentence/README.md, 'How it's made'"
+    },
+    {
+      "claim": "realism test shape overlap: plan 0.995, take 1 0.902, take 2 0.570 (median)",
+      "source": "07-grok-test/RESULTS.md, the calibrated overlap table"
+    },
+    {
+      "claim": "take 1 kept the CG look (no real surface); take 2 added a real surface and lost the path",
+      "source": "07-grok-test/RESULTS.md, 'What it shows' for takes 1 and 2"
+    },
+    {
+      "claim": "a light on the shoe jumps back every 2 seconds (film 05's own flaw)",
+      "source": "07-grok-test/RESULTS.md, 'Found while calibrating' (6.3 % flicker on the code itself)"
+    }
+  ],
+  "rule_exceptions": [
+    {
+      "rule": "linkedin_engine rules, Craft 2: 0-3 hashtags",
+      "here": "4 hashtags",
+      "decided": "open: drop #CreativeTools before posting, or edit it out after"
+    },
+    {
+      "rule": "linkedin_engine rules, Craft 5: one named tool in every post",
+      "here": "no tool named",
+      "decided": "founder, 2026-10-16: show the approach, not the architecture"
+    },
+    {
+      "rule": "linkedin_engine rules, Craft 6: end on a hard question",
+      "here": "ends on a statement",
+      "decided": "voice page forbids questions thrown at the audience; the two pages disagree, flagged for the founder"
+    },
+    {
+      "rule": "linkedin_engine run order: made by an engine run, gated by the weekly row",
+      "here": "made in a Claude Code session, outside the engine",
+      "decided": "founder, 2026-10-16: 'not the engine'"
+    }
+  ],
+  "missing": [
+    {
+      "what": "confirmation of which file was uploaded (this light copy, or the full-quality one in not_in_git)",
+      "who": "founder"
+    },
+    {
+      "what": "published_at and post_url; rename the folder if it goes out on another date",
+      "who": "founder"
+    },
+    {
+      "what": "the Notion posts row (notion_post)",
+      "who": "to create once the founder says yes"
+    }
+  ]
+}

@@ -124,6 +124,11 @@ node bin/looklab.mjs mcp-setup   # prints the `claude mcp add` command for this 
 - Shape change → `docs/architecture-decisions.md`; choice inside the architecture → `docs/decision-log.md` (chose · rejected · why, citing P-LL-001); measured session → `docs/progress-log.md`; defect → `docs/bug-log.md` **the moment it is found**; term → `docs/CONTEXT.md` (mired, Duv, S-Log3 code, the split, LIGHT/GRADE/SET, capture card, grade check); accuracy against a known answer → `docs/validation.md` §5; not yet a decision → `plans/`. Propose a new record file before creating it.
 - Never renumber an id. `tests/records/` checks the bug-log shape and the registry; a file `plans/P-LL-NNN-*.md` counts as defining its id.
 
+## Marketing posts (any session, any phase)
+- Asked for a LinkedIn post, marketing copy, a PR asset or a video to post: read [`marketing/README.md`](marketing/README.md) first. The final files (exact text, first comment, uploaded video, cover, comment picture, build script) go in `marketing/posts/<YYYY-MM-DD-slug>/` with a `manifest.json`; run `node marketing/verify.mjs` before saying it is done (D-LL-057).
+- People, comments and DMs from a post go to Notion (`linkedin_engine → engagement`; employer threads in `GOAL → conversations`), never into this public repo.
+- Keep this section when CLAUDE.md is regenerated for the next phase.
+
 ## Project Documents — Available On Demand
 Do not load these at session start; read one only when a task needs it.
 - `plans/P-LL-001-colour-grading.md` (the spec: read §4 for the task at hand, §7 for contracts, §9 for tests)

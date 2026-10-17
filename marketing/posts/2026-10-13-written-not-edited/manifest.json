@@ -1,0 +1,66 @@
+{
+  "post_id": "2026-10-13-written-not-edited",
+  "title": "No camera. No stock footage. No editing software.",
+  "channel": "linkedin",
+  "format": "video",
+  "pillar": "P1 Build Log",
+  "status": "published",
+  "published_at": "2026-10-13T21:35:28Z",
+  "post_url": "https://www.linkedin.com/feed/update/urn:li:activity:7515887959548805120/",
+  "notion_post": null,
+  "website_post": null,
+  "files": [
+    {
+      "path": "post.transcribed.md",
+      "role": "the post text as read from the founder's screenshot (2026-10-16); not yet confirmed exact: the top of the post was outside the screenshot",
+      "bytes": 992,
+      "sha256": "36d5e0f8fc2fd6c5bf78e6296669dd03546e367b26967c0cbd66e49116ec29fb"
+    }
+  ],
+  "not_in_git": [],
+  "sources": [
+    {
+      "what": "film 01 Look Lab pitch, the whole 15 s film",
+      "repo": "shayandas862-hub/LOOKLAB",
+      "branch": "shayan/kind-hamilton-nvl2fl",
+      "commit": "009a11039e698b9fd144c4483832088bd3885025",
+      "path": "incubator/video-harness-experiments/01-look-lab-pitch",
+      "used": "the film's MP4 was never committed; this code renders it again"
+    }
+  ],
+  "numbers": [
+    {
+      "claim": "a 15-second film",
+      "source": "incubator/video-harness-experiments/README.md, films table (01: 15 s, 60 fps)"
+    },
+    {
+      "claim": "published 2026-10-13 21:35:28 UTC",
+      "source": "read from the post's URL: the activity id 7515887959548805120 carries its creation time (id >> 22 = 1791927328002 ms since 1970)"
+    }
+  ],
+  "rule_exceptions": [
+    {
+      "rule": "linkedin_engine rules, Craft 2: 0-3 hashtags",
+      "here": "5 hashtags",
+      "decided": "already published; noted, not changed"
+    }
+  ],
+  "missing": [
+    {
+      "what": "post.md: the original text, pasted from LinkedIn (Edit post, copy all); then post.transcribed.md can go",
+      "who": "founder"
+    },
+    {
+      "what": "media/video.mp4: the exact file uploaded on 2026-10-13; it exists only on the founder's device",
+      "who": "founder"
+    },
+    {
+      "what": "media/thumbnail.png, if a custom cover was set",
+      "who": "founder"
+    },
+    {
+      "what": "the Notion posts row (notion_post)",
+      "who": "to create once the founder says yes"
+    }
+  ]
+}

@@ -6,7 +6,9 @@ by git): the poster isn't ours to publish. A test, not for commercial use until 
 
 **What it does.** The video opens on the clean picture (no text) with a slow 2.5D camera pull-back and a focus pull; the
 headline comes in last ("IT'S" drops, "BACK." rises letter by letter from behind the fries, a small punch on the full
-stop), then the logo, badge, product lines and the bar, and it ends exactly on the poster. 10 s, 1080×1350, 30 fps.
+stop), then the logo, badge, product lines and the bar, and it ends exactly on the poster. Two cuts, 1080×1350, 30 fps:
+10 s (the text from 5.5 s) and 6 s (the text from 0.9 s, the camera faster; the text moves with the product, so it can come
+in while the camera still moves).
 
 **How (all classical maths, `poster.py`):**
 1. The text is lifted off. Where it lies on the backdrop, it and a ring for the webp's colour smear become backdrop;
@@ -23,6 +25,7 @@ stop), then the logo, badge, product lines and the bar, and it ends exactly on t
 # in the checker's environment (numpy, Pillow, scipy); ffmpeg on the path; the poster at out/in/poster.webp
 ../07-grok-test/.venv/bin/python -I poster.py layers   # 10–25 s → out/layers/ (clean, plate, product, text layers, sheet.png)
 ../07-grok-test/.venv/bin/python -I poster.py video    # 367 s in the cloud, peak 948 MB → out/poster_motion.mp4, out/contact.png
+../07-grok-test/.venv/bin/python -I poster.py video 6s # 368 s in the cloud, peak 938 MB → out/poster_motion_6s.mp4, out/contact_6s.png
 ```
 
 **Measured:** the last frame against the poster, mean |difference| 2.3 levels (the grain is 1.6); before the closing

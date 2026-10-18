@@ -7,7 +7,7 @@ How the clean picture is made (classical maths, no inpainting model):
   - the product is cut out where the clean picture differs from the backdrop model; the plate under it is the model.
 Layers and depth: the backdrop wall is far, the table comes nearer row by row, the product stands on the table.
   python -I poster.py layers      → out/layers/*.png and out/layers/sheet.png (check the cut-out by eye)
-  python -I poster.py video       → out/poster_motion.mp4 (1080×1350, 30 fps) and out/contact.png
+  python -I poster.py video [6s]  → out/poster_motion.mp4 (10 s) or out/poster_motion_6s.mp4, 1080×1350, 30 fps, and a contact sheet
 The poster lives in out/in/poster.webp (out/ is ignored by git: the poster isn't ours to publish)."""
 import json, subprocess, sys
 from pathlib import Path
@@ -176,9 +176,15 @@ def layers():
           f"product box {info['product_box']}")
 
 # --- the motion ---------------------------------------------------------------------------------------------------
-FPS, SECONDS, OUT_W, OUT_H = 30, 10.0, 1080, 1350
+FPS, OUT_W, OUT_H = 30, 1080, 1350
 Z_WALL, Z_NEAR = 1.8, 0.85                        # the wall is far, the table's bottom row near
-CAM_T, K0, O0 = 5.6, 0.13, (-20.0, 28.0)          # the pull-back: 13 % closer and offset at the start, the poster at the end
+K0, O0 = 0.13, (-20.0, 28.0)                      # the pull-back: 13 % closer and offset at the start, the poster at the end
+# Two cuts: when each thing starts and how long it takes (s). The text moves with the product, so it can come in while
+# the camera still moves; the cross-fade to the poster waits for the camera to stop.
+CUTS = {'10s': dict(seconds=10, cam=5.6, focus=0.8, its=(5.5, 0.6), back=(5.9, 0.32, 0.07), punch=(6.45, 0.35), logo=(6.7, 0.5),
+                    badge=(6.85, 0.45), line1=(7.2, 0.55), line2=(7.4, 0.55), bar=(7.9, 0.5), end=(8.6, 0.3)),
+        '6s': dict(seconds=6, cam=3.0, focus=0.3, its=(0.9, 0.45), back=(1.2, 0.26, 0.05), punch=(1.55, 0.3), logo=(1.85, 0.4),
+                   badge=(1.95, 0.35), line1=(2.2, 0.4), line2=(2.35, 0.4), bar=(2.65, 0.4), end=(3.4, 0.3))}
 
 def smoother(x): x = min(1.0, max(0.0, x)); return x * x * x * (x * (6 * x - 15) + 10)
 def ease_out(x): x = min(1.0, max(0.0, x)); return 1 - (1 - x) ** 3
@@ -187,7 +193,8 @@ def depth(y): return np.where(y < HORIZON, Z_WALL, Z_WALL + (Z_NEAR - Z_WALL) * 
 
 def rgba(name): a = np.asarray(Image.open(LAYERS / f'{name}.png')).astype(np.float32) / 255; return a[..., :3] * 255, a[..., 3:]
 
-def video():
+def video(cut='10s'):
+    c = CUTS[cut]; SECONDS, name = c['seconds'], 'poster_motion' + ('' if cut == '10s' else f'_{cut}')
     info = json.loads((LAYERS / 'layers.json').read_text()); W, H = info['size']; cx, cy = info['product_centre']
     plate, _ = rgba('plate'); prod = Image.open(LAYERS / 'product.png'); orig, _ = rgba('original')
     zk = float(depth(np.array(info['product_box'][3]))); ys, xs = np.mgrid[0:H, 0:W].astype(np.float32)
@@ -195,7 +202,7 @@ def video():
     boxes = {n: im.getchannel('A').getbbox() for n, im in texts.items()}
     rng = np.random.default_rng(3)
     enc = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{OUT_W}x{OUT_H}', '-r', str(FPS), '-i', '-',
-                            '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(OUT / 'poster_motion.mp4')],
+                            '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(OUT / f'{name}.mp4')],
                            stdin=subprocess.PIPE)
     def place(img, s, ox, oy, about=(cx, cy)):          # scale s about a point, then move: the layer as the camera sees it
         a, (px, py) = 1 / s, about
@@ -206,43 +213,49 @@ def video():
         return frame * (1 - m) + a[..., :3] * 255 * m
     sheet, n = [], int(FPS * SECONDS)
     for f in range(n):
-        t = f / FPS; k = 1 - smoother(t / CAM_T); K, ox, oy = K0 * k, O0[0] * k, O0[1] * k
+        t = f / FPS; k = 1 - smoother(t / c['cam']); K, ox, oy = K0 * k, O0[0] * k, O0[1] * k
         # the plate: each row at its own depth (far rows move less), sampled where that row's camera puts it
         r = zk / depth(ys); s = 1 + K * r
         sx, sy = cx + (xs - cx - ox * r) / s, cy + (ys - cy - oy * r) / s
         frame = np.stack([nd.map_coordinates(plate[..., c], [sy, sx], order=1, mode='nearest') for c in range(3)], -1)
         # the text behind the product, then the product, then the text in front: all at the product's depth
         S = 1 + K
-        frame = over(frame, place(texts['its'], S, ox, oy - 50 * (1 - back_out((t - 5.5) / 0.6))), alpha=min(1, max(0, (t - 5.5) / 0.2)))
+        (t0, d0), (t1, d1, step) = c['its'], c['back']
+        frame = over(frame, place(texts['its'], S, ox, oy - 50 * (1 - back_out((t - t0) / d0))), alpha=min(1, max(0, (t - t0) / (d0 / 3))))
         for i in range(info['back_letters']):
-            x = (t - 5.9 - 0.07 * i) / 0.32
+            x = (t - t1 - step * i) / d1
             if x > 0: b = boxes[f'back{i}']; frame = over(frame, place(texts[f'back{i}'], S, ox, oy), wipe=b[3] - (b[3] - b[1] + 20) * ease_out(x))
         frame = over(frame, place(prod, S, ox, oy))
-        def fade_up(name, t0, dur, rise):
-            x = (t - t0) / dur
-            return over(frame, place(texts[name], S, ox, oy + rise * (1 - ease_out(x))), alpha=min(1, max(0, x * 1.4))) if x > 0 else frame
-        frame = fade_up('logo', 6.7, 0.5, 12)
-        if t > 6.85:
-            b = boxes['badge']; x = ease_out((t - 6.85) / 0.45); sc = (0.9 + 0.1 * back_out((t - 6.85) / 0.45)) * S
+        def fade_up(part, rise):
+            x = (t - c[part][0]) / c[part][1]
+            return over(frame, place(texts[part], S, ox, oy + rise * (1 - ease_out(x))), alpha=min(1, max(0, x * 1.4))) if x > 0 else frame
+        frame = fade_up('logo', 12)
+        (tb, db), b = c['badge'], boxes['badge']
+        if t > tb:
+            x = ease_out((t - tb) / db); sc = (0.9 + 0.1 * back_out((t - tb) / db)) * S
             frame = over(frame, place(texts['badge'], sc, ox, oy, about=((b[0] + b[2]) / 2, (b[1] + b[3]) / 2)), alpha=x)
-        frame = fade_up('line1', 7.2, 0.55, 16); frame = fade_up('line2', 7.4, 0.55, 16)
-        if t > 7.9: frame = over(frame, place(texts['bar'], S, ox, oy + 80 * (1 - ease_out((t - 7.9) / 0.5))))
-        x = min(1, max(0, (t - 8.6) / 0.3)); frame = frame * (1 - x) + orig * x if x > 0 else frame    # ends on the poster itself
+        frame = fade_up('line1', 16); frame = fade_up('line2', 16)
+        (tr, dr), (te, de) = c['bar'], c['end']
+        if t > tr: frame = over(frame, place(texts['bar'], S, ox, oy + 80 * (1 - ease_out((t - tr) / dr))))
+        x = min(1, max(0, (t - te) / de)); frame = frame * (1 - x) + orig * x if x > 0 else frame       # ends on the poster itself
         im = Image.fromarray(np.clip(frame, 0, 255).astype(np.uint8))
-        punch = 0.018 * np.sin(np.pi * min(1, max(0, (t - 6.45) / 0.35)))                          # a beat when the full stop lands
+        punch = 0.018 * np.sin(np.pi * min(1, max(0, (t - c['punch'][0]) / c['punch'][1])))         # a beat when the full stop lands
         if punch > 0: im = place(im.convert('RGBA'), 1 + punch, 0, 0).convert('RGB')
-        blur = 5 * (1 - ease_out(t / 0.8))                                                          # the lens finds focus
+        blur = 5 * (1 - ease_out(t / c['focus']))                                                  # the lens finds focus
         if blur > 0.05: im = im.filter(ImageFilter.GaussianBlur(blur))
         im = im.resize((OUT_W, OUT_H), Image.LANCZOS)
         g = nd.gaussian_filter(rng.normal(0, 1.6, (OUT_H, OUT_W)).astype(np.float32), 0.5) * 1.6   # fine grain, every frame new
         out = np.clip(np.asarray(im).astype(np.float32) + g[..., None], 0, 255).astype(np.uint8)
         enc.stdin.write(out.tobytes())
-        if f % 30 == 0 or f == n - 1: sheet.append((t, Image.fromarray(out)))
+        if f in {round(i * (n - 1) / 11) for i in range(12)}: sheet.append((t, Image.fromarray(out)))
     enc.stdin.close(); enc.wait()
     tiles = Image.new('RGB', (6 * 216, 2 * 290), 'white'); d = ImageDraw.Draw(tiles)
     for i, (t, im) in enumerate(sheet[:12]): tiles.paste(im.resize((212, 265)), ((i % 6) * 216, (i // 6) * 290)); d.text(((i % 6) * 216 + 4, (i // 6) * 290 + 268), f'{t:.1f} s', fill='black')
-    tiles.save(OUT / 'contact.png')
-    print(f'{n} frames → out/poster_motion.mp4 ({OUT_W}×{OUT_H}, {FPS} fps, {SECONDS:g} s) and out/contact.png')
+    sheet_name = 'contact' + ('' if cut == '10s' else f'_{cut}'); tiles.save(OUT / f'{sheet_name}.png')
+    print(f'{n} frames → out/{name}.mp4 ({OUT_W}×{OUT_H}, {FPS} fps, {SECONDS:g} s) and out/{sheet_name}.png')
 
 if __name__ == '__main__':
-    {'layers': layers, 'video': video}.get(sys.argv[1] if len(sys.argv) > 1 else '', lambda: sys.exit(__doc__))()
+    mode = sys.argv[1] if len(sys.argv) > 1 else ''
+    if mode == 'layers': layers()
+    elif mode == 'video': video(sys.argv[2] if len(sys.argv) > 2 else '10s')
+    else: sys.exit(__doc__)

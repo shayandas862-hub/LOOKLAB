@@ -7,6 +7,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { spawn, execFileSync } from 'node:child_process';
 import { chromium } from 'playwright-core';
 import { FPS, DURATION, W, H } from './src/timeline.js';
@@ -17,7 +18,7 @@ const LAUNCH = CLOUD
   ? { executablePath: '/opt/pw-browsers/chromium', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', ...FLAGS] }
   : process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH, args: FLAGS } : { channel: 'chrome', args: FLAGS };
 
-const ROOT = path.dirname(new URL(import.meta.url).pathname);
+const ROOT = path.dirname(fileURLToPath(import.meta.url)); // decoded: the repo path holds spaces ("LOOK LAB ")
 const OUT = path.join(ROOT, 'out'), STILLS = path.join(OUT, 'stills');
 fs.mkdirSync(STILLS, { recursive: true });
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.woff2': 'font/woff2', '.mjs': 'text/javascript', '.json': 'application/json' };

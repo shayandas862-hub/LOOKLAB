@@ -1,17 +1,17 @@
 # Test 2 · café ad (Blend, Stirling) · where it stands
 
-Updated 2026-10-17 at the end of the first (cloud) session. **A test, not for commercial use** until the café agrees
+Updated 2026-10-18 on the founder's Mac, after the first S3 takes ([`RESULTS.md`](RESULTS.md)). **A test, not for commercial use** until the café agrees
 and the models' terms are checked. Read this first, then only the file a step names.
 
 ## Decided by the founder
 - The ad: the ingredients float, fall into a glass bowl layer by layer, the bowl turns 360°, a hand drizzles honey,
   end card. Shot list and risks: [`BRIEF.md`](BRIEF.md).
-- The process: brief → plan with pass marks → code skeleton → keyframes (image model on the code's depth) → animate
-  (video model with first/last frame and depth) → finish (logo and type from code, edit, music). Not every frame as a
-  separate image (they would flicker).
+- The process (changed 2026-10-18, PLAN.md §3): brief → plan with pass marks → code previs → **one approved photo** made
+  from the previs frame (the look) → a video model given the photo and the previs clip (the motion) → checks → finish
+  (logo and type from code, edit, music). Depth-only video and three separate keyframes are dropped.
 - Start small: one 5 s shot (S3, the turn) through code → keyframes → animate, under about $1, before the whole ad.
 
-## Done (all free; nothing sent to fal, $0 spent)
+## Done
 | What | Where | How to run |
 |---|---|---|
 | Brief, the founder's pick, shot list | `BRIEF.md` | — |
@@ -22,25 +22,22 @@ and the models' terms are checked. Read this first, then only the file a step na
 | Reference-video tool: link or file → transcript, cut list, contact sheet | `../tools/ref.sh` | `tools/ref.sh <youtube-link or file>` → `tools/out/<id>/` (links only work from a home connection: YouTube blocks cloud servers) |
 | How AI ad platforms (Higgsfield, Kling, Runway, Creatify) build ads, stated vs inferred | `PLATFORMS.md` | — |
 | The two Higgsfield "Blender + Higgsfield" videos, from public pages (no transcript reachable from the cloud) | `VIDEOS.md` | — |
+| 2026-10-18: the five reference videos from their transcripts and sheets | `VIDEOS.md` ("Added 2026-10-18") | — |
+| 2026-10-18: S3 plan, marks, three takes on fal (LTX, Seedance 2.5, Wan 3.0), the money; **≈ $3.67 spent** | `PLAN.md`, `RESULTS.md` | `node s3-run.mjs ltx\|seedance\|wan3 --still <photo> --dry` (`--yes` pays) |
+| S3's checker (outline overlap; self-test first) | `s3-check.py` | `../07-grok-test/.venv/bin/python -I s3-check.py calibrate --model u2net` |
 
 ## Waiting on the founder
-1. **Budget** for Test 2 (fal balance about $4.43 on 2026-10-17, the founder's figure).
-2. **The S3 test**, priced 2026-10-17 (details in `MODELS.md`):
-   - route 1, one keyframe (`fal-ai/flux-control-lora-depth/image-to-image`, $0.04/MP) then
-     `fal-ai/ltx-2.3-quality/render-to-real` on the previs: about $0.31;
-   - route 2, three keyframes (0°, 180°, 360°) then `blackforestlabs/flux-3/keyframes-to-video` (5 s 720p): about $0.97;
-   - route 3 (optional baseline), the same keyframes and the depth video into `fal-ai/wan-vace-14b/depth`: about $0.41.
-   Routes 1+2 with keyframe retries: cap $1.75; all three: cap $2.50. Nothing is sent without the founder's yes.
-3. Whether to compare against Higgsfield itself on the same shot (needs a Higgsfield account).
+1. The fal balance after the Wan 3.0 take (to close RESULTS.md §5; expected ≈ $0.76).
+2. Realism numbers (1–5) for the Seedance and Wan takes.
+3. Seedance 2.5 or Wan 3.0 as the default, and a budget for the fall-in (S1, S2) and the honey (S4).
+4. Optional: Higgsfield's $3 pack to price the same shot there (needs an account the founder makes).
 
 ## Next, in order
-1. ~~On the founder's Mac: `tools/ref.sh` on the reference videos below~~ Done 2026-10-18: all five, notes and what to
-   borrow for S3 in `VIDEOS.md` ("Added 2026-10-18"). $0 spent.
-2. `PLAN.md`: S3's pass marks, written before anything is made (shape against the bowl mask, stripe order and
-   layers, brand colour after the Fixer, flicker, the founder's realism score ≥ 3.5 / 5).
-3. The checker's known gap: count only the outline touching the code's object (Test 1b's glowing-floor patch).
+1. A light per-ingredient colour check (drift and morphing), proved on the previs and on shifted copies, its marks
+   written before it measures; then measure the Seedance and Wan takes. Heavy models don't run on this Mac.
+2. Fix the previs's far side (sliced strawberries all round) and frame it with headroom.
+3. The order of work: text → rough code → photo from the code frame → code adjusted to the photo → video.
 4. A prompt compiler: the shot list in, every image and video prompt out, so prompts never drift.
-5. S3's source frames and passes at the routes' frame rates; the total; the founder's yes; run; `RESULTS.md`.
 
 ## Reference videos (study only: never sent to fal, never committed, never copied shot for shot)
 - `https://youtu.be/vUYq38wC_xI` Higgsfield: "GPT Astra 6 + Blender + Higgsfield Builds The Craziest Cinematic Scenes!"

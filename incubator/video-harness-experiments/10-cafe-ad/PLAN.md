@@ -207,3 +207,35 @@ account. Licences: fal marks every model above "commercial"; the makers' own ter
   Planned ≈ $0.95; the founder's balance after it is the real figure.
 - **2026-10-18, the founder on M2 vs M3:** "similar, the motion is okay, but I think Seedance's one is more constant in
   colour". Recorded in words; no realism numbers were given for M2 or M3.
+- **2026-10-18, cloud session (no fal spend), set-up for the colour check.** The three takes were fetched again from
+  fal's job records (free; no new generation) and match the founder's Mac byte for byte (SHA-256). The passes were
+  rebuilt in the cloud (108 frames, 393 s, peak 1.27 GB). **Bug found and fixed in `src/passes.js`:** stand-in
+  materials were cached by `plane.uuid`, which a `THREE.Plane` doesn't have, so every layer got the first layer's
+  clipping plane and the upper açaí layer and the granola band vanished from any pass that swaps materials. Fixed
+  (keyed by the plane object). Beauty, `mask-bowl`, `mask-tops` and `mask-plinth` are byte-identical before and after,
+  so the u2net calibration and every take are untouched; **the depth pass was wrong before** (44,618 px of frame 0
+  change) and is right now. No model was ever given the café's depth pass.
+- **Written before the colour check ran anything (`s3-colour.py`, numpy + Pillow):** per frame and ingredient (two
+  açaí layers, granola band, five topping rows; per-ingredient masks added to `src/passes.js`, seen without the glass),
+  drift = CIEDE2000 between the take's median colour inside the code's mask (shrunk 4 px) and that ingredient's colour
+  in the hero still (lined up with the previs first); and the share of food-mask pixels that read as backdrop (within
+  ΔE00 12 of it and nearer to it than to the ingredient). Four changes to the founder's brief, said here: the glass is
+  left out of the backdrop count (clear glass shows the backdrop legitimately); frames are matched by the turn (start a,
+  speed b fitted to the previs) with the clock's own match reported beside it (the takes are 5.0–5.04 s, the previs's
+  turn 4.5 s); the still is lined up (it sits higher than the code); a recoloured-kiwi copy proves it sees colour, not
+  only position. **Proof criteria, all must pass or the check is blind and judges nothing:** (1) previs shifted 0 < 2 <
+  5 % of the frame → drift median rises; (2) the same for the backdrop share; (3) kiwi recoloured to banana's colour →
+  kiwi's median rises ≥ 10, every other ingredient unchanged; (4) the previs fits itself, a = 0 ± 0.02 s, b = 1 ± 0.01;
+  (5) a 5.0 s copy of the previs is found, b = 1.111 ± 0.02; (6) a previs frame scaled 1.04 and moved (12, −30) px is
+  put back (scale 0.96 ± 0.011, shift ± 3 px). Then, with the hero still: the same shift and recolour tests on the
+  Seedance take. Its pass marks are proposed only after that, for the founder's yes.
+- **2026-10-18, the proof ran (`s3-colour.py prove`, 221 s, peak 149 MB): 5 of 6 pass, so v1 judges nothing.**
+  Pass: shift 0 / 2 / 5 % → drift median 2.74 / 18.69 / 22.38 and backdrop share 1.21 / 6.0 / 15.02 %; the previs fits
+  itself (a 0.02 s, b 1.0); the 5.0 s copy is found (b 1.115); the moved frame is put back (scale 0.96, shift −12, 28 px).
+  **Fail, as written:** kiwi recoloured to banana's colour rose 6.84 → 14.47 (+7.6, mark ≥ 10); every other ingredient
+  unchanged to 0.01. It sees the change (kiwi 0 → 14 where it matched the look), but the mark is larger than this swap
+  gives at most frames; the mark stays and the result stays a fail. **Found:** on the previs's own turn strawberry
+  drifts median 20.8 (0 at frame 0, 12–27 after, not back at the end) and kiwi's worst tenth is 29, because each row is
+  part cut face, part skin and a 7° turn tips the median from one to the other; banana, blueberry, açaí and granola stay
+  0.7–4.9. One median per ingredient can't judge those two. Proposed v2 (the founder decides): each ingredient against
+  its few colours in the look, re-proved with new criteria written first.

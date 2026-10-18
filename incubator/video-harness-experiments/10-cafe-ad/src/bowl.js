@@ -59,13 +59,18 @@ function setLevel(o, k) {
 }
 
 // The toppings, in five stripes across the bowl (left to right as the S2 camera sees them).
+// Each piece is labelled with its stripe's food (userData.food) for the per-ingredient masks; labels don't change the picture.
+const STRIPES = ['banana', 'strawberry', 'granola-top', 'blueberry', 'kiwi'];
 function toppings(r) {
+  let food;
   const out = [], R = rIn(TOP) - 0.07, add = (obj, x, z, lift, rot) => {
     const y = TOP + mound(x, z) + lift;
+    obj.userData.food = food;
     out.push({ obj, end: new THREE.Vector3(x, y, z), q: new THREE.Quaternion().setFromEuler(new THREE.Euler(...rot)) });
   };
   const stripes = [-0.66, -0.33, 0, 0.33, 0.62];
   stripes.forEach((x0, k) => {
+    food = STRIPES[k];
     const zMax = Math.sqrt(Math.max(0, R * R - x0 * x0)) - 0.02;
     if (k === 0) for (let z = -zMax; z <= zMax; z += 0.13) add(banana(), x0 + (r() - 0.5) * 0.03, z, 0.05, [0.9, 0, (r() - 0.5) * 0.2]);
     if (k === 1) for (let z = -zMax, i = 0; z <= zMax; z += 0.16, i++) add(strawberry(true), x0 + (r() - 0.5) * 0.04, z, 0.07, [0.7, (i % 2 ? 0.3 : -0.3), -Math.PI / 2]);
@@ -81,17 +86,18 @@ function toppings(r) {
 export function createBowl() {
   const r = rng(5), group = new THREE.Group();
   const g = glass(); g.renderOrder = 2; g.userData.glass = true; group.add(g);
-  const layers = LAYERS.map((L) => { const o = layer(L); group.add(o); return { ...L, o }; });
+  const FOOD = ['acai-low', 'granola-band', 'acai-high'];
+  const layers = LAYERS.map((L, li) => { const o = layer(L); o.userData.food = FOOD[li]; group.add(o); return { ...L, o }; });
 
   // Açaí scoops drop into each açaí layer; granola clusters rain into the granola band.
   const drops = [];
   layers.forEach((L, li) => {
     if (L.kind === 'acai') for (let i = 0; i < 3; i++) {
-      const s = acaiScoop(20 + li * 3 + i, 0.26); group.add(s);
+      const s = acaiScoop(20 + li * 3 + i, 0.26); s.userData.food = FOOD[li]; group.add(s);
       const t0 = L.cue[0] + i * 0.28, a = i * 2.1 + li;
       drops.push({ obj: s, t0, end: new THREE.Vector3(Math.cos(a) * 0.3, L.y[0] + 0.15, Math.sin(a) * 0.3), melt: true, layer: L });
     } else for (let i = 0; i < 70; i++) {
-      const s = granola(300 + i, 0.05 + r() * 0.035); group.add(s);
+      const s = granola(300 + i, 0.05 + r() * 0.035); s.userData.food = FOOD[li]; group.add(s);
       const y = L.y[0] + 0.04 + r() * (L.y[1] - L.y[0] - 0.06), a = r() * 6.283, d = i < 46 ? rIn(y) - 0.055 : r() * (rIn(y) - 0.1);
       drops.push({ obj: s, t0: L.cue[0] + r() * 0.75, end: new THREE.Vector3(Math.cos(a) * d, y, Math.sin(a) * d), spin: [r() * 6, r() * 6, r() * 6] });
     }

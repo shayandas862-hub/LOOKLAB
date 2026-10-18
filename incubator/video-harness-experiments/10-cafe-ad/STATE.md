@@ -25,6 +25,7 @@ and the models' terms are checked. Read this first, then only the file a step na
 | 2026-10-18: the five reference videos from their transcripts and sheets | `VIDEOS.md` ("Added 2026-10-18") | — |
 | 2026-10-18: S3 plan, marks, three takes on fal (LTX, Seedance 2.5, Wan 3.0), the money; **≈ $3.67 spent** | `PLAN.md`, `RESULTS.md` | `node s3-run.mjs ltx\|seedance\|wan3 --still <photo> --dry` (`--yes` pays) |
 | S3's checker (outline overlap; self-test first) | `s3-check.py` | `../07-grok-test/.venv/bin/python -I s3-check.py calibrate --model u2net` |
+| 2026-10-18 (cloud): per-ingredient masks (8 foods, seen without the glass) and the colour check v1; a pass bug fixed (the upper layers vanished from the masks and depth; the beauty and old masks unchanged) | `src/passes.js`, `s3-colour.py`, PLAN.md §11 | `../07-grok-test/.venv/bin/python -I s3-colour.py prove` (needs only numpy + Pillow): **5 of 6 proofs pass; the recoloured kiwi fails** (+7.6, mark ≥ 10); strawberry and kiwi change colour over the previs's own turn (cut face vs skin), so v1 must not judge any take. v2 (each food's few colours, not one median) waits on the founder |
 
 ## Waiting on the founder
 1. The fal balance after the Wan 3.0 take (to close RESULTS.md §5; expected ≈ $0.76).
@@ -45,7 +46,7 @@ The next session's opening prompt: [`NEXT-SESSION.md`](NEXT-SESSION.md).
 |---|---|---|
 | The hero still and the other photos (the founder's, from "Luna 6") | `out/stills-in/luna6_1…3.png` (+ `.webp`) | can't be rebuilt: keep them; the hero still is `luna6_1` |
 | The three takes and the side-by-sides | `out/clips/S3_ltx.mp4`, `S3_seedance.mp4`, `S3_wan3.mp4`, `S3_previs_*.mp4` | re-buying costs money: keep them; fal's job numbers are in `RESULTS.md` |
-| S3's passes (108 frames, 24 fps) | `out/passes/s3/` | `node render.mjs passes 7.5 11.958333333333334 108 --name s3 --passes beauty,depth,mask:bowl,mask:tops,mask:plinth` (≈ 50 s) |
+| S3's passes (108 frames, 24 fps) | `out/passes/s3/` | `node render.mjs passes 7.5 11.958333333333334 108 --name s3 --passes beauty,depth,mask:bowl,mask:tops,mask:plinth` (≈ 50 s on the Mac; 393 s in the cloud), then the food masks: `--passes depth,mask:acai-low,mask:granola-band,mask:acai-high,mask:banana,mask:strawberry,mask:granola-top,mask:blueberry,mask:kiwi` (201 s in the cloud). **Re-render on the Mac after 2026-10-18:** its depth pass predates the fix |
 | The previs clip the models were given | `out/passes/s3/beauty_24fps.mp4` | `ffmpeg -framerate 24 -i out/passes/s3/beauty_%03d.png -vf format=yuv420p -c:v libx264 -crf 12 -movflags +faststart out/passes/s3/beauty_24fps.mp4` |
 | The checker's environment (461 MB) and outline models (552 MB in `~/.rembg`) | `../07-grok-test/.venv` | `/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13 -m venv ../07-grok-test/.venv && ../07-grok-test/.venv/bin/pip install "rembg[cpu]==2.0.85"` (29 s) |
 | The fal key | macOS Keychain, service `fal-key` | runs read it with `FAL_KEY="$(security find-generic-password -s fal-key -w)"`; never in a file |

@@ -33,11 +33,26 @@ and the models' terms are checked. Read this first, then only the file a step na
 4. Optional: Higgsfield's $3 pack to price the same shot there (needs an account the founder makes).
 
 ## Next, in order
+The next session's opening prompt: [`NEXT-SESSION.md`](NEXT-SESSION.md).
 1. A light per-ingredient colour check (drift and morphing), proved on the previs and on shifted copies, its marks
    written before it measures; then measure the Seedance and Wan takes. Heavy models don't run on this Mac.
 2. Fix the previs's far side (sliced strawberries all round) and frame it with headroom.
 3. The order of work: text → rough code → photo from the code frame → code adjusted to the photo → video.
 4. A prompt compiler: the shot list in, every image and video prompt out, so prompts never drift.
+
+## Only on the founder's Mac (not in git), and how to rebuild it
+| What | Where | Rebuild |
+|---|---|---|
+| The hero still and the other photos (the founder's, from "Luna 6") | `out/stills-in/luna6_1…3.png` (+ `.webp`) | can't be rebuilt: keep them; the hero still is `luna6_1` |
+| The three takes and the side-by-sides | `out/clips/S3_ltx.mp4`, `S3_seedance.mp4`, `S3_wan3.mp4`, `S3_previs_*.mp4` | re-buying costs money: keep them; fal's job numbers are in `RESULTS.md` |
+| S3's passes (108 frames, 24 fps) | `out/passes/s3/` | `node render.mjs passes 7.5 11.958333333333334 108 --name s3 --passes beauty,depth,mask:bowl,mask:tops,mask:plinth` (≈ 50 s) |
+| The previs clip the models were given | `out/passes/s3/beauty_24fps.mp4` | `ffmpeg -framerate 24 -i out/passes/s3/beauty_%03d.png -vf format=yuv420p -c:v libx264 -crf 12 -movflags +faststart out/passes/s3/beauty_24fps.mp4` |
+| The checker's environment (461 MB) and outline models (552 MB in `~/.rembg`) | `../07-grok-test/.venv` | `/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13 -m venv ../07-grok-test/.venv && ../07-grok-test/.venv/bin/pip install "rembg[cpu]==2.0.85"` (29 s) |
+| The fal key | macOS Keychain, service `fal-key` | runs read it with `FAL_KEY="$(security find-generic-password -s fal-key -w)"`; never in a file |
+| The five reference videos (study only) | `../tools/out/<id>/` (329 MB) | `../tools/ref.sh <link>` |
+
+**This Mac has 8 GB:** every local job runs one frame first under a memory meter (`/usr/bin/time -l`); above 1.5 GB it
+doesn't run here (BiRefNet reached about 12 GB on 2026-10-18).
 
 ## Reference videos (study only: never sent to fal, never committed, never copied shot for shot)
 - `https://youtu.be/vUYq38wC_xI` Higgsfield: "GPT Astra 6 + Blender + Higgsfield Builds The Craziest Cinematic Scenes!"

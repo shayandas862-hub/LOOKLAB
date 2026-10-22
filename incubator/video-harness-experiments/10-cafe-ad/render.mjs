@@ -37,7 +37,7 @@ async function openPage(browser, port) {
   const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.error('[page]', m.text()); });
   page.on('pageerror', (e) => console.error('[page error]', e.message));
-  await page.goto(`http://127.0.0.1:${port}/index.html`);
+  await page.goto(`http://127.0.0.1:${port}/${process.env.PAGE || 'index.html'}`);   // PAGE=person.html for the person test
   const info = await page.evaluate(() => window.ready);
   if (!info) throw new Error('page failed to initialise: check the console above or run node --check on src/*.js');
   return { page, info };
@@ -123,7 +123,8 @@ try {
     await br.close();
     for (const w of want) {
       const p = w.replace(':', '-');
-      ff(['-framerate', '16', '-i', path.join(dir, `${p}_%03d.png`), '-vf', 'format=yuv420p', '-c:v', 'libx264', '-crf', '12', '-movflags', '+faststart', path.join(dir, `${p}_16fps.mp4`)]);
+      const fps = String(opt(rest, '--fps', 16));   // the rate the frames were sampled at (default fal's 16)
+      ff(['-framerate', fps, '-i', path.join(dir, `${p}_%03d.png`), '-vf', 'format=yuv420p', '-c:v', 'libx264', '-crf', '12', '-movflags', '+faststart', path.join(dir, `${p}_${fps}fps.mp4`)]);
     }
     console.log(`done in ${((Date.now() - t0) / 1000).toFixed(0)} s → ${path.relative(ROOT, dir)}`);
   } else if (mode === 'video') {
